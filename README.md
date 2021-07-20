@@ -2,7 +2,7 @@
 A Splunk Synthetics (Formerly Rigor) client for golang.
 
 ## Installation
-`go get https://github.com/greatestusername-splunk/syntheticsclient.git`
+`go get https://github.com/splunk/syntheticsclient.git`
 
 ## Important Note
 
@@ -15,7 +15,7 @@ package syntheticsclient
 import (
 	"fmt"
 
-	"https://github.com/greatestusername-splunk/syntheticsclient.git"
+	"https://github.com/splunk/syntheticsclient.git"
 )
 
 func main() {
@@ -49,7 +49,7 @@ import (
 	"fmt"
 	"encoding/json"
 
-	"https://github.com/greatestusername-splunk/syntheticsclient.git"
+	"https://github.com/splunk/syntheticsclient.git"
 )
 
 func main() {
