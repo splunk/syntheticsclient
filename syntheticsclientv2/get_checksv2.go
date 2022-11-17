@@ -20,18 +20,10 @@ import (
 	"fmt"
 )
 
-// Leaving off "Enabled" filter setting. Can be added later if required.
-type GetChecksV2Options struct {
-	Type    	string 	`json:"type"`
-	PerPage 	int    	`json:"per_page"`
-	Page    	int 	  `json:"page"`
-	Search   	string  `json:"search"`
-	OrderBy		string	`json:"orderBy"`
-}
 
-func parseChecksV2Response(response string) (*GetChecksV2, error) {
+func parseChecksV2Response(response string) (*ChecksV2Response, error) {
 	// Parse the response and return the check object
-	var checks GetChecksV2
+	var checks ChecksV2Response
 	err := json.Unmarshal([]byte(response), &checks)
 	if err != nil {
 		return nil, err
@@ -41,10 +33,13 @@ func parseChecksV2Response(response string) (*GetChecksV2, error) {
 }
 
 // GetChecks returns all checks
-func (c Client) GetChecks(params *GetChecksV2Options) (*GetChecksV2, *RequestDetails, error) {
+func (c Client) GetChecksV2(params *GetChecksV2Options) (*ChecksV2Response, *RequestDetails, error) {
 	// Check for default params
-	if params.Type == "" {
-		params.Type = "all"
+	if params.TestType == "" {
+		params.TestType = ""
+	}
+	if params.Search == "" {
+		params.Search = ""
 	}
 	if params.Page == 0 {
 		params.Page = int(1)
@@ -56,7 +51,7 @@ func (c Client) GetChecks(params *GetChecksV2Options) (*GetChecksV2, *RequestDet
 	// Make the request
 	details, err := c.makePublicAPICall(
 		"GET",
-		fmt.Sprintf("/tests?testType=%s&page=%d&perPage=%d&orderBy=%s&search=%s", params.Type, params.Page, params.PerPage, params.OrderBy, params.Search),
+		fmt.Sprintf("/tests?testType=%s&page=%d&perPage=%d&orderBy=%s&search=%s", params.TestType, params.Page, params.PerPage, params.OrderBy, params.Search),
 		bytes.NewBufferString("{}"),
 		nil)
 

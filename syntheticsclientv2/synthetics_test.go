@@ -87,7 +87,7 @@ func TestConfigurableClientTimeout(t *testing.T) {
 		publicBaseUrl:  testServer.URL,
 	})
 	log.Printf("Client instantiated: %s", testServer.URL)
-	_, _, err := testConfigurableClient.GetCheck(12)
+	_, _, err := testConfigurableClient.GetBrowserCheckV2(12)
 	if !strings.Contains(err.Error(), "context deadline exceeded (Client.Timeout exceeded while awaiting headers)") {
 		t.Errorf("expected to see timeout error, but saw: %s", err.Error())
 	}

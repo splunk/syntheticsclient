@@ -24,68 +24,36 @@ import (
 )
 
 var (
-	getChecksV2Body  = ``
+	getChecksV2Body  = `{"testType":"","page":1,"perPage":50,"search":"","orderBy":"id"}`
 	inputGetChecksV2 = verifyChecksV2Input(string(getChecksV2Body))
+	getChecksV2Output = `{"tests":[{"id":482,"name":"Test of Splunk.com","active":true,"frequency":5,"scheduling_strategy":"round_robin","created_at":"2022-08-15T16:05:25.815Z","updated_at":"2022-09-29T19:13:13.853Z","location_ids":["aws-us-east-1"],"type":"browser"},{"id":489,"name":"Appinspect login API","active":true,"frequency":5,"scheduling_strategy":"round_robin","created_at":"2022-08-16T15:47:43.730Z","updated_at":"2022-08-16T15:47:43.741Z","location_ids":["aws-us-east-1"],"type":"api"},{"id":490,"name":"Arch Linux Packages","active":true,"frequency":10,"scheduling_strategy":"round_robin","created_at":"2022-08-16T16:48:42.119Z","updated_at":"2022-08-16T16:48:42.131Z","location_ids":["aws-us-east-1"],"type":"http"},{"id":492,"name":"Test of Splunkbase","active":true,"frequency":5,"scheduling_strategy":"round_robin","created_at":"2022-08-16T19:35:54.014Z","updated_at":"2022-09-29T19:13:13.907Z","location_ids":["aws-us-east-1"],"type":"browser"},{"id":493,"name":"Brewery API","active":true,"frequency":5,"scheduling_strategy":"round_robin","created_at":"2022-08-16T19:44:15.626Z","updated_at":"2022-08-16T19:44:15.635Z","location_ids":["aws-us-east-1"],"type":"api"},{"id":495,"name":"Multi-step test of legacy Splunkbase","active":true,"frequency":5,"scheduling_strategy":"round_robin","created_at":"2022-08-17T01:24:44.579Z","updated_at":"2022-09-29T19:13:13.203Z","location_ids":["aws-us-east-1"],"type":"browser"},{"id":496,"name":"Multi-step Test of new Splunkbase","active":true,"frequency":5,"scheduling_strategy":"round_robin","created_at":"2022-08-17T01:33:27.771Z","updated_at":"2022-09-29T19:13:13.997Z","location_ids":["aws-us-east-1"],"type":"browser"},{"id":935,"name":"This test does test stuff","active":true,"frequency":30,"scheduling_strategy":"round_robin","created_at":"2022-10-26T14:48:36.026Z","updated_at":"2022-10-26T14:48:36.037Z","location_ids":["aws-us-east-1"],"type":"api"},{"id":1116,"name":"boop-test","active":true,"frequency":5,"scheduling_strategy":"round_robin","created_at":"2022-11-16T19:18:59.603Z","updated_at":"2022-11-16T19:20:58.911Z","location_ids":["aws-us-east-1","aws-ap-northeast-1"],"type":"api"},{"id":1128,"name":"boopbeep","active":true,"frequency":5,"scheduling_strategy":"round_robin","created_at":"2022-11-17T14:19:49.564Z","updated_at":"2022-11-17T14:19:49.571Z","location_ids":["aws-us-east-1"],"type":"browser"}],"page":1,"per_page":50,"next_page_link":null,"total_count":10}`
+	output = &ChecksV2Response{}
 )
 
-// func TestGetChecksV2(t *testing.T) {
-// 	setup()
-// 	defer teardown()
+func TestGetChecksV2(t *testing.T) {
+	setup()
+	defer teardown()
 
-// 	testMux.HandleFunc("/tests/browser/1", func(w http.ResponseWriter, r *http.Request) {
-// 		testMethod(t, r, "GET")
-// 		w.Write([]byte(getChecksV2Body))
-// 	})
+	testMux.HandleFunc("/tests", func(w http.ResponseWriter, r *http.Request) {
+		testMethod(t, r, "GET")
+		w.Write([]byte(getChecksV2Output))
+	})
 
-// 	resp, _, err := testClient.GetChecksV2(1)
+	json.Unmarshal([]byte(getChecksV2Output), output)
 
-// 	if err != nil {
-// 		t.Fatal(err)
-// 	}
-// 	if !reflect.DeepEqual(resp.Test.ID, inputGetChecksV2.Test.ID) {
-// 		t.Errorf("returned \n\n%#v want \n\n%#v", resp.Test.ID, inputGetChecksV2.Test.ID)
-// 	}
+	resp, _, err := testClient.GetChecksV2(inputGetChecksV2)
 
-// 	if !reflect.DeepEqual(resp.Test.Name, inputGetChecksV2.Test.Name) {
-// 		t.Errorf("returned \n\n%#v want \n\n%#v", resp.Test.Name, inputGetChecksV2.Test.Name)
-// 	}
+	if err != nil {
+		t.Fatal(err)
+	}
+	if !reflect.DeepEqual(resp.Tests, output.Tests) {
+		t.Errorf("returned \n\n%#v want \n\n%#v", resp.Tests, output.Tests)
+	}
 
-// 	if !reflect.DeepEqual(resp.Test.Type, inputGetChecksV2.Test.Type) {
-// 		t.Errorf("returned \n\n%#v want \n\n%#v", resp.Test.Type, inputGetChecksV2.Test.Type)
-// 	}
+}
 
-// 	if !reflect.DeepEqual(resp.Test.Frequency, inputGetChecksV2.Test.Frequency) {
-// 		t.Errorf("returned \n\n%#v want \n\n%#v", resp.Test.Frequency, inputGetChecksV2.Test.Frequency)
-// 	}
-
-// 	if !reflect.DeepEqual(resp.Test.Active, inputGetChecksV2.Test.Active) {
-// 		t.Errorf("returned \n\n%#v want \n\n%#v", resp.Test.Active, inputGetChecksV2.Test.Active)
-// 	}
-
-// 	if !reflect.DeepEqual(resp.Test.Createdat, inputGetChecksV2.Test.Createdat) {
-// 		t.Errorf("returned \n\n%#v want \n\n%#v", resp.Test.Createdat, inputGetChecksV2.Test.Createdat)
-// 	}
-
-// 	if !reflect.DeepEqual(resp.Test.Updatedat, inputGetChecksV2.Test.Updatedat) {
-// 		t.Errorf("returned \n\n%#v want \n\n%#v", resp.Test.Updatedat, inputGetChecksV2.Test.Updatedat)
-// 	}
-
-// 	if !reflect.DeepEqual(resp.Test.Device, inputGetChecksV2.Test.Device) {
-// 		t.Errorf("returned \n\n%#v want \n\n%#v", resp.Test.Device, inputGetChecksV2.Test.Device)
-// 	}
-
-// 	if !reflect.DeepEqual(resp.Test.Advancedsettings, inputGetChecksV2.Test.Advancedsettings) {
-// 		t.Errorf("returned \n\n%#v want \n\n%#v", resp.Test.Advancedsettings, inputGetChecksV2.Test.Advancedsettings)
-// 	}
-
-// 	if !reflect.DeepEqual(resp.Test.Transactions, inputGetChecksV2.Test.Transactions) {
-// 		t.Errorf("returned \n\n%#v want \n\n%#v", resp.Test.Transactions, inputGetChecksV2.Test.Transactions)
-// 	}
-
-// }
-
-func verifyChecksV2Input(stringInput string) *ChecksV2Response {
-	check := &ChecksV2Response{}
+func verifyChecksV2Input(stringInput string) *GetChecksV2Options {
+	check := &GetChecksV2Options{}
 	err := json.Unmarshal([]byte(stringInput), check)
 	if err != nil {
 		panic(err)
@@ -106,7 +74,7 @@ func TestLiveGetChecksV2(t *testing.T) {
 	c := NewClient(token, realm)
 
 	// Make the request with your check settings and print result
-  res, _, err := c.GetChecksV2(495)
+  res, _, err := c.GetChecksV2(inputGetChecksV2)
 	if err != nil {
 		fmt.Println(err)
 	} else {

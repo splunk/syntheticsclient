@@ -318,6 +318,14 @@ type Tests        []struct {
 	Updatedat          time.Time `json:"updatedAt"`
 }
 
+type GetChecksV2Options struct {
+	TestType    	string 	`json:"testType"`
+	PerPage 	int    	`json:"perPage"`
+	Page    	int 	  `json:"page"`
+	Search   	string  `json:"search"`
+	OrderBy		string	`json:"orderBy"`
+}
+
 type Errors []struct {
 	Title       string `json:"title,omitempty"`
 	Description string `json:"description,omitempty"`
