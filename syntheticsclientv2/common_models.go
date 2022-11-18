@@ -331,10 +331,33 @@ type Errors []struct {
 	Description string `json:"description,omitempty"`
 }
 
+type HttpHeaders []struct {
+	Name       	string `json:"name,omitempty"`
+	Value 			string `json:"value,omitempty"`
+}
+
+type Variable struct {
+	Createdat   time.Time `json:"createdAt,omitempty"`
+	Description string    `json:"description,omitempty"`
+	ID          int       `json:"id,omitempty"`
+	Name        string    `json:"name"`
+	Secret      bool      `json:"secret"`
+	Updatedat   time.Time `json:"updatedAt,omitempty"`
+	Value       string    `json:"value"`
+}
+
 type DeleteCheck struct {
 	Result  string `json:"result"`
 	Message string `json:"message"`
 	Errors  Errors `json:"errors"`
+}
+
+type VariableV2Response struct {
+	Variable `json:"variable"`
+}
+
+type VariableV2Input struct {
+	Variable `json:"variable"`
 }
 
 type ChecksV2Response struct {
@@ -342,6 +365,39 @@ type ChecksV2Response struct {
 	Perpage      int `json:"perPage"`
 	Tests        `json:"tests"`
 	Totalcount int `json:"totalCount"`
+}
+
+type HttpCheckV2Response struct {
+	Test struct {
+		ID                 int         `json:"id"`
+		Name               string      `json:"name"`
+		Active             bool        `json:"active"`
+		Frequency          int         `json:"frequency"`
+		SchedulingStrategy string      `json:"scheduling_strategy"`
+		CreatedAt          time.Time   `json:"created_at,omitempty"`
+		UpdatedAt          time.Time   `json:"updated_at,omitempty"`
+		LocationIds        []string    `json:"location_ids"`
+		Type               string      `json:"type"`
+		URL                string      `json:"url"`
+		RequestMethod      string      `json:"request_method"`
+		Body               string 		`json:"body,omitempty"`
+		HttpHeaders        						 `json:"headers,omitempty"`
+} `json:"test"`
+}
+
+type HttpCheckV2Input struct {
+	Test struct {
+		Name               string      `json:"name"`
+		Type               string      `json:"type"`
+		URL                string      `json:"url"`
+		LocationIds        []string    `json:"location_ids"`
+		Frequency          int         `json:"frequency"`
+		SchedulingStrategy string      `json:"scheduling_strategy"`
+		Active             bool        `json:"active"`
+		RequestMethod      string      `json:"request_method"`
+		Body               string	 			`json:"body,omitempty"`
+		HttpHeaders             			`json:"headers,omitempty"`
+	} `json:"test"`
 }
 
 type ApiCheckV2Input struct {

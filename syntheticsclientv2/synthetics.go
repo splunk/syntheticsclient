@@ -127,6 +127,7 @@ func NewClient(apiKey string, realm string) *Client {
 func NewConfigurableClient(apiKey string, realm string, args ClientArgs) *Client {
 	client := Client{
 		apiKey:     apiKey,
+		realm:			realm,
 		httpClient: http.Client{Timeout: time.Duration(args.timeoutSeconds) * time.Second},
 	}
 	if args.publicBaseUrl == "" {
