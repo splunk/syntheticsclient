@@ -200,16 +200,16 @@ type Networkconnection struct {
 }
 
 type Advancedsettings struct {
-	Authentication					`json:"authentication"`
-	Cookiesv2  							`json:"cookies"`
-	BrowserHeaders					`json:"headers,omitempty"`
+	Authentication     `json:"authentication"`
+	Cookiesv2          `json:"cookies"`
+	BrowserHeaders     `json:"headers,omitempty"`
 	Verifycertificates bool `json:"verifyCertificates,omitempty"`
-} 
+}
 
 type Authentication struct {
 	Password string `json:"password"`
 	Username string `json:"username"`
-} 
+}
 
 type Cookiesv2 []struct {
 	Key    string `json:"key"`
@@ -225,13 +225,13 @@ type BrowserHeaders []struct {
 }
 
 type Transactions []struct {
-	Name  string 	`json:"name"`
-	Stepsv2				`json:"steps"`
+	Name    string `json:"name"`
+	Stepsv2 `json:"steps"`
 }
 
 type BusinessTransactions []struct {
-	Name  											string `json:"name"`
-	BusinessTransactionStepsV2 				 `json:"steps"`
+	Name                       string `json:"name"`
+	BusinessTransactionStepsV2 `json:"steps"`
 }
 
 type Stepsv2 []struct {
@@ -256,19 +256,19 @@ type Device struct {
 	ID                int    `json:"id,omitempty"`
 	Label             string `json:"label,omitempty"`
 	Networkconnection `json:"networkConnection,omitempty"`
-	Viewportheight 		int `json:"viewportHeight,omitempty"`
-	Viewportwidth  		int `json:"viewportWidth,omitempty"`
+	Viewportheight    int `json:"viewportHeight,omitempty"`
+	Viewportwidth     int `json:"viewportWidth,omitempty"`
 }
 
 type Requests []struct {
 	Configuration `json:"configuration,omitempty"`
-	Setup 				`json:"setup,omitempty"`
-	Validations 	`json:"validations,omitempty"`
+	Setup         `json:"setup,omitempty"`
+	Validations   `json:"validations,omitempty"`
 }
 
 type Configuration struct {
-	Body    			string `json:"body"`
-	Headers 			`json:"headers,omitempty"`
+	Body          string `json:"body"`
+	Headers       `json:"headers,omitempty"`
 	Name          string `json:"name,omitempty"`
 	Requestmethod string `json:"requestMethod,omitempty"`
 	URL           string `json:"url,omitempty"`
@@ -290,7 +290,7 @@ type Validations []struct {
 	Expected   string `json:"expected,omitempty"`
 	Name       string `json:"name,omitempty"`
 	Type       string `json:"type,omitempty"`
-} 
+}
 
 type Checks []struct {
 	ID        int    `json:"id"`
@@ -306,7 +306,7 @@ type Checks []struct {
 	Tags      Tags   `json:"tags"`
 }
 
-type Tests        []struct {
+type Tests []struct {
 	Active             bool      `json:"active"`
 	Createdat          time.Time `json:"createdAt"`
 	Frequency          int       `json:"frequency"`
@@ -319,11 +319,11 @@ type Tests        []struct {
 }
 
 type GetChecksV2Options struct {
-	TestType    	string 	`json:"testType"`
-	PerPage 	int    	`json:"perPage"`
-	Page    	int 	  `json:"page"`
-	Search   	string  `json:"search"`
-	OrderBy		string	`json:"orderBy"`
+	TestType string `json:"testType"`
+	PerPage  int    `json:"perPage"`
+	Page     int    `json:"page"`
+	Search   string `json:"search"`
+	OrderBy  string `json:"orderBy"`
 }
 
 type Errors []struct {
@@ -332,8 +332,8 @@ type Errors []struct {
 }
 
 type HttpHeaders []struct {
-	Name       	string `json:"name,omitempty"`
-	Value 			string `json:"value,omitempty"`
+	Name  string `json:"name,omitempty"`
+	Value string `json:"value,omitempty"`
 }
 
 type Variable struct {
@@ -364,100 +364,100 @@ type ChecksV2Response struct {
 	Nextpagelink int `json:"nextPageLink"`
 	Perpage      int `json:"perPage"`
 	Tests        `json:"tests"`
-	Totalcount int `json:"totalCount"`
+	Totalcount   int `json:"totalCount"`
 }
 
 type HttpCheckV2Response struct {
 	Test struct {
-		ID                 int         `json:"id"`
-		Name               string      `json:"name"`
-		Active             bool        `json:"active"`
-		Frequency          int         `json:"frequency"`
-		SchedulingStrategy string      `json:"scheduling_strategy"`
-		CreatedAt          time.Time   `json:"created_at,omitempty"`
-		UpdatedAt          time.Time   `json:"updated_at,omitempty"`
-		LocationIds        []string    `json:"location_ids"`
-		Type               string      `json:"type"`
-		URL                string      `json:"url"`
-		RequestMethod      string      `json:"request_method"`
-		Body               string 		`json:"body,omitempty"`
-		HttpHeaders        						 `json:"headers,omitempty"`
-} `json:"test"`
+		ID                 int       `json:"id"`
+		Name               string    `json:"name"`
+		Active             bool      `json:"active"`
+		Frequency          int       `json:"frequency"`
+		SchedulingStrategy string    `json:"scheduling_strategy"`
+		CreatedAt          time.Time `json:"created_at,omitempty"`
+		UpdatedAt          time.Time `json:"updated_at,omitempty"`
+		LocationIds        []string  `json:"location_ids"`
+		Type               string    `json:"type"`
+		URL                string    `json:"url"`
+		RequestMethod      string    `json:"request_method"`
+		Body               string    `json:"body,omitempty"`
+		HttpHeaders        `json:"headers,omitempty"`
+	} `json:"test"`
 }
 
 type HttpCheckV2Input struct {
 	Test struct {
-		Name               string      `json:"name"`
-		Type               string      `json:"type"`
-		URL                string      `json:"url"`
-		LocationIds        []string    `json:"location_ids"`
-		Frequency          int         `json:"frequency"`
-		SchedulingStrategy string      `json:"scheduling_strategy"`
-		Active             bool        `json:"active"`
-		RequestMethod      string      `json:"request_method"`
-		Body               string	 			`json:"body,omitempty"`
-		HttpHeaders             			`json:"headers,omitempty"`
+		Name               string   `json:"name"`
+		Type               string   `json:"type"`
+		URL                string   `json:"url"`
+		LocationIds        []string `json:"location_ids"`
+		Frequency          int      `json:"frequency"`
+		SchedulingStrategy string   `json:"scheduling_strategy"`
+		Active             bool     `json:"active"`
+		RequestMethod      string   `json:"request_method"`
+		Body               string   `json:"body,omitempty"`
+		HttpHeaders        `json:"headers,omitempty"`
 	} `json:"test"`
 }
 
 type ApiCheckV2Input struct {
 	Test struct {
-		Active      bool     			`json:"active"`
-		Deviceid    int      			`json:"device_id"`
-		Frequency   int      			`json:"frequency"`
-		Locationids []string 			`json:"location_ids"`
-		Name        string   			`json:"name"`
-		Requests    							`json:"requests"`
+		Active             bool     `json:"active"`
+		Deviceid           int      `json:"device_id"`
+		Frequency          int      `json:"frequency"`
+		Locationids        []string `json:"location_ids"`
+		Name               string   `json:"name"`
+		Requests           `json:"requests"`
 		Schedulingstrategy string `json:"schedulingStrategy"`
 	} `json:"test"`
 }
 
 type ApiCheckV2Response struct {
 	Test struct {
-		Active    bool      					`json:"active,omitempty"`
-		Createdat time.Time 					`json:"createdAt,omitempty"`
-		Device    										`json:"device,omitempty"`
-		Frequency   int      					`json:"frequency,omitempty"`
-		ID          int      					`json:"id,omitempty"`
-		Locationids []string 					`json:"location_ids,omitempty"`
-		Name        string   					`json:"name,omitempty"`
-		Requests    									`json:"requests,omitempty"`
-		Schedulingstrategy string    	`json:"schedulingStrategy,omitempty"`
-		Type               string    	`json:"type,omitempty"`
-		Updatedat          time.Time 	`json:"updatedAt,omitempty"`
-	} 
+		Active             bool      `json:"active,omitempty"`
+		Createdat          time.Time `json:"createdAt,omitempty"`
+		Device             `json:"device,omitempty"`
+		Frequency          int      `json:"frequency,omitempty"`
+		ID                 int      `json:"id,omitempty"`
+		Locationids        []string `json:"location_ids,omitempty"`
+		Name               string   `json:"name,omitempty"`
+		Requests           `json:"requests,omitempty"`
+		Schedulingstrategy string    `json:"schedulingStrategy,omitempty"`
+		Type               string    `json:"type,omitempty"`
+		Updatedat          time.Time `json:"updatedAt,omitempty"`
+	}
 }
 
 type BrowserCheckV2Input struct {
 	Test struct {
-		Name                 	string 		`json:"name"`
-		BusinessTransactions  					`json:"business_transactions"`
-		Urlprotocol       	 	string   	`json:"urlProtocol"`
-		Starturl           		string   	`json:"startUrl"`
-		LocationIds        		[]string 	`json:"location_ids"`
-		DeviceID           		int      	`json:"device_id"`
-		Frequency          		int      	`json:"frequency"`
-		Schedulingstrategy 		string   	`json:"scheduling_strategy"`
-		Active             		bool     	`json:"active"`
-		Advancedsettings   							`json:"advanced_settings"`
+		Name                 string `json:"name"`
+		BusinessTransactions `json:"business_transactions"`
+		Urlprotocol          string   `json:"urlProtocol"`
+		Starturl             string   `json:"startUrl"`
+		LocationIds          []string `json:"location_ids"`
+		DeviceID             int      `json:"device_id"`
+		Frequency            int      `json:"frequency"`
+		Schedulingstrategy   string   `json:"scheduling_strategy"`
+		Active               bool     `json:"active"`
+		Advancedsettings     `json:"advanced_settings"`
 	} `json:"test"`
 }
 
 type BrowserCheckV2Response struct {
 	Test struct {
-		Active           		bool 			`json:"active"`
-		Advancedsettings 							`json:"advanced_settings"`
-		BusinessTransactions  				`json:"business_transactions"`
-		Createdat 					time.Time `json:"createdAt"`
-		Device												`json:"device"`
-		Frequency          	int      	`json:"frequency"`
-		ID                 	int      	`json:"id"`
-		Locationids        	[]string 	`json:"location_ids"`
-		Name               	string		`json:"name"`
-		Schedulingstrategy	string		`json:"scheduling_strategy"`
-		Transactions									`json:"transactions"`
-		Type      					string    `json:"type"`
-		Updatedat 					time.Time `json:"updatedAt"`
+		Active               bool `json:"active"`
+		Advancedsettings     `json:"advanced_settings"`
+		BusinessTransactions `json:"business_transactions"`
+		Createdat            time.Time `json:"createdAt"`
+		Device               `json:"device"`
+		Frequency            int      `json:"frequency"`
+		ID                   int      `json:"id"`
+		Locationids          []string `json:"location_ids"`
+		Name                 string   `json:"name"`
+		Schedulingstrategy   string   `json:"scheduling_strategy"`
+		Transactions         `json:"transactions"`
+		Type                 string    `json:"type"`
+		Updatedat            time.Time `json:"updatedAt"`
 	} `json:"test"`
 }
 
