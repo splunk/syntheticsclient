@@ -367,6 +367,38 @@ type ChecksV2Response struct {
 	Totalcount   int `json:"totalCount"`
 }
 
+type PortCheckV2Response struct {
+	Test struct {
+		ID                 int       `json:"id"`
+		Name               string    `json:"name"`
+		Active             bool      `json:"active"`
+		Frequency          int       `json:"frequency"`
+		SchedulingStrategy string    `json:"scheduling_strategy"`
+		CreatedAt          time.Time `json:"created_at"`
+		UpdatedAt          time.Time `json:"updated_at"`
+		LocationIds        []string  `json:"location_ids"`
+		Type               string    `json:"type"`
+		Protocol           string    `json:"protocol"`
+		Host               string    `json:"host"`
+		Port               int       `json:"port"`
+	} `json:"test"`
+}
+
+type PortCheckV2Input struct {
+	Test struct {
+		Name               string   `json:"name"`
+		Type               string   `json:"type"`
+		URL                string   `json:"url"`
+		Port               int      `json:"port"`
+		Protocol           string   `json:"protocol"`
+		Host               string   `json:"host"`
+		LocationIds        []string `json:"location_ids"`
+		Frequency          int      `json:"frequency"`
+		SchedulingStrategy string   `json:"scheduling_strategy"`
+		Active             bool     `json:"active"`
+	} `json:"test"`
+}
+
 type HttpCheckV2Response struct {
 	Test struct {
 		ID                 int       `json:"id"`
