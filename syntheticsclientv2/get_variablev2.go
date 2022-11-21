@@ -20,7 +20,6 @@ import (
 	"fmt"
 )
 
-
 func parseVariableV2Response(response string) (*VariableV2Response, error) {
 	// Parse the response and return the check object
 	var check VariableV2Response

@@ -19,7 +19,6 @@ import (
 	"encoding/json"
 )
 
-
 func parseCreateApiCheckV2Response(response string) (*ApiCheckV2Response, error) {
 
 	var createApiCheckV2 ApiCheckV2Response

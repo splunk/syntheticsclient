@@ -1,3 +1,6 @@
+//go:build unit_tests
+// +build unit_tests
+
 // Copyright 2021 Splunk, Inc.
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
@@ -15,10 +18,9 @@
 package syntheticsclientv2
 
 import (
+	"fmt"
 	"net/http"
 	"testing"
-	"os"
-	"fmt"
 )
 
 var (
@@ -31,7 +33,10 @@ func TestDeleteVariableV2(t *testing.T) {
 
 	testMux.HandleFunc("/variables/19", func(w http.ResponseWriter, r *http.Request) {
 		testMethod(t, r, "DELETE")
-		w.Write([]byte(deleteVariableV2RespBody))
+		_, err := w.Write([]byte(deleteVariableV2RespBody))
+		if err != nil {
+			t.Fatal(err)
+		}
 	})
 
 	resp, err := testClient.DeleteVariableV2(19)
@@ -40,33 +45,4 @@ func TestDeleteVariableV2(t *testing.T) {
 		t.Fatal(err)
 	}
 	fmt.Println(resp)
-}
-
-func TestLiveDeleteVariableV2(t *testing.T) {
-	setup()
-	defer teardown()
-
-	//Expects a token is available from the API_ACCESS_TOKEN environment variable
-	//Expects a valid realm (E.G. us0, us1, eu0, etc) environment variable
-	token := os.Getenv("API_ACCESS_TOKEN")
-	realm := os.Getenv("REALM")
-
-	//Create your client with the token
-	c := NewClient(token, realm)
-	
-	fmt.Println(c)
-	fmt.Println(inputData)
-
-	// Make the request with your check settings and print result
-  res, err := c.DeleteVariableV2(254)
-	if err != nil {
-		fmt.Println(err)
-	} else {
-		JsonPrint(res)
-	}
-
-	if err != nil {
-		t.Fatal(err)
-	}
-
 }

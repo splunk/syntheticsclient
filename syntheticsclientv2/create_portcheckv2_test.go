@@ -1,3 +1,6 @@
+//go:build unit_tests
+// +build unit_tests
+
 // Copyright 2021 Splunk, Inc.
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
@@ -18,7 +21,6 @@ import (
 	"encoding/json"
 	"fmt"
 	"net/http"
-	"os"
 	"reflect"
 	"testing"
 )
@@ -34,10 +36,16 @@ func TestCreatePortCheckV2(t *testing.T) {
 
 	testMux.HandleFunc("/tests/port", func(w http.ResponseWriter, r *http.Request) {
 		testMethod(t, r, "POST")
-		w.Write([]byte(createPortCheckV2Body))
+		_, err := w.Write([]byte(createPortCheckV2Body))
+		if err != nil {
+			t.Fatal(err)
+		}
 	})
 
-	json.Unmarshal([]byte(createPortCheckV2Body), &inputPortCheckV2Data)
+	err := json.Unmarshal([]byte(createPortCheckV2Body), &inputPortCheckV2Data)
+	if err != nil {
+		t.Fatal(err)
+	}
 
 	resp, _, err := testClient.CreatePortCheckV2(&inputPortCheckV2Data)
 
@@ -47,64 +55,32 @@ func TestCreatePortCheckV2(t *testing.T) {
 
 	fmt.Println(resp)
 
-	if !reflect.DeepEqual(resp.Test.Name, inputGetPortCheckV2.Test.Name) {
-		t.Errorf("returned \n\n%#v want \n\n%#v", resp.Test.Name, inputGetPortCheckV2.Test.Name)
+	if !reflect.DeepEqual(resp.Test.Name, inputPortCheckV2Data.Test.Name) {
+		t.Errorf("returned \n\n%#v want \n\n%#v", resp.Test.Name, inputPortCheckV2Data.Test.Name)
 	}
 
-	if !reflect.DeepEqual(resp.Test.Type, inputGetPortCheckV2.Test.Type) {
-		t.Errorf("returned \n\n%#v want \n\n%#v", resp.Test.Type, inputGetPortCheckV2.Test.Type)
+	if !reflect.DeepEqual(resp.Test.Type, inputPortCheckV2Data.Test.Type) {
+		t.Errorf("returned \n\n%#v want \n\n%#v", resp.Test.Type, inputPortCheckV2Data.Test.Type)
 	}
 
-	if !reflect.DeepEqual(resp.Test.Frequency, inputGetPortCheckV2.Test.Frequency) {
-		t.Errorf("returned \n\n%#v want \n\n%#v", resp.Test.Frequency, inputGetPortCheckV2.Test.Frequency)
+	if !reflect.DeepEqual(resp.Test.Frequency, inputPortCheckV2Data.Test.Frequency) {
+		t.Errorf("returned \n\n%#v want \n\n%#v", resp.Test.Frequency, inputPortCheckV2Data.Test.Frequency)
 	}
 
-	if !reflect.DeepEqual(resp.Test.Active, inputGetPortCheckV2.Test.Active) {
-		t.Errorf("returned \n\n%#v want \n\n%#v", resp.Test.Active, inputGetPortCheckV2.Test.Active)
+	if !reflect.DeepEqual(resp.Test.Active, inputPortCheckV2Data.Test.Active) {
+		t.Errorf("returned \n\n%#v want \n\n%#v", resp.Test.Active, inputPortCheckV2Data.Test.Active)
 	}
 
-	if !reflect.DeepEqual(resp.Test.Protocol, inputGetPortCheckV2.Test.Protocol) {
-		t.Errorf("returned \n\n%#v want \n\n%#v", resp.Test.Protocol, inputGetPortCheckV2.Test.Protocol)
+	if !reflect.DeepEqual(resp.Test.Protocol, inputPortCheckV2Data.Test.Protocol) {
+		t.Errorf("returned \n\n%#v want \n\n%#v", resp.Test.Protocol, inputPortCheckV2Data.Test.Protocol)
 	}
 
-	if !reflect.DeepEqual(resp.Test.Host, inputGetPortCheckV2.Test.Host) {
-		t.Errorf("returned \n\n%#v want \n\n%#v", resp.Test.Host, inputGetPortCheckV2.Test.Host)
+	if !reflect.DeepEqual(resp.Test.Host, inputPortCheckV2Data.Test.Host) {
+		t.Errorf("returned \n\n%#v want \n\n%#v", resp.Test.Host, inputPortCheckV2Data.Test.Host)
 	}
 
-	if !reflect.DeepEqual(resp.Test.Port, inputGetPortCheckV2.Test.Port) {
-		t.Errorf("returned \n\n%#v want \n\n%#v", resp.Test.Port, inputGetPortCheckV2.Test.Port)
-	}
-
-}
-
-func TestLiveCreatePortCheckV2(t *testing.T) {
-	setup()
-	defer teardown()
-
-	json.Unmarshal([]byte(createPortCheckV2Body), &inputPortCheckV2Data)
-
-	//Expects a token is available from the API_ACCESS_TOKEN environment variable
-	//Expects a valid realm (E.G. us0, us1, eu0, etc) environment variable
-	token := os.Getenv("API_ACCESS_TOKEN")
-	realm := os.Getenv("REALM")
-
-	//Create your client with the token
-	c := NewClient(token, realm)
-
-	fmt.Println(c)
-	fmt.Println(inputPortCheckV2Data)
-
-	// Make the request with your check settings and print result
-	res, reqDetail, err := c.CreatePortCheckV2(&inputPortCheckV2Data)
-	if err != nil {
-		fmt.Println(err)
-	} else {
-		fmt.Println(reqDetail)
-		JsonPrint(res)
-	}
-
-	if err != nil {
-		t.Fatal(err)
+	if !reflect.DeepEqual(resp.Test.Port, inputPortCheckV2Data.Test.Port) {
+		t.Errorf("returned \n\n%#v want \n\n%#v", resp.Test.Port, inputPortCheckV2Data.Test.Port)
 	}
 
 }

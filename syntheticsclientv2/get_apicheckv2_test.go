@@ -1,3 +1,6 @@
+//go:build unit_tests
+// +build unit_tests
+
 // Copyright 2021 Splunk, Inc.
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
@@ -19,8 +22,6 @@ import (
 	"net/http"
 	"reflect"
 	"testing"
-	"os"
-	"fmt"
 )
 
 var (
@@ -34,7 +35,10 @@ func TestGetApiCheckV2(t *testing.T) {
 
 	testMux.HandleFunc("/tests/api/489", func(w http.ResponseWriter, r *http.Request) {
 		testMethod(t, r, "GET")
-		w.Write([]byte(getApiCheckV2Body))
+		_, err := w.Write([]byte(getApiCheckV2Body))
+		if err != nil {
+			t.Fatal(err)
+		}
 	})
 
 	resp, _, err := testClient.GetApiCheckV2(489)
@@ -87,30 +91,4 @@ func verifyApiCheckV2Input(stringInput string) *ApiCheckV2Response {
 		panic(err)
 	}
 	return check
-}
-
-func TestLiveGetApiCheckV2(t *testing.T) {
-	setup()
-	defer teardown()
-
-	//Expects a token is available from the API_ACCESS_TOKEN environment variable
-	//Expects a valid realm (E.G. us0, us1, eu0, etc) environment variable
-	token := os.Getenv("API_ACCESS_TOKEN")
-	realm := os.Getenv("REALM")
-
-	//Create your client with the token
-	c := NewClient(token, realm)
-
-	// Make the request with your check settings and print result
-  res, _, err := c.GetApiCheckV2(489)
-	if err != nil {
-		fmt.Println(err)
-	} else {
-		JsonPrint(res)
-	}
-
-	if err != nil {
-		t.Fatal(err)
-	}
-
 }

@@ -1,3 +1,6 @@
+//go:build unit_tests
+// +build unit_tests
+
 // Copyright 2021 Splunk, Inc.
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
@@ -33,10 +36,16 @@ func TestUpdatePortCheckV2(t *testing.T) {
 
 	testMux.HandleFunc("/tests/port/1650", func(w http.ResponseWriter, r *http.Request) {
 		testMethod(t, r, "PUT")
-		w.Write([]byte(updatePortCheckV2Body))
+		_, err := w.Write([]byte(updatePortCheckV2Body))
+		if err != nil {
+			t.Fatal(err)
+		}
 	})
 
-	json.Unmarshal([]byte(updatePortCheckV2Body), &inputPortCheckV2Update)
+	err := json.Unmarshal([]byte(updatePortCheckV2Body), &inputPortCheckV2Update)
+	if err != nil {
+		t.Fatal(err)
+	}
 
 	resp, _, err := testClient.UpdatePortCheckV2(1650, &inputPortCheckV2Update)
 	if err != nil {

@@ -1,3 +1,6 @@
+//go:build unit_tests
+// +build unit_tests
+
 // Copyright 2021 Splunk, Inc.
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
@@ -54,6 +57,9 @@ func testMethod(t *testing.T, r *http.Request, want string) {
 }
 
 func TestConfigurableClient(t *testing.T) {
+	setup()
+	defer teardown()
+
 	testMux = http.NewServeMux()
 	testServer = httptest.NewServer(testMux)
 	args := ClientArgs{
@@ -61,16 +67,16 @@ func TestConfigurableClient(t *testing.T) {
 		publicBaseUrl:  testServer.URL,
 	}
 
-	testConfigurableClient := NewConfigurableClient("snakedonut", "realm-o", args)
+	testConfigurableClient := NewConfigurableClient("snakedonut", "us0", args)
 	log.Printf("Client instantiated: %s", testServer.URL)
 	if testConfigurableClient.GetHTTPClient() == nil {
 		t.Errorf("http client is nil")
 	}
 	if testConfigurableClient.apiKey != "snakedonut" {
-		t.Errorf("apiKey was not correctly passed")
+		t.Errorf("returned \n\n%#v want \n\n%#v", testConfigurableClient.apiKey, "snakedonut")
 	}
-	if testConfigurableClient.apiKey != "realm-o" {
-		t.Errorf("apiKey was not correctly passed")
+	if testConfigurableClient.realm != "us0" {
+		t.Errorf("returned \n\n%#v want \n\n%#v", testConfigurableClient.realm, "us0")
 	}
 }
 
@@ -78,7 +84,7 @@ func TestConfigurableClientTimeout(t *testing.T) {
 	testMux = http.NewServeMux()
 	testServer = httptest.NewServer(testMux)
 
-	testMux.HandleFunc("/v2/checks/12", func(w http.ResponseWriter, r *http.Request) {
+	testMux.HandleFunc("/tests/browser/12", func(w http.ResponseWriter, r *http.Request) {
 		time.Sleep(2 * time.Second)
 	})
 

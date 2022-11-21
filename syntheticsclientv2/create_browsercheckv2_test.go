@@ -1,3 +1,6 @@
+//go:build unit_tests
+// +build unit_tests
+
 // Copyright 2021 Splunk, Inc.
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
@@ -15,17 +18,16 @@
 package syntheticsclientv2
 
 import (
+	"encoding/json"
+	"fmt"
 	"net/http"
 	"reflect"
 	"testing"
-	"fmt"
-	"encoding/json"
-	"os"
 )
 
 var (
-	createBrowserCheckV2Body  = `{"test":{"name":"browser-beep-test","business_transactions":[{"name":"Synthetic transaction 1","steps":[{"name":"Go to URL","type":"go_to_url","url":"https://www.splunk.com","action":"go_to_url","wait_for_nav":true},{"name":"Nexter step","type":"click_element","selector_type":"id","wait_for_nav":false,"selector":"free-splunk-click-desktop"}]}],"urlProtocol":"https://","startUrl":"www.splunk.com","location_ids":["aws-us-east-1"],"device_id":1,"frequency":5,"scheduling_strategy":"round_robin","active":true,"advanced_settings":{"verify_certificates":true,"authentication":{"username":"boopuser","password":"{{env.beep-var}}"},"headers":[{"name":"batman","value":"Agentoz","domain":"www.batmansagent.com"}],"cookies":[{"key":"super","value":"duper","domain":"www.batmansagent.com","path":"/boom/goes/beep"}]}}}`
-	inputBrowserCheckV2Data = BrowserCheckV2Input{}
+	createBrowserCheckV2Body = `{"test":{"name":"browser-beep-test","business_transactions":[{"name":"Synthetic transaction 1","steps":[{"name":"Go to URL","type":"go_to_url","url":"https://www.splunk.com","action":"go_to_url","wait_for_nav":true},{"name":"Nexter step","type":"click_element","selector_type":"id","wait_for_nav":false,"selector":"free-splunk-click-desktop"}]}],"urlProtocol":"https://","startUrl":"www.splunk.com","location_ids":["aws-us-east-1"],"device_id":1,"frequency":5,"scheduling_strategy":"round_robin","active":true,"advanced_settings":{"verify_certificates":true,"authentication":{"username":"boopuser","password":"{{env.beep-var}}"},"headers":[{"name":"batman","value":"Agentoz","domain":"www.batmansagent.com"}],"cookies":[{"key":"super","value":"duper","domain":"www.batmansagent.com","path":"/boom/goes/beep"}]}}}`
+	inputBrowserCheckV2Data  = BrowserCheckV2Input{}
 )
 
 func TestCreateBrowserCheckV2(t *testing.T) {
@@ -34,10 +36,16 @@ func TestCreateBrowserCheckV2(t *testing.T) {
 
 	testMux.HandleFunc("/tests/browser", func(w http.ResponseWriter, r *http.Request) {
 		testMethod(t, r, "POST")
-		w.Write([]byte(createBrowserCheckV2Body))
+		_, err := w.Write([]byte(createBrowserCheckV2Body))
+		if err != nil {
+			t.Fatal(err)
+		}
 	})
 
-	json.Unmarshal([]byte(createBrowserCheckV2Body), &inputBrowserCheckV2Data)
+	err := json.Unmarshal([]byte(createBrowserCheckV2Body), &inputBrowserCheckV2Data)
+	if err != nil {
+		t.Fatal(err)
+	}
 
 	resp, _, err := testClient.CreateBrowserCheckV2(&inputBrowserCheckV2Data)
 
@@ -73,39 +81,6 @@ func TestCreateBrowserCheckV2(t *testing.T) {
 
 	if !reflect.DeepEqual(resp.Test.Schedulingstrategy, inputBrowserCheckV2Data.Test.Schedulingstrategy) {
 		t.Errorf("returned \n\n%#v want \n\n%#v", resp.Test.Schedulingstrategy, inputBrowserCheckV2Data.Test.Schedulingstrategy)
-	}
-
-}
-
-
-func TestLiveCreateBrowserCheckV2(t *testing.T) {
-	setup()
-	defer teardown()
-
-	json.Unmarshal([]byte(createBrowserCheckV2Body), &inputBrowserCheckV2Data)
-
-	//Expects a token is available from the API_ACCESS_TOKEN environment variable
-	//Expects a valid realm (E.G. us0, us1, eu0, etc) environment variable
-	token := os.Getenv("API_ACCESS_TOKEN")
-	realm := os.Getenv("REALM")
-
-	//Create your client with the token
-	c := NewClient(token, realm)
-	
-	fmt.Println(c)
-	fmt.Println(inputBrowserCheckV2Data)
-
-	// Make the request with your check settings and print result
-  res, reqDetail, err := c.CreateBrowserCheckV2(&inputBrowserCheckV2Data)
-	if err != nil {
-		fmt.Println(err)
-	} else {
-		fmt.Println(reqDetail)
-		JsonPrint(res)
-	}
-
-	if err != nil {
-		t.Fatal(err)
 	}
 
 }

@@ -1,3 +1,6 @@
+//go:build unit_tests
+// +build unit_tests
+
 // Copyright 2021 Splunk, Inc.
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
@@ -15,17 +18,16 @@
 package syntheticsclientv2
 
 import (
+	"encoding/json"
+	"fmt"
 	"net/http"
 	"reflect"
 	"testing"
-	"fmt"
-	"encoding/json"
-	"os"
 )
 
 var (
-	createVariableV2Body  = `{"variable":{"description":"My super awesome test variable","name":"food","secret":false,"value":"bar"}}`
-	inputVariableV2Data = VariableV2Input{}
+	createVariableV2Body = `{"variable":{"description":"My super awesome test variable","name":"food","secret":false,"value":"bar"}}`
+	inputVariableV2Data  = VariableV2Input{}
 )
 
 func TestCreateVariableV2(t *testing.T) {
@@ -34,10 +36,16 @@ func TestCreateVariableV2(t *testing.T) {
 
 	testMux.HandleFunc("/variables", func(w http.ResponseWriter, r *http.Request) {
 		testMethod(t, r, "POST")
-		w.Write([]byte(createVariableV2Body))
+		_, err := w.Write([]byte(createVariableV2Body))
+		if err != nil {
+			t.Fatal(err)
+		}
 	})
 
-	json.Unmarshal([]byte(createVariableV2Body), &inputVariableV2Data)
+	err := json.Unmarshal([]byte(createVariableV2Body), &inputVariableV2Data)
+	if err != nil {
+		t.Fatal(err)
+	}
 
 	resp, _, err := testClient.CreateVariableV2(&inputVariableV2Data)
 
@@ -65,39 +73,6 @@ func TestCreateVariableV2(t *testing.T) {
 
 	if !reflect.DeepEqual(resp.Variable.Secret, inputVariableV2Data.Variable.Secret) {
 		t.Errorf("returned \n\n%#v want \n\n%#v", resp.Variable.Secret, inputVariableV2Data.Variable.Secret)
-	}
-
-}
-
-
-func TestLiveCreateVariableV2(t *testing.T) {
-	setup()
-	defer teardown()
-
-	json.Unmarshal([]byte(createVariableV2Body), &inputVariableV2Data)
-
-	//Expects a token is available from the API_ACCESS_TOKEN environment variable
-	//Expects a valid realm (E.G. us0, us1, eu0, etc) environment variable
-	token := os.Getenv("API_ACCESS_TOKEN")
-	realm := os.Getenv("REALM")
-
-	//Create your client with the token
-	c := NewClient(token, realm)
-	
-	fmt.Println(c)
-	fmt.Println(inputVariableV2Data)
-
-	// Make the request with your check settings and print result
-  res, reqDetail, err := c.CreateVariableV2(&inputVariableV2Data)
-	if err != nil {
-		fmt.Println(err)
-	} else {
-		fmt.Println(reqDetail)
-		JsonPrint(res)
-	}
-
-	if err != nil {
-		t.Fatal(err)
 	}
 
 }

@@ -1,3 +1,6 @@
+//go:build unit_tests
+// +build unit_tests
+
 // Copyright 2021 Splunk, Inc.
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
@@ -16,9 +19,7 @@ package syntheticsclientv2
 
 import (
 	"encoding/json"
-	"fmt"
 	"net/http"
-	"os"
 	"reflect"
 	"testing"
 )
@@ -34,7 +35,10 @@ func TestGetHttpCheckV2(t *testing.T) {
 
 	testMux.HandleFunc("/tests/http/1", func(w http.ResponseWriter, r *http.Request) {
 		testMethod(t, r, "GET")
-		w.Write([]byte(getHttpCheckV2Body))
+		_, err := w.Write([]byte(getHttpCheckV2Body))
+		if err != nil {
+			t.Fatal(err)
+		}
 	})
 
 	resp, _, err := testClient.GetHttpCheckV2(1)
@@ -103,30 +107,4 @@ func verifyHttpCheckV2Input(stringInput string) *HttpCheckV2Response {
 		panic(err)
 	}
 	return check
-}
-
-func TestLiveGetHttpCheckV2(t *testing.T) {
-	setup()
-	defer teardown()
-
-	//Expects a token is available from the API_ACCESS_TOKEN environment variable
-	//Expects a valid realm (E.G. us0, us1, eu0, etc) environment variable
-	token := os.Getenv("API_ACCESS_TOKEN")
-	realm := os.Getenv("REALM")
-
-	//Create your client with the token
-	c := NewClient(token, realm)
-
-	// Make the request with your check settings and print result
-	res, _, err := c.GetHttpCheckV2(1528)
-	if err != nil {
-		fmt.Println(err)
-	} else {
-		JsonPrint(res)
-	}
-
-	if err != nil {
-		t.Fatal(err)
-	}
-
 }

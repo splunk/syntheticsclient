@@ -1,3 +1,6 @@
+//go:build unit_tests
+// +build unit_tests
+
 // Copyright 2021 Splunk, Inc.
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
@@ -23,7 +26,7 @@ import (
 )
 
 var (
-	updateVariableV2Body = `{"variable":{"description":"My super awesome test variable","name":"foo2","secret":false,"value":"bar"}}`
+	updateVariableV2Body  = `{"variable":{"description":"My super awesome test variable","name":"foo2","secret":false,"value":"bar"}}`
 	inputVariableV2Update = VariableV2Input{}
 )
 
@@ -33,10 +36,16 @@ func TestUpdateVariableV2(t *testing.T) {
 
 	testMux.HandleFunc("/variables/10", func(w http.ResponseWriter, r *http.Request) {
 		testMethod(t, r, "PUT")
-		w.Write([]byte(updateVariableV2Body))
+		_, err := w.Write([]byte(updateVariableV2Body))
+		if err != nil {
+			t.Fatal(err)
+		}
 	})
 
-	json.Unmarshal([]byte(updateVariableV2Body), &inputVariableV2Update)
+	err := json.Unmarshal([]byte(updateVariableV2Body), &inputVariableV2Update)
+	if err != nil {
+		t.Fatal(err)
+	}
 
 	resp, _, err := testClient.UpdateVariableV2(10, &inputVariableV2Update)
 	if err != nil {
@@ -62,4 +71,3 @@ func TestUpdateVariableV2(t *testing.T) {
 	}
 
 }
-

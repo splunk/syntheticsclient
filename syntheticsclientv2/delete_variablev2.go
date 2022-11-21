@@ -21,13 +21,12 @@ import (
 	"strconv"
 )
 
-
 func (c Client) DeleteVariableV2(id int) (int, error) {
 	requestDetails, err := c.makePublicAPICall("DELETE", fmt.Sprintf("/variables/%d", id), bytes.NewBufferString("{}"), nil)
 	if err != nil {
 		return 1, err
 	}
-  var status = requestDetails.StatusCode
+	var status = requestDetails.StatusCode
 
 	fmt.Println(status)
 
@@ -35,6 +34,6 @@ func (c Client) DeleteVariableV2(id int) (int, error) {
 		errorMsg := fmt.Sprintf("error: Response code %v. Expecting 2XX.", strconv.Itoa(status))
 		return status, errors.New(errorMsg)
 	}
-	
+
 	return status, err
 }

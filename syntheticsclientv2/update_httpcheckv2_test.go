@@ -1,3 +1,6 @@
+//go:build unit_tests
+// +build unit_tests
+
 // Copyright 2021 Splunk, Inc.
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
@@ -23,7 +26,7 @@ import (
 )
 
 var (
-	updateHttpCheckV2Body = `{"test":{"name":"morebeeps-test","type":"http","url":"https://www.splunk.com","location_ids":["aws-us-east-1"],"frequency":10,"scheduling_strategy":"round_robin","active":true,"request_method":"GET","body":null,"headers":[{"name":"boop","value":"beep"}]}}`
+	updateHttpCheckV2Body  = `{"test":{"name":"morebeeps-test","type":"http","url":"https://www.splunk.com","location_ids":["aws-us-east-1"],"frequency":10,"scheduling_strategy":"round_robin","active":true,"request_method":"GET","body":null,"headers":[{"name":"boop","value":"beep"}]}}`
 	inputHttpCheckV2Update = HttpCheckV2Input{}
 )
 
@@ -33,10 +36,16 @@ func TestUpdateHttpCheckV2(t *testing.T) {
 
 	testMux.HandleFunc("/tests/http/10", func(w http.ResponseWriter, r *http.Request) {
 		testMethod(t, r, "PUT")
-		w.Write([]byte(updateHttpCheckV2Body))
+		_, err := w.Write([]byte(updateHttpCheckV2Body))
+		if err != nil {
+			t.Fatal(err)
+		}
 	})
 
-	json.Unmarshal([]byte(updateHttpCheckV2Body), &inputHttpCheckV2Update)
+	err := json.Unmarshal([]byte(updateHttpCheckV2Body), &inputHttpCheckV2Update)
+	if err != nil {
+		t.Fatal(err)
+	}
 
 	resp, _, err := testClient.UpdateHttpCheckV2(10, &inputHttpCheckV2Update)
 	if err != nil {
@@ -50,4 +59,3 @@ func TestUpdateHttpCheckV2(t *testing.T) {
 	}
 
 }
-

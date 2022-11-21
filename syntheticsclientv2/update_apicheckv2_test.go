@@ -1,3 +1,6 @@
+//go:build unit_tests
+// +build unit_tests
+
 // Copyright 2021 Splunk, Inc.
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
@@ -23,7 +26,7 @@ import (
 )
 
 var (
-	updateApiCheckV2Body = `{"test":{"active":true,"device_id":4,"frequency":5,"location_ids":["aws-us-east-1","aws-ap-northeast-1"],"name":"boop-test","scheduling_strategy":"round_robin","requests":[{"configuration":{"name":"Get-Test","requestMethod":"GET","url":"https://api.us1.signalfx.com/v2/synthetics/tests/api/489","headers":{"beep":"boop","X-SF-TOKEN":"jinglebellsbatmanshells"},"body":null},"setup":[{"name":"Extract from response body","type":"extract_json","source":"{{response.body}}","extractor":"$.requests","variable":"custom-varz"}],"validations":[{"name":"Assert response code equals 200","type":"assert_numeric","actual":"{{response.code}}","expected":"200","comparator":"equals"}]}]}}`
+	updateApiCheckV2Body  = `{"test":{"active":true,"device_id":4,"frequency":5,"location_ids":["aws-us-east-1","aws-ap-northeast-1"],"name":"boop-test","scheduling_strategy":"round_robin","requests":[{"configuration":{"name":"Get-Test","requestMethod":"GET","url":"https://api.us1.signalfx.com/v2/synthetics/tests/api/489","headers":{"beep":"boop","X-SF-TOKEN":"jinglebellsbatmanshells"},"body":null},"setup":[{"name":"Extract from response body","type":"extract_json","source":"{{response.body}}","extractor":"$.requests","variable":"custom-varz"}],"validations":[{"name":"Assert response code equals 200","type":"assert_numeric","actual":"{{response.code}}","expected":"200","comparator":"equals"}]}]}}`
 	inputApiCheckV2Update = ApiCheckV2Input{}
 )
 
@@ -33,10 +36,16 @@ func TestUpdateApiCheckV2(t *testing.T) {
 
 	testMux.HandleFunc("/tests/api/10", func(w http.ResponseWriter, r *http.Request) {
 		testMethod(t, r, "PUT")
-		w.Write([]byte(updateApiCheckV2Body))
+		_, err := w.Write([]byte(updateApiCheckV2Body))
+		if err != nil {
+			t.Fatal(err)
+		}
 	})
 
-	json.Unmarshal([]byte(updateApiCheckV2Body), &inputApiCheckV2Update)
+	err := json.Unmarshal([]byte(updateApiCheckV2Body), &inputApiCheckV2Update)
+	if err != nil {
+		t.Fatal(err)
+	}
 
 	resp, _, err := testClient.UpdateApiCheckV2(10, &inputApiCheckV2Update)
 	if err != nil {
@@ -70,4 +79,3 @@ func TestUpdateApiCheckV2(t *testing.T) {
 	}
 
 }
-
