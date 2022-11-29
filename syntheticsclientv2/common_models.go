@@ -255,9 +255,10 @@ type BusinessTransactionStepsV2 []struct {
 type Device struct {
 	ID                int    `json:"id,omitempty"`
 	Label             string `json:"label,omitempty"`
-	Networkconnection `json:"networkConnection,omitempty"`
-	Viewportheight    int `json:"viewportHeight,omitempty"`
-	Viewportwidth     int `json:"viewportWidth,omitempty"`
+	UserAgent         string `json:"user_agent,omitempty"`
+	Networkconnection `json:"network_connection,omitempty"`
+	Viewportheight    int `json:"viewport_height"`
+	Viewportwidth     int `json:"viewport_width"`
 }
 
 type Requests []struct {
