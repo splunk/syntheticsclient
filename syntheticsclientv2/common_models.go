@@ -193,16 +193,18 @@ type DNSOverrides struct {
 
 type Networkconnection struct {
 	Description       string `json:"description,omitempty"`
-	Downloadbandwidth int    `json:"downloadBandwidth,omitempty"`
+	Downloadbandwidth int    `json:"download_bandwidth,omitempty"`
 	Latency           int    `json:"latency,omitempty"`
-	Packetloss        int    `json:"packetLoss,omitempty"`
-	Uploadbandwidth   int    `json:"uploadBandwidth,omitempty"`
+	Packetloss        int    `json:"packet_loss,omitempty"`
+	Uploadbandwidth   int    `json:"upload_bandwidth,omitempty"`
 }
 
 type Advancedsettings struct {
 	Authentication     `json:"authentication"`
-	Cookiesv2          `json:"cookies"`
-	BrowserHeaders     `json:"headers,omitempty"`
+	Cookiesv2         []Cookiesv2 `json:"cookies"`
+	BrowserHeaders     []BrowserHeaders `json:"headers,omitempty"`
+	HostOverrides     []HostOverrides `json:"host_overrides,omitempty"`
+	UserAgent string `json:"user_agent,omitempty"`
 	Verifycertificates bool `json:"verifyCertificates,omitempty"`
 }
 
@@ -211,38 +213,36 @@ type Authentication struct {
 	Username string `json:"username"`
 }
 
-type Cookiesv2 []struct {
+type Cookiesv2 struct {
 	Key    string `json:"key"`
 	Value  string `json:"value"`
 	Domain string `json:"domain"`
 	Path   string `json:"path"`
 }
 
-type BrowserHeaders []struct {
+type BrowserHeaders struct {
 	Name   string `json:"name"`
 	Value  string `json:"value"`
 	Domain string `json:"domain"`
 }
 
-type Transactions []struct {
+type HostOverrides struct {
+	Source   string `json:"source"`
+	Target  string `json:"target"`
+	KeepHostHeader bool `json:"keep_host_header"`
+}
+
+type Transactions struct {
 	Name    string `json:"name"`
-	Stepsv2 `json:"steps"`
+	StepsV2 []StepsV2 `json:"steps"`
 }
 
-type BusinessTransactions []struct {
+type BusinessTransactions struct {
 	Name                       string `json:"name"`
-	BusinessTransactionStepsV2 `json:"steps"`
+	StepsV2 []StepsV2 `json:"steps"`
 }
 
-type Stepsv2 []struct {
-	Name         string `json:"name"`
-	Selector     string `json:"selector,omitempty"`
-	Selectortype string `json:"selectorType,omitempty"`
-	Type         string `json:"type,omitempty"`
-	Waitfornav   bool   `json:"waitForNav,omitempty"`
-}
-
-type BusinessTransactionStepsV2 []struct {
+type StepsV2 struct {
 	Name         string `json:"name"`
 	Type         string `json:"type"`
 	URL          string `json:"url,omitempty"`
@@ -250,6 +250,22 @@ type BusinessTransactionStepsV2 []struct {
 	WaitForNav   bool   `json:"wait_for_nav"`
 	SelectorType string `json:"selector_type,omitempty"`
 	Selector     string `json:"selector,omitempty"`
+	Options			`json:"options,omitempty"`
+}
+
+type BusinessTransactionStepsV2 struct {
+	Name         string `json:"name"`
+	Type         string `json:"type"`
+	URL          string `json:"url,omitempty"`
+	Action       string `json:"action,omitempty"`
+	WaitForNav   bool   `json:"wait_for_nav"`
+	SelectorType string `json:"selector_type,omitempty"`
+	Selector     string `json:"selector,omitempty"`
+	Options			`json:"options,omitempty"`
+}
+
+type Options struct {
+	URL                string    `json:"url,omitempty"`
 }
 
 type Device struct {
@@ -261,10 +277,10 @@ type Device struct {
 	Viewportwidth     int `json:"viewport_width"`
 }
 
-type Requests []struct {
+type Requests struct {
 	Configuration `json:"configuration,omitempty"`
-	Setup         `json:"setup,omitempty"`
-	Validations   `json:"validations,omitempty"`
+	Setup         []Setup `json:"setup,omitempty"`
+	Validations   []Validations `json:"validations,omitempty"`
 }
 
 type Configuration struct {
@@ -277,7 +293,7 @@ type Configuration struct {
 
 type Headers map[string]interface{}
 
-type Setup []struct {
+type Setup struct {
 	Extractor string `json:"extractor,omitempty"`
 	Name      string `json:"name,omitempty"`
 	Source    string `json:"source,omitempty"`
@@ -285,7 +301,7 @@ type Setup []struct {
 	Variable  string `json:"variable,omitempty"`
 }
 
-type Validations []struct {
+type Validations struct {
 	Actual     string `json:"actual,omitempty"`
 	Comparator string `json:"comparator,omitempty"`
 	Expected   string `json:"expected,omitempty"`
@@ -309,14 +325,14 @@ type Checks []struct {
 
 type Tests []struct {
 	Active             bool      `json:"active"`
-	Createdat          time.Time `json:"createdAt"`
+	Createdat          time.Time `json:"created_at"`
 	Frequency          int       `json:"frequency"`
 	ID                 int       `json:"id"`
 	Locationids        []string  `json:"locationIds"`
 	Name               string    `json:"name"`
-	Schedulingstrategy string    `json:"schedulingStrategy"`
+	Schedulingstrategy string    `json:"scheduling_strategy"`
 	Type               string    `json:"type"`
-	Updatedat          time.Time `json:"updatedAt"`
+	Updatedat          time.Time `json:"updated_at"`
 }
 
 type GetChecksV2Options struct {
@@ -332,18 +348,18 @@ type Errors []struct {
 	Description string `json:"description,omitempty"`
 }
 
-type HttpHeaders []struct {
+type HttpHeaders struct {
 	Name  string `json:"name,omitempty"`
 	Value string `json:"value,omitempty"`
 }
 
 type Variable struct {
-	Createdat   time.Time `json:"createdAt,omitempty"`
+	Createdat   time.Time `json:"created_at,omitempty"`
 	Description string    `json:"description,omitempty"`
 	ID          int       `json:"id,omitempty"`
 	Name        string    `json:"name"`
 	Secret      bool      `json:"secret"`
-	Updatedat   time.Time `json:"updatedAt,omitempty"`
+	Updatedat   time.Time `json:"updated_at,omitempty"`
 	Value       string    `json:"value"`
 }
 
@@ -414,7 +430,7 @@ type HttpCheckV2Response struct {
 		URL                string    `json:"url"`
 		RequestMethod      string    `json:"request_method"`
 		Body               string    `json:"body,omitempty"`
-		HttpHeaders        `json:"headers,omitempty"`
+		HttpHeaders        []HttpHeaders `json:"headers,omitempty"`
 	} `json:"test"`
 }
 
@@ -429,7 +445,7 @@ type HttpCheckV2Input struct {
 		Active             bool     `json:"active"`
 		RequestMethod      string   `json:"request_method"`
 		Body               string   `json:"body,omitempty"`
-		HttpHeaders        `json:"headers,omitempty"`
+		HttpHeaders        []HttpHeaders `json:"headers,omitempty"`
 	} `json:"test"`
 }
 
@@ -440,31 +456,31 @@ type ApiCheckV2Input struct {
 		Frequency          int      `json:"frequency"`
 		Locationids        []string `json:"location_ids"`
 		Name               string   `json:"name"`
-		Requests           `json:"requests"`
-		Schedulingstrategy string `json:"schedulingStrategy"`
+		Requests           []Requests `json:"requests"`
+		Schedulingstrategy string `json:"scheduling_strategy"`
 	} `json:"test"`
 }
 
 type ApiCheckV2Response struct {
 	Test struct {
 		Active             bool      `json:"active,omitempty"`
-		Createdat          time.Time `json:"createdAt,omitempty"`
+		Createdat          time.Time `json:"created_at"`
 		Device             `json:"device,omitempty"`
 		Frequency          int      `json:"frequency,omitempty"`
 		ID                 int      `json:"id,omitempty"`
 		Locationids        []string `json:"location_ids,omitempty"`
 		Name               string   `json:"name,omitempty"`
-		Requests           `json:"requests,omitempty"`
-		Schedulingstrategy string    `json:"schedulingStrategy,omitempty"`
+		Requests           []Requests  `json:"requests,omitempty"`
+		Schedulingstrategy string    `json:"scheduling_strategy,omitempty"`
 		Type               string    `json:"type,omitempty"`
-		Updatedat          time.Time `json:"updatedAt,omitempty"`
+		Updatedat          time.Time `json:"updated_at,omitempty"`
 	}
 }
 
 type BrowserCheckV2Input struct {
 	Test struct {
 		Name                 string `json:"name"`
-		BusinessTransactions `json:"business_transactions"`
+		BusinessTransactions []BusinessTransactions `json:"business_transactions"`
 		Urlprotocol          string   `json:"urlProtocol"`
 		Starturl             string   `json:"startUrl"`
 		LocationIds          []string `json:"location_ids"`
@@ -480,17 +496,17 @@ type BrowserCheckV2Response struct {
 	Test struct {
 		Active               bool `json:"active"`
 		Advancedsettings     `json:"advanced_settings"`
-		BusinessTransactions `json:"business_transactions"`
-		Createdat            time.Time `json:"createdAt"`
+		BusinessTransactions  []BusinessTransactions `json:"business_transactions"`
+		Createdat            time.Time `json:"created_at"`
 		Device               `json:"device"`
 		Frequency            int      `json:"frequency"`
 		ID                   int      `json:"id"`
 		Locationids          []string `json:"location_ids"`
 		Name                 string   `json:"name"`
 		Schedulingstrategy   string   `json:"scheduling_strategy"`
-		Transactions         `json:"transactions"`
+		Transactions         []Transactions `json:"transactions"`
 		Type                 string    `json:"type"`
-		Updatedat            time.Time `json:"updatedAt"`
+		Updatedat            time.Time `json:"updated_at"`
 	} `json:"test"`
 }
 
