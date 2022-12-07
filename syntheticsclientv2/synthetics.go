@@ -131,7 +131,7 @@ func NewConfigurableClient(apiKey string, realm string, args ClientArgs) *Client
 		httpClient: http.Client{Timeout: time.Duration(args.timeoutSeconds) * time.Second},
 	}
 	if args.publicBaseUrl == "" {
-		client.publicBaseURL = "https://api." + realm + ".signalfx.com/v2/synthetics/"
+		client.publicBaseURL = "https://api." + realm + ".signalfx.com/v2/synthetics"
 	} else {
 		client.publicBaseURL = args.publicBaseUrl
 	}
