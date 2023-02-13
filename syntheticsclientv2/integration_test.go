@@ -29,15 +29,15 @@ var (
 	realm                    = os.Getenv("REALM")
 	getChecksV2Body          = `{"testType":"","page":1,"perPage":50,"search":"","orderBy":"id"}`
 	inputGetChecksV2         = GetChecksV2Options{}
-	createVariableV2Body     = `{"variable":{"description":"My super awesome test variable","name":"food","secret":false,"value":"bar"}}`
+	createVariableV2Body     = `{"variable":{"description":"My super awesome test variable","name":"foodz","secret":false,"value":"bar"}}`
 	inputVariableV2Data      = VariableV2Input{}
-	createHttpCheckV2Body    = `{"test":{"name":"morebeeps-test","type":"http","url":"https://www.splunk.com","location_ids":["aws-us-east-1"],"frequency":10,"scheduling_strategy":"round_robin","active":true,"request_method":"GET","body":null,"headers":[{"name":"boop","value":"beep"}]}}`
+	createHttpCheckV2Body    = `{"test":{"name":"morebeeps-test","type":"http","url":"https://www.splunk.com","locationIds":["aws-us-east-1"],"frequency":10,"schedulingStrategy":"round_robin","active":true,"requestMethod":"GET","body":null,"headers":[{"name":"boop","value":"beep"}]}}`
 	inputHttpCheckV2Data     = HttpCheckV2Input{}
-	createBrowserCheckV2Body = `{"test":{"name":"browser-beep-test","business_transactions":[{"name":"Synthetic transaction 1","steps":[{"name":"Go to URL","type":"go_to_url","url":"https://www.splunk.com","action":"go_to_url","wait_for_nav":true},{"name":"Nexter step","type":"click_element","selector_type":"id","wait_for_nav":false,"selector":"free-splunk-click-desktop"}]}],"urlProtocol":"https://","startUrl":"www.splunk.com","location_ids":["aws-us-east-1"],"device_id":1,"frequency":5,"scheduling_strategy":"round_robin","active":true,"advanced_settings":{"verify_certificates":true,"authentication":{"username":"boopuser","password":"{{env.beep-var}}"},"headers":[{"name":"batman","value":"Agentoz","domain":"www.batmansagent.com"}],"cookies":[{"key":"super","value":"duper","domain":"www.batmansagent.com","path":"/boom/goes/beep"}]}}}`
+	createBrowserCheckV2Body = `{"test":{"name":"browser-beep-test","transactions":[{"name":"Synthetic transaction 1","steps":[{"name":"Go to URL","type":"go_to_url","url":"https://www.splunk.com","action":"go_to_url","wait_for_nav":true},{"name":"Nexter step","type":"click_element","selectorType":"id","wait_for_nav":false,"selector":"free-splunk-click-desktop"}]}],"urlProtocol":"https://","startUrl":"www.splunk.com","locationIds":["aws-us-east-1"],"deviceId":1,"frequency":5,"schedulingStrategy":"round_robin","active":true,"advancedSettings":{"verifyCertificates":true,"authentication":{"username":"boopuser","password":"{{env.beep-var}}"},"headers":[{"name":"batman","value":"Agentoz","domain":"www.batmansagent.com"}],"cookies":[{"key":"super","value":"duper","domain":"www.batmansagent.com","path":"/boom/goes/beep"}]}}}`
 	inputBrowserCheckV2Data  = BrowserCheckV2Input{}
-	createPortCheckV2Body    = `{"test":{"name":"splunk - port 443","type":"port","url":"","port":443,"protocol":"tcp","host":"www.splunk.com","location_ids":["aws-us-east-1"],"frequency":10,"scheduling_strategy":"round_robin","active":true}}`
+	createPortCheckV2Body    = `{"test":{"name":"splunk - port 443","type":"port","url":"","port":443,"protocol":"tcp","host":"www.splunk.com","locationIds":["aws-us-east-1"],"frequency":10,"schedulingStrategy":"round_robin","active":true}}`
 	inputPortCheckV2Data     = PortCheckV2Input{}
-	createApiV2Body          = `{"test":{"active":true,"device_id":1,"frequency":5,"location_ids":["aws-us-east-1"],"name":"boop-test","scheduling_strategy":"round_robin","requests":[{"configuration":{"name":"Get-Test","requestMethod":"GET","url":"https://api.us1.signalfx.com/v2/synthetics/tests/api/489","headers":{"X-SF-TOKEN":"jinglebellsbatmanshells", "beep":"boop"},"body":null},"setup":[{"name":"Extract from response body","type":"extract_json","source":"{{response.body}}","extractor":"$.requests","variable":"custom-varz"}],"validations":[{"name":"Assert response code equals 200","type":"assert_numeric","actual":"{{response.code}}","expected":"200","comparator":"equals"}]}]}}`
+	createApiV2Body          = `{"test":{"active":true,"deviceId":1,"frequency":5,"locationIds":["aws-us-east-1"],"name":"boop-test","schedulingStrategy":"round_robin","requests":[{"configuration":{"name":"Get-Test","requestMethod": "GET","url":"https://api.us1.signalfx.com/v2/synthetics/tests/api/489","headers":{"X-SF-TOKEN":"jinglebellsbatmanshells", "beep":"boop"},"body":null},"setup":[{"name":"Extract from response body","type":"extract_json","source":"{{response.body}}","extractor":"$.requests","variable":"custom-varz"}],"validations":[{"name":"Assert response code equals 200","type":"assert_numeric","actual":"{{response.code}}","expected":"200","comparator":"equals"}]}]}}`
 	inputApiCheckV2Data      = ApiCheckV2Input{}
 )
 
@@ -120,7 +120,7 @@ func TestLiveDeleteVariableV2(t *testing.T) {
 	c := NewClient(token, realm)
 
 	// Make the request with your check settings and print result
-	res, err := c.DeleteVariableV2(254)
+	res, err := c.DeleteVariableV2(397)
 	if err != nil {
 		fmt.Println(err)
 	} else {
@@ -185,7 +185,7 @@ func TestLiveDeleteHttpCheckV2(t *testing.T) {
 	c := NewClient(token, realm)
 
 	// Make the request with your check settings and print result
-	res, err := c.DeleteHttpCheckV2(1528)
+	res, err := c.DeleteHttpCheckV2(2099)
 	if err != nil {
 		fmt.Println(err)
 	} else {
@@ -250,7 +250,7 @@ func TestLiveDeleteBrowserCheckV2(t *testing.T) {
 	c := NewClient(token, realm)
 
 	// Make the request with your check settings and print result
-	res, err := c.DeleteBrowserCheckV2(1115)
+	res, err := c.DeleteBrowserCheckV2(2101)
 	if err != nil {
 		fmt.Println(err)
 	} else {
