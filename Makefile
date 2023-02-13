@@ -5,7 +5,7 @@ FILES=./syntheticsclientv2/...
 
 default: test 
 
-all: clean build test
+all: clean build test 
 
 build: fmtcheck
 	go build -tags=unit_tests
@@ -22,7 +22,7 @@ fmt:
 
 lint:
 	@echo "==> Checking source code against linters "
-	@GOGC=30 golangci-lint run $(FILES)
+	@GOGC=30 golangci-lint run ./syntheticsclientv2/...
 
 fmtcheck: fmt lint
 
