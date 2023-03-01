@@ -133,6 +133,25 @@ func TestLiveDeleteVariableV2(t *testing.T) {
 
 }
 
+func TestLiveGetDevicesV2(t *testing.T) {
+
+	//Create your client with the token
+	c := NewClient(token, realm)
+
+	// Make the request with your check settings and print result
+	res, _, err := c.GetDevicesV2()
+	if err != nil {
+		fmt.Println(err)
+	} else {
+		JsonPrint(res)
+	}
+
+	if err != nil {
+		t.Fatal(err)
+	}
+
+}
+
 func TestLiveCreateHttpCheckV2(t *testing.T) {
 
 	err := json.Unmarshal([]byte(createHttpCheckV2Body), &inputHttpCheckV2Data)
