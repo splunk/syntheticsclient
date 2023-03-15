@@ -1,3 +1,6 @@
+//go:build unit_tests
+// +build unit_tests
+
 // Copyright 2021 Splunk, Inc.
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
@@ -15,36 +18,31 @@
 package syntheticsclientv2
 
 import (
-	"bytes"
-	"encoding/json"
+	"fmt"
+	"net/http"
+	"testing"
 )
 
-func parseDevicesV2Response(response string) (*DevicesV2Response, error) {
-	// Parse the response and return the device object
-	var device DevicesV2Response
-	err := json.Unmarshal([]byte(response), &device)
+var (
+	deleteLocationV2RespBody = ``
+)
+
+func TestDeleteLocationV2(t *testing.T) {
+	setup()
+	defer teardown()
+
+	testMux.HandleFunc("/locations/beep", func(w http.ResponseWriter, r *http.Request) {
+		testMethod(t, r, "DELETE")
+		_, err := w.Write([]byte(deleteLocationV2RespBody))
+		if err != nil {
+			t.Fatal(err)
+		}
+	})
+
+	resp, err := testClient.DeleteLocationV2("beep")
 	if err != nil {
-		return nil, err
+		fmt.Println(resp)
+		t.Fatal(err)
 	}
-
-	return &device, err
-}
-
-func (c Client) GetDevicesV2() (*DevicesV2Response, *RequestDetails, error) {
-
-	details, err := c.makePublicAPICall("GET",
-		"/devices",
-		bytes.NewBufferString("{}"),
-		nil)
-
-	if err != nil {
-		return nil, details, err
-	}
-
-	check, err := parseDevicesV2Response(details.ResponseBody)
-	if err != nil {
-		return check, details, err
-	}
-
-	return check, details, nil
+	fmt.Println(resp)
 }

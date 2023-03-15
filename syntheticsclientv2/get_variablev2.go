@@ -64,7 +64,7 @@ func parseVariablesV2Response(response string) (*VariablesV2Response, error) {
 func (c Client) GetVariablesV2() (*VariablesV2Response, *RequestDetails, error) {
 
 	details, err := c.makePublicAPICall("GET",
-		fmt.Sprintf("/variables"),
+		"/variables",
 		bytes.NewBufferString("{}"),
 		nil)
 

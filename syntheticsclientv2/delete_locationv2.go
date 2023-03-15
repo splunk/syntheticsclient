@@ -16,35 +16,24 @@ package syntheticsclientv2
 
 import (
 	"bytes"
-	"encoding/json"
+	"errors"
+	"fmt"
+	"strconv"
 )
 
-func parseDevicesV2Response(response string) (*DevicesV2Response, error) {
-	// Parse the response and return the device object
-	var device DevicesV2Response
-	err := json.Unmarshal([]byte(response), &device)
+func (c Client) DeleteLocationV2(id string) (int, error) {
+	requestDetails, err := c.makePublicAPICall("DELETE", fmt.Sprintf("/locations/%s", id), bytes.NewBufferString("{}"), nil)
 	if err != nil {
-		return nil, err
+		return 1, err
+	}
+	var status = requestDetails.StatusCode
+
+	fmt.Println(status)
+
+	if status >= 300 || status < 200 {
+		errorMsg := fmt.Sprintf("error: Response code %v. Expecting 2XX.", strconv.Itoa(status))
+		return status, errors.New(errorMsg)
 	}
 
-	return &device, err
-}
-
-func (c Client) GetDevicesV2() (*DevicesV2Response, *RequestDetails, error) {
-
-	details, err := c.makePublicAPICall("GET",
-		"/devices",
-		bytes.NewBufferString("{}"),
-		nil)
-
-	if err != nil {
-		return nil, details, err
-	}
-
-	check, err := parseDevicesV2Response(details.ResponseBody)
-	if err != nil {
-		return check, details, err
-	}
-
-	return check, details, nil
+	return status, err
 }

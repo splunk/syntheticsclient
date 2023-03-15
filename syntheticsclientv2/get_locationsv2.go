@@ -45,7 +45,7 @@ func parseLocationV2Response(response string) (*LocationV2Response, error) {
 func (c Client) GetLocationsV2() (*LocationsV2Response, *RequestDetails, error) {
 
 	details, err := c.makePublicAPICall("GET",
-		fmt.Sprintf("/locations"),
+		"/locations",
 		bytes.NewBufferString("{}"),
 		nil)
 

@@ -104,32 +104,32 @@ func TestGetVariablesV2(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
-	if !reflect.DeepEqual(resp.Variables[1].ID, inputGetVariablesV2.Variables[1].ID) {
-		t.Errorf("returned \n\n%#v want \n\n%#v", resp.Variables[1].ID, inputGetVariablesV2.Variables[1].ID)
+	if !reflect.DeepEqual(resp.Variable[1].ID, inputGetVariablesV2.Variable[1].ID) {
+		t.Errorf("returned \n\n%#v want \n\n%#v", resp.Variable[1].ID, inputGetVariablesV2.Variable[1].ID)
 	}
 
-	if !reflect.DeepEqual(resp.Variables[1].Name, inputGetVariablesV2.Variables[1].Name) {
-		t.Errorf("returned \n\n%#v want \n\n%#v", resp.Variables[1].Name, inputGetVariablesV2.Variables[1].Name)
+	if !reflect.DeepEqual(resp.Variable[1].Name, inputGetVariablesV2.Variable[1].Name) {
+		t.Errorf("returned \n\n%#v want \n\n%#v", resp.Variable[1].Name, inputGetVariablesV2.Variable[1].Name)
 	}
 
-	if !reflect.DeepEqual(resp.Variables[1].Description, inputGetVariablesV2.Variables[1].Description) {
-		t.Errorf("returned \n\n%#v want \n\n%#v", resp.Variables[1].Description, inputGetVariablesV2.Variables[1].Description)
+	if !reflect.DeepEqual(resp.Variable[1].Description, inputGetVariablesV2.Variable[1].Description) {
+		t.Errorf("returned \n\n%#v want \n\n%#v", resp.Variable[1].Description, inputGetVariablesV2.Variable[1].Description)
 	}
 
-	if !reflect.DeepEqual(resp.Variables[1].Value, inputGetVariablesV2.Variables[1].Value) {
-		t.Errorf("returned \n\n%#v want \n\n%#v", resp.Variables[1].Value, inputGetVariablesV2.Variables[1].Value)
+	if !reflect.DeepEqual(resp.Variable[1].Value, inputGetVariablesV2.Variable[1].Value) {
+		t.Errorf("returned \n\n%#v want \n\n%#v", resp.Variable[1].Value, inputGetVariablesV2.Variable[1].Value)
 	}
 
-	if !reflect.DeepEqual(resp.Variables[1].Secret, inputGetVariablesV2.Variables[1].Secret) {
-		t.Errorf("returned \n\n%#v want \n\n%#v", resp.Variables[1].Secret, inputGetVariablesV2.Variables[1].Secret)
+	if !reflect.DeepEqual(resp.Variable[1].Secret, inputGetVariablesV2.Variable[1].Secret) {
+		t.Errorf("returned \n\n%#v want \n\n%#v", resp.Variable[1].Secret, inputGetVariablesV2.Variable[1].Secret)
 	}
 
-	if !reflect.DeepEqual(resp.Variables[1].Createdat, inputGetVariablesV2.Variables[1].Createdat) {
-		t.Errorf("returned \n\n%#v want \n\n%#v", resp.Variables[1].Createdat, inputGetVariablesV2.Variables[1].Createdat)
+	if !reflect.DeepEqual(resp.Variable[1].Createdat, inputGetVariablesV2.Variable[1].Createdat) {
+		t.Errorf("returned \n\n%#v want \n\n%#v", resp.Variable[1].Createdat, inputGetVariablesV2.Variable[1].Createdat)
 	}
 
-	if !reflect.DeepEqual(resp.Variables[1].Updatedat, inputGetVariablesV2.Variables[1].Updatedat) {
-		t.Errorf("returned \n\n%#v want \n\n%#v", resp.Variables[1].Updatedat, inputGetVariablesV2.Variables[1].Updatedat)
+	if !reflect.DeepEqual(resp.Variable[1].Updatedat, inputGetVariablesV2.Variable[1].Updatedat) {
+		t.Errorf("returned \n\n%#v want \n\n%#v", resp.Variable[1].Updatedat, inputGetVariablesV2.Variable[1].Updatedat)
 	}
 
 }

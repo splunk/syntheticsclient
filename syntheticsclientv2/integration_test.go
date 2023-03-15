@@ -31,6 +31,8 @@ var (
 	inputGetChecksV2         = GetChecksV2Options{}
 	createVariableV2Body     = `{"variable":{"description":"My super awesome test variable","name":"foodz","secret":false,"value":"bar"}}`
 	inputVariableV2Data      = VariableV2Input{}
+	createLocationV2Body     = `{"location":{"id":"private-data-center-go-test","label":"Data Center place", "default":false}}`
+	inputLocationV2Data      = LocationV2Input{}
 	createHttpCheckV2Body    = `{"test":{"name":"morebeeps-test","type":"http","url":"https://www.splunk.com","locationIds":["aws-us-east-1"],"frequency":10,"schedulingStrategy":"round_robin","active":true,"requestMethod":"GET","body":null,"headers":[{"name":"boop","value":"beep"}]}}`
 	inputHttpCheckV2Data     = HttpCheckV2Input{}
 	createBrowserCheckV2Body = `{"test":{"name":"browser-beep-test","transactions":[{"name":"Synthetic transaction 1","steps":[{"name":"Go to URL","type":"go_to_url","url":"https://www.splunk.com","action":"go_to_url","wait_for_nav":true},{"name":"Nexter step","type":"click_element","selectorType":"id","wait_for_nav":false,"selector":"free-splunk-click-desktop"}]}],"urlProtocol":"https://","startUrl":"www.splunk.com","locationIds":["aws-us-east-1"],"deviceId":1,"frequency":5,"schedulingStrategy":"round_robin","active":true,"advancedSettings":{"verifyCertificates":true,"authentication":{"username":"boopuser","password":"{{env.beep-var}}"},"headers":[{"name":"batman","value":"Agentoz","domain":"www.batmansagent.com"}],"cookies":[{"key":"super","value":"duper","domain":"www.batmansagent.com","path":"/boom/goes/beep"}]}}}`
@@ -332,7 +334,7 @@ func TestLiveDeleteApiCheckV2(t *testing.T) {
 	c := NewClient(token, realm)
 
 	// Make the request with your check settings and print result
-	res, err := c.DeleteApiCheckV2(1093)
+	res, err := c.DeleteApiCheckV2(3007)
 	if err != nil {
 		fmt.Println(err)
 	} else {
@@ -398,6 +400,71 @@ func TestLiveDeletePortCheckV2(t *testing.T) {
 
 	// Make the request with your check settings and print result
 	res, err := c.DeletePortCheckV2(1649)
+	if err != nil {
+		fmt.Println(err)
+	} else {
+		JsonPrint(res)
+	}
+
+	if err != nil {
+		t.Fatal(err)
+	}
+
+}
+
+func TestLiveCreateLocationV2(t *testing.T) {
+
+	err := json.Unmarshal([]byte(createLocationV2Body), &inputLocationV2Data)
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	//Create your client with the token
+	c := NewClient(token, realm)
+
+	fmt.Println(inputLocationV2Data)
+
+	// Make the request with your location settings and print result
+	res, reqDetail, err := c.CreateLocationV2(&inputLocationV2Data)
+	if err != nil {
+		fmt.Println(err)
+	} else {
+		fmt.Println(reqDetail)
+		JsonPrint(res)
+	}
+
+	if err != nil {
+		t.Fatal(err)
+	}
+
+}
+
+func TestLiveGetLocationV2(t *testing.T) {
+
+	//Create your client with the token
+	c := NewClient(token, realm)
+
+	// Make the request with your location settings and print result
+	res, _, err := c.GetLocationV2("aws-eu-central-1")
+	if err != nil {
+		fmt.Println(err)
+	} else {
+		JsonPrint(res)
+	}
+
+	if err != nil {
+		t.Fatal(err)
+	}
+
+}
+
+func TestLiveDeleteLocationV2(t *testing.T) {
+
+	//Create your client with the token
+	c := NewClient(token, realm)
+
+	// Make the request with your location settings and print result
+	res, err := c.DeleteLocationV2("private-data-center-go-test")
 	if err != nil {
 		fmt.Println(err)
 	} else {

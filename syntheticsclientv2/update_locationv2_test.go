@@ -26,29 +26,28 @@ import (
 )
 
 var (
-	createLocationV2Body = `{"location":{"id":"private-data-center","label":"Data Center"}}`
-	inputLocationV2Data  = LocationV2Input{}
+	updateLocationV2Body  = `{"location":{"id":"private-data-center","label":"Data Center"}}`
+	inputLocationV2Update = LocationV2Input{}
 )
 
-func TestCreateLocationV2(t *testing.T) {
+func TestUpdateLocationV2(t *testing.T) {
 	setup()
 	defer teardown()
 
-	testMux.HandleFunc("/locations", func(w http.ResponseWriter, r *http.Request) {
-		testMethod(t, r, "POST")
-		_, err := w.Write([]byte(createLocationV2Body))
+	testMux.HandleFunc("/variables/10", func(w http.ResponseWriter, r *http.Request) {
+		testMethod(t, r, "PUT")
+		_, err := w.Write([]byte(updateLocationV2Body))
 		if err != nil {
 			t.Fatal(err)
 		}
 	})
 
-	err := json.Unmarshal([]byte(createLocationV2Body), &inputLocationV2Data)
+	err := json.Unmarshal([]byte(updateLocationV2Body), &inputLocationV2Update)
 	if err != nil {
 		t.Fatal(err)
 	}
 
-	resp, _, err := testClient.CreateLocationV2(&inputLocationV2Data)
-
+	resp, _, err := testClient.UpdateLocationV2("private-data-center", &inputLocationV2Update)
 	if err != nil {
 		t.Fatal(err)
 	}

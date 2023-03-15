@@ -166,43 +166,16 @@ type Variable struct {
 	Value       string    `json:"value"`
 }
 
-type Variables []struct {
-	ID          int       `json:"id"`
-	Name        string    `json:"name"`
-	Description string    `json:"description"`
-	Value       string    `json:"value"`
-	Secret      bool      `json:"secret"`
-	Createdat   time.Time `json:"createdAt"`
-	Updatedat   time.Time `json:"updatedAt"`
-}
-
 type DeleteCheck struct {
 	Result  string `json:"result"`
 	Message string `json:"message"`
 	Errors  Errors `json:"errors"`
 }
 
-type Devices []struct {
-	ID                int    `json:"id"`
-	Label             string `json:"label"`
-	UserAgent         string `json:"userAgent"`
-	ViewportWidth     int    `json:"viewportWidth"`
-	ViewportHeight    int    `json:"viewportHeight"`
-	Networkconnection `json:"networkConnection"`
-}
-
-type Locations []struct {
-	ID      string `json:"id"`
-	Label   string `json:"label"`
-	Default bool   `json:"default"`
-	Type    string `json:"type"`
-	Country string `json:"country"`
-}
-
 type Location struct {
 	ID      string `json:"id"`
 	Label   string `json:"label"`
-	Default bool   `json:"default,omitempty"`
+	Default bool   `json:"default"`
 	Type    string `json:"type,omitempty"`
 	Country string `json:"country,omitempty"`
 }
@@ -213,11 +186,11 @@ type Meta struct {
 }
 
 type DevicesV2Response struct {
-	Devices `json:"devices"`
+	Devices []Device `json:"devices"`
 }
 
 type VariableV2Response struct {
-	Variable `json:"location"`
+	Variable `json:"variable"`
 }
 
 type VariableV2Input struct {
@@ -225,11 +198,11 @@ type VariableV2Input struct {
 }
 
 type VariablesV2Response struct {
-	Variables `json:"variables"`
+	Variable []Variable `json:"variables"`
 }
 
 type LocationsV2Response struct {
-	Locations          `json:"locations"`
+	Location	[]Location          `json:"locations"`
 	DefaultLocationIds []string `json:"defaultLocationIds"`
 }
 
@@ -239,7 +212,7 @@ type LocationV2Response struct {
 }
 
 type LocationV2Input struct {
-	Location `json:"variable"`
+	Location `json:"location"`
 }
 
 type ChecksV2Response struct {

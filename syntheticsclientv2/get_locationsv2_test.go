@@ -49,24 +49,24 @@ func TestGetLocationsV2(t *testing.T) {
 		t.Fatal(err)
 	}
 
-	if !reflect.DeepEqual(resp.Locations[1].ID, inputGetLocationsV2.Locations[1].ID) {
-		t.Errorf("returned \n\n%#v want \n\n%#v", resp.Locations[1].ID, inputGetLocationsV2.Locations[1].ID)
+	if !reflect.DeepEqual(resp.Location[1].ID, inputGetLocationsV2.Location[1].ID) {
+		t.Errorf("returned \n\n%#v want \n\n%#v", resp.Location[1].ID, inputGetLocationsV2.Location[1].ID)
 	}
 
-	if !reflect.DeepEqual(resp.Locations[1].Label, inputGetLocationsV2.Locations[1].Label) {
-		t.Errorf("returned \n\n%#v want \n\n%#v", resp.Locations[1].Label, inputGetLocationsV2.Locations[1].Label)
+	if !reflect.DeepEqual(resp.Location[1].Label, inputGetLocationsV2.Location[1].Label) {
+		t.Errorf("returned \n\n%#v want \n\n%#v", resp.Location[1].Label, inputGetLocationsV2.Location[1].Label)
 	}
 
-	if !reflect.DeepEqual(resp.Locations[1].Default, inputGetLocationsV2.Locations[1].Default) {
-		t.Errorf("returned \n\n%#v want \n\n%#v", resp.Locations[1].Default, inputGetLocationsV2.Locations[1].Default)
+	if !reflect.DeepEqual(resp.Location[1].Default, inputGetLocationsV2.Location[1].Default) {
+		t.Errorf("returned \n\n%#v want \n\n%#v", resp.Location[1].Default, inputGetLocationsV2.Location[1].Default)
 	}
 
-	if !reflect.DeepEqual(resp.Locations[1].Type, inputGetLocationsV2.Locations[1].Type) {
-		t.Errorf("returned \n\n%#v want \n\n%#v", resp.Locations[1].Type, inputGetLocationsV2.Locations[1].Type)
+	if !reflect.DeepEqual(resp.Location[1].Type, inputGetLocationsV2.Location[1].Type) {
+		t.Errorf("returned \n\n%#v want \n\n%#v", resp.Location[1].Type, inputGetLocationsV2.Location[1].Type)
 	}
 
-	if !reflect.DeepEqual(resp.Locations[1].Country, inputGetLocationsV2.Locations[1].Country) {
-		t.Errorf("returned \n\n%#v want \n\n%#v", resp.Locations[1].Country, inputGetLocationsV2.Locations[1].Country)
+	if !reflect.DeepEqual(resp.Location[1].Country, inputGetLocationsV2.Location[1].Country) {
+		t.Errorf("returned \n\n%#v want \n\n%#v", resp.Location[1].Country, inputGetLocationsV2.Location[1].Country)
 	}
 
 	if !reflect.DeepEqual(resp.DefaultLocationIds, inputGetLocationsV2.DefaultLocationIds) {

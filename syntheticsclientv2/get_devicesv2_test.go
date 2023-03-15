@@ -59,12 +59,12 @@ func TestGetDevicesV2(t *testing.T) {
 		t.Errorf("returned \n\n%#v want \n\n%#v", resp.Devices[1].UserAgent, inputGetDevicesV2.Devices[1].UserAgent)
 	}
 
-	if !reflect.DeepEqual(resp.Devices[1].ViewportWidth, inputGetDevicesV2.Devices[1].ViewportWidth) {
-		t.Errorf("returned \n\n%#v want \n\n%#v", resp.Devices[1].ViewportWidth, inputGetDevicesV2.Devices[1].ViewportWidth)
+	if !reflect.DeepEqual(resp.Devices[1].Viewportwidth, inputGetDevicesV2.Devices[1].Viewportwidth) {
+		t.Errorf("returned \n\n%#v want \n\n%#v", resp.Devices[1].Viewportwidth, inputGetDevicesV2.Devices[1].Viewportwidth)
 	}
 
-	if !reflect.DeepEqual(resp.Devices[1].ViewportHeight, inputGetDevicesV2.Devices[1].ViewportHeight) {
-		t.Errorf("returned \n\n%#v want \n\n%#v", resp.Devices[1].ViewportHeight, inputGetDevicesV2.Devices[1].ViewportHeight)
+	if !reflect.DeepEqual(resp.Devices[1].Viewportheight, inputGetDevicesV2.Devices[1].Viewportheight) {
+		t.Errorf("returned \n\n%#v want \n\n%#v", resp.Devices[1].Viewportheight, inputGetDevicesV2.Devices[1].Viewportheight)
 	}
 
 	if !reflect.DeepEqual(resp.Devices[1].Networkconnection, inputGetDevicesV2.Devices[1].Networkconnection) {

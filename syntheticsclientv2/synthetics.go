@@ -61,7 +61,7 @@ func (c Client) String() string {
 func (c Client) makePublicAPICall(method string, endpoint string, requestBody io.Reader, queryParams map[string]string) (*RequestDetails, error) {
 	details := RequestDetails{}
 	// Create the request
-	req, err := http.NewRequest(method, c.publicBaseURL+endpoint+"?format=camel", requestBody)
+	req, err := http.NewRequest(method, c.publicBaseURL+endpoint, requestBody)
 	if err != nil {
 		return &details, err
 	}
