@@ -48,5 +48,8 @@ func main() {
 }
 ```
 
+## API Documentation
+API Docs are [available here](https://dev.splunk.com/observability/reference)
+
 ## Additional Information
 This client is largely a copypasta mutation of the [go-victor](https://github.com/victorops/go-victorops) client for Splunk On-Call (formerly known as VictorOps).
