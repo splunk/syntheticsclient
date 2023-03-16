@@ -202,8 +202,8 @@ type VariablesV2Response struct {
 }
 
 type LocationsV2Response struct {
-	Location	[]Location          `json:"locations"`
-	DefaultLocationIds []string `json:"defaultLocationIds"`
+	Location           []Location `json:"locations"`
+	DefaultLocationIds []string   `json:"defaultLocationIds"`
 }
 
 type LocationV2Response struct {
