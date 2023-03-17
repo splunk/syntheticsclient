@@ -31,7 +31,7 @@ func main() {
 	c := sc2.NewClient(token, realm)
 
 	//Take your ugly (but valid) JSON string as bytes and unmarshal into a CreateHttpCheckV2 struct
-	jsonData := []byte(`{"test":{"name":"Testing-HTTP-stuff","type":"http","url":"https://www.splunk.com","location_ids":["aws-us-east-1","aws-ap-northeast-3"],"frequency":10,"scheduling_strategy":"round_robin","active":true,"request_method":"GET","body":null,"headers":[{"name":"supercool","value":"batman"},{"name":"ajx-back","value":"peeko"}]}}`)
+	jsonData := []byte(`{"test":{"name":"http-test","type":"http","url":"https://www.splunk.com","locationIds":["aws-us-east-1"],"frequency":10,"schedulingStrategy":"round_robin","active":true,"requestMethod":"GET","body":null,"headers":[{"name":"boop","value":"beep"}]}}`)
 	var httpCheckDetail sc2.HttpCheckV2Input
 	err := json.Unmarshal(jsonData, &httpCheckDetail)
 	if err != nil {
@@ -47,6 +47,9 @@ func main() {
 	}
 }
 ```
+
+## API Documentation
+API Docs are [available here](https://dev.splunk.com/observability/reference)
 
 ## Additional Information
 This client is largely a copypasta mutation of the [go-victor](https://github.com/victorops/go-victorops) client for Splunk On-Call (formerly known as VictorOps).

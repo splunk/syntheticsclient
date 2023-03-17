@@ -20,21 +20,32 @@ import (
 	"fmt"
 )
 
-func parseVariableV2Response(response string) (*VariableV2Response, error) {
-	// Parse the response and return the check object
-	var check VariableV2Response
-	err := json.Unmarshal([]byte(response), &check)
+func parseLocationsV2Response(response string) (*LocationsV2Response, error) {
+	// Parse the response and return the locations object
+	var locations LocationsV2Response
+	err := json.Unmarshal([]byte(response), &locations)
 	if err != nil {
 		return nil, err
 	}
 
-	return &check, err
+	return &locations, err
 }
 
-func (c Client) GetVariableV2(id int) (*VariableV2Response, *RequestDetails, error) {
+func parseLocationV2Response(response string) (*LocationV2Response, error) {
+	// Parse the response and return the locations object
+	var location LocationV2Response
+	err := json.Unmarshal([]byte(response), &location)
+	if err != nil {
+		return nil, err
+	}
+
+	return &location, err
+}
+
+func (c Client) GetLocationsV2() (*LocationsV2Response, *RequestDetails, error) {
 
 	details, err := c.makePublicAPICall("GET",
-		fmt.Sprintf("/variables/%d", id),
+		"/locations",
 		bytes.NewBufferString("{}"),
 		nil)
 
@@ -42,29 +53,18 @@ func (c Client) GetVariableV2(id int) (*VariableV2Response, *RequestDetails, err
 		return nil, details, err
 	}
 
-	check, err := parseVariableV2Response(details.ResponseBody)
+	locations, err := parseLocationsV2Response(details.ResponseBody)
 	if err != nil {
-		return check, details, err
+		return locations, details, err
 	}
 
-	return check, details, nil
+	return locations, details, nil
 }
 
-func parseVariablesV2Response(response string) (*VariablesV2Response, error) {
-	// Parse the response and return the check object
-	var check VariablesV2Response
-	err := json.Unmarshal([]byte(response), &check)
-	if err != nil {
-		return nil, err
-	}
-
-	return &check, err
-}
-
-func (c Client) GetVariablesV2() (*VariablesV2Response, *RequestDetails, error) {
+func (c Client) GetLocationV2(id string) (*LocationV2Response, *RequestDetails, error) {
 
 	details, err := c.makePublicAPICall("GET",
-		"/variables",
+		fmt.Sprintf("/locations/%s", id),
 		bytes.NewBufferString("{}"),
 		nil)
 
@@ -72,10 +72,10 @@ func (c Client) GetVariablesV2() (*VariablesV2Response, *RequestDetails, error) 
 		return nil, details, err
 	}
 
-	check, err := parseVariablesV2Response(details.ResponseBody)
+	location, err := parseLocationV2Response(details.ResponseBody)
 	if err != nil {
-		return check, details, err
+		return location, details, err
 	}
 
-	return check, details, nil
+	return location, details, nil
 }
