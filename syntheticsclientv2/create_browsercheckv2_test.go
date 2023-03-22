@@ -26,7 +26,7 @@ import (
 )
 
 var (
-	createBrowserCheckV2Body = `{"test":{"name":"browser-beep-test","business_transactions":[{"name":"Synthetic transaction 1","steps":[{"name":"Go to URL","type":"go_to_url","url":"https://www.splunk.com","action":"go_to_url","wait_for_nav":true},{"name":"Nexter step","type":"click_element","selector_type":"id","wait_for_nav":false,"selector":"free-splunk-click-desktop"}]}],"urlProtocol":"https://","startUrl":"www.splunk.com","location_ids":["aws-us-east-1"],"device_id":1,"frequency":5,"scheduling_strategy":"round_robin","active":true,"advanced_settings":{"verify_certificates":true,"authentication":{"username":"boopuser","password":"{{env.beep-var}}"},"headers":[{"name":"batman","value":"Agentoz","domain":"www.batmansagent.com"}],"cookies":[{"key":"super","value":"duper","domain":"www.batmansagent.com","path":"/boom/goes/beep"}]}}}`
+	createBrowserCheckV2Body = `{"test":{"name":"browser-beep-test","transactions":[{"name":"Synthetic transaction 1","steps":[{"name":"Go to URL","type":"go_to_url","url":"https://www.splunk.com","action":"go_to_url","wait_for_nav":true},{"name":"Nexter step","type":"click_element","selectorType":"id","wait_for_nav":false,"selector":"free-splunk-click-desktop"}]}],"urlProtocol":"https://","startUrl":"www.splunk.com","locationIds":["aws-us-east-1"],"deviceId":1,"frequency":5,"schedulingStrategy":"round_robin","active":true,"advancedSettings":{"verifyCertificates":true,"authentication":{"username":"boopuser","password":"{{env.beep-var}}"},"headers":[{"name":"batman","value":"Agentoz","domain":"www.batmansagent.com"}],"cookies":[{"key":"super","value":"duper","domain":"www.batmansagent.com","path":"/boom/goes/beep"}]}}}`
 	inputBrowserCheckV2Data  = BrowserCheckV2Input{}
 )
 
@@ -71,8 +71,8 @@ func TestCreateBrowserCheckV2(t *testing.T) {
 		t.Errorf("returned \n\n%#v want \n\n%#v", resp.Test.Frequency, inputBrowserCheckV2Data.Test.Frequency)
 	}
 
-	if !reflect.DeepEqual(resp.Test.BusinessTransactions, inputBrowserCheckV2Data.Test.BusinessTransactions) {
-		t.Errorf("returned \n\n%#v want \n\n%#v", resp.Test.BusinessTransactions, inputBrowserCheckV2Data.Test.BusinessTransactions)
+	if !reflect.DeepEqual(resp.Test.Transactions, inputBrowserCheckV2Data.Test.Transactions) {
+		t.Errorf("returned \n\n%#v want \n\n%#v", resp.Test.Transactions, inputBrowserCheckV2Data.Test.Transactions)
 	}
 
 	if !reflect.DeepEqual(resp.Test.Advancedsettings, inputBrowserCheckV2Data.Test.Advancedsettings) {
