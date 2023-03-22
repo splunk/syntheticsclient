@@ -29,18 +29,28 @@ var (
 	realm                    = os.Getenv("REALM")
 	getChecksV2Body          = `{"testType":"","page":1,"perPage":50,"search":"","orderBy":"id"}`
 	inputGetChecksV2         = GetChecksV2Options{}
-	createVariableV2Body     = `{"variable":{"description":"My super awesome test variable","name":"foodz","secret":false,"value":"bar"}}`
+	createVariableV2Body     = `{"variable":{"description":"beep-var","name":"foodz","secret":false,"value":"bar"}}`
 	inputVariableV2Data      = VariableV2Input{}
+	updateVariableV2Body     = `{"variable":{"description":"My super awesome test variable22","name":"foodz","secret":false,"value":"bar"}}`
+	updateVariableV2Data      = VariableV2Input{}
 	createLocationV2Body     = `{"location":{"id":"private-data-center-go-test","label":"Data Center place", "default":false}}`
 	inputLocationV2Data      = LocationV2Input{}
 	createHttpCheckV2Body    = `{"test":{"name":"morebeeps-test","type":"http","url":"https://www.splunk.com","locationIds":["aws-us-east-1"],"frequency":10,"schedulingStrategy":"round_robin","active":true,"requestMethod":"GET","body":null,"headers":[{"name":"boop","value":"beep"}]}}`
 	inputHttpCheckV2Data     = HttpCheckV2Input{}
+	updateHttpCheckV2Body    = `{"test":{"name":"morebeeps-test","type":"http","url":"https://www.splunk.com/index/","locationIds":["aws-us-east-1"],"frequency":10,"schedulingStrategy":"round_robin","active":true,"requestMethod":"GET","body":null,"headers":[{"name":"boop","value":"beep"}]}}`
+	updateHttpCheckV2Data     = HttpCheckV2Input{}
 	createBrowserCheckV2Body = `{"test":{"name":"browser-beep-test","transactions":[{"name":"Synthetic transaction 1","steps":[{"name":"Go to URL","type":"go_to_url","url":"https://www.splunk.com","action":"go_to_url","wait_for_nav":true},{"name":"Nexter step","type":"click_element","selectorType":"id","wait_for_nav":false,"selector":"free-splunk-click-desktop"}]}],"urlProtocol":"https://","startUrl":"www.splunk.com","locationIds":["aws-us-east-1"],"deviceId":1,"frequency":5,"schedulingStrategy":"round_robin","active":true,"advancedSettings":{"verifyCertificates":true,"authentication":{"username":"boopuser","password":"{{env.beep-var}}"},"headers":[{"name":"batman","value":"Agentoz","domain":"www.batmansagent.com"}],"cookies":[{"key":"super","value":"duper","domain":"www.batmansagent.com","path":"/boom/goes/beep"}]}}}`
 	inputBrowserCheckV2Data  = BrowserCheckV2Input{}
+	updateBrowserCheckV2Body = `{"test":{"name":"browser-beep-test","transactions":[{"name":"Synthetic transaction 1","steps":[{"name":"Go to URL","type":"go_to_url","url":"https://www.splunk.com","action":"go_to_url","wait_for_nav":true},{"name":"Nexter step","type":"click_element","selectorType":"id","wait_for_nav":false,"selector":"free-splunk-click-desktop"}]}],"urlProtocol":"https://","startUrl":"www.splunk.com","locationIds":["aws-us-east-1"],"deviceId":1,"frequency":5,"schedulingStrategy":"round_robin","active":true,"advancedSettings":{"verifyCertificates":true,"authentication":{"username":"boopuser","password":"{{env.beep-var}}"},"headers":[{"name":"batman","value":"Agentoz","domain":"www.batmansagent.com"}],"cookies":[{"key":"super","value":"duper","domain":"www.batmansagent.com","path":"/boom/goes/beep22"}]}}}`
+	updateBrowserCheckV2Data  = BrowserCheckV2Input{}
 	createPortCheckV2Body    = `{"test":{"name":"splunk - port 443","type":"port","url":"","port":443,"protocol":"tcp","host":"www.splunk.com","locationIds":["aws-us-east-1"],"frequency":10,"schedulingStrategy":"round_robin","active":true}}`
 	inputPortCheckV2Data     = PortCheckV2Input{}
+	updatePortCheckV2Body    = `{"test":{"name":"splunk - port 448","type":"port","url":"","port":448,"protocol":"tcp","host":"www.splunk.com","locationIds":["aws-us-east-1"],"frequency":10,"schedulingStrategy":"round_robin","active":true}}`
+	updatePortCheckV2Data     = PortCheckV2Input{}
 	createApiV2Body          = `{"test":{"active":true,"deviceId":1,"frequency":5,"locationIds":["aws-us-east-1"],"name":"boop-test","schedulingStrategy":"round_robin","requests":[{"configuration":{"name":"Get-Test","requestMethod": "GET","url":"https://api.us1.signalfx.com/v2/synthetics/tests/api/489","headers":{"X-SF-TOKEN":"jinglebellsbatmanshells", "beep":"boop"},"body":null},"setup":[{"name":"Extract from response body","type":"extract_json","source":"{{response.body}}","extractor":"$.requests","variable":"custom-varz"}],"validations":[{"name":"Assert response code equals 200","type":"assert_numeric","actual":"{{response.code}}","expected":"200","comparator":"equals"}]}]}}`
 	inputApiCheckV2Data      = ApiCheckV2Input{}
+	updateApiCheckV2Body          = `{"test":{"active":true,"deviceId":1,"frequency":5,"locationIds":["aws-us-east-1"],"name":"boop-test","schedulingStrategy":"round_robin","requests":[{"configuration":{"name":"Get-Test","requestMethod": "GET","url":"https://api.us1.signalfx.com/v2/synthetics/tests/api/4892","headers":{"X-SF-TOKEN":"jinglebellsbatmanshells", "beep":"boop"},"body":null},"setup":[{"name":"Extract from response body","type":"extract_json","source":"{{response.body}}","extractor":"$.requests","variable":"custom-varz"}],"validations":[{"name":"Assert response code equals 200","type":"assert_numeric","actual":"{{response.code}}","expected":"200","comparator":"equals"}]}]}}`
+	updateApiCheckV2Data      = ApiCheckV2Input{}
 )
 
 // You will need to fill in values for the get and delete tests
@@ -97,13 +107,40 @@ func TestLiveCreateVariableV2(t *testing.T) {
 
 }
 
+func TestLiveUpdateVariableV2(t *testing.T) {
+
+	err := json.Unmarshal([]byte(updateVariableV2Body), &updateVariableV2Data)
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	//Update your client with the token
+	c := NewClient(token, realm)
+
+	fmt.Println(updateVariableV2Data)
+
+	// Make the request with your check settings and print result
+	res, reqDetail, err := c.UpdateVariableV2(859, &updateVariableV2Data)
+	if err != nil {
+		fmt.Println(err)
+	} else {
+		fmt.Println(reqDetail)
+		JsonPrint(res)
+	}
+
+	if err != nil {
+		t.Fatal(err)
+	}
+
+}
+
 func TestLiveGetVariableV2(t *testing.T) {
 
 	//Create your client with the token
 	c := NewClient(token, realm)
 
 	// Make the request with your check settings and print result
-	res, _, err := c.GetVariableV2(246)
+	res, _, err := c.GetVariableV2(859)
 	if err != nil {
 		fmt.Println(err)
 	} else {
@@ -122,7 +159,7 @@ func TestLiveDeleteVariableV2(t *testing.T) {
 	c := NewClient(token, realm)
 
 	// Make the request with your check settings and print result
-	res, err := c.DeleteVariableV2(397)
+	res, err := c.DeleteVariableV2(398)
 	if err != nil {
 		fmt.Println(err)
 	} else {
@@ -200,6 +237,33 @@ func TestLiveGetHttpCheckV2(t *testing.T) {
 
 }
 
+func TestLiveUpdateHttpCheckV2(t *testing.T) {
+
+	err := json.Unmarshal([]byte(updateHttpCheckV2Body), &inputHttpCheckV2Data)
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	//Update your client with the token
+	c := NewClient(token, realm)
+
+	fmt.Println(inputHttpCheckV2Data)
+
+	// Make the request with your check settings and print result
+	res, reqDetail, err := c.UpdateHttpCheckV2(3420, &inputHttpCheckV2Data)
+	if err != nil {
+		fmt.Println(err)
+	} else {
+		fmt.Println(reqDetail)
+		JsonPrint(res)
+	}
+
+	if err != nil {
+		t.Fatal(err)
+	}
+
+}
+
 func TestLiveDeleteHttpCheckV2(t *testing.T) {
 
 	//Create your client with the token
@@ -265,13 +329,40 @@ func TestLiveGetBrowserCheckV2(t *testing.T) {
 
 }
 
+func TestLiveUpdateBrowserCheckV2(t *testing.T) {
+
+	err := json.Unmarshal([]byte(updateBrowserCheckV2Body), &updateBrowserCheckV2Data)
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	//Update your client with the token
+	c := NewClient(token, realm)
+
+	fmt.Println(updateBrowserCheckV2Data)
+
+	// Make the request with your check settings and print result
+	res, reqDetail, err := c.UpdateBrowserCheckV2(3434, &updateBrowserCheckV2Data)
+	if err != nil {
+		fmt.Println(err)
+	} else {
+		fmt.Println(reqDetail)
+		JsonPrint(res)
+	}
+
+	if err != nil {
+		t.Fatal(err)
+	}
+
+}
+
 func TestLiveDeleteBrowserCheckV2(t *testing.T) {
 
 	//Create your client with the token
 	c := NewClient(token, realm)
 
 	// Make the request with your check settings and print result
-	res, err := c.DeleteBrowserCheckV2(2101)
+	res, err := c.DeleteBrowserCheckV2(3434)
 	if err != nil {
 		fmt.Println(err)
 	} else {
@@ -315,10 +406,37 @@ func TestLiveGetApiCheckV2(t *testing.T) {
 	c := NewClient(token, realm)
 
 	// Make the request with your check settings and print result
-	res, _, err := c.GetApiCheckV2(489)
+	res, _, err := c.GetApiCheckV2(3435)
 	if err != nil {
 		fmt.Println(err)
 	} else {
+		JsonPrint(res)
+	}
+
+	if err != nil {
+		t.Fatal(err)
+	}
+
+}
+
+func TestLiveUpdateApiCheckV2(t *testing.T) {
+
+	err := json.Unmarshal([]byte(updateApiCheckV2Body), &updateApiCheckV2Data)
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	//Update your client with the token
+	c := NewClient(token, realm)
+
+	fmt.Println(updateApiCheckV2Data)
+
+	// Make the request with your check settings and print result
+	res, reqDetail, err := c.UpdateApiCheckV2(3435, &updateApiCheckV2Data)
+	if err != nil {
+		fmt.Println(err)
+	} else {
+		fmt.Println(reqDetail)
 		JsonPrint(res)
 	}
 
@@ -334,7 +452,7 @@ func TestLiveDeleteApiCheckV2(t *testing.T) {
 	c := NewClient(token, realm)
 
 	// Make the request with your check settings and print result
-	res, err := c.DeleteApiCheckV2(3007)
+	res, err := c.DeleteApiCheckV2(3435)
 	if err != nil {
 		fmt.Println(err)
 	} else {
@@ -384,6 +502,33 @@ func TestLiveGetPortCheckV2(t *testing.T) {
 	if err != nil {
 		fmt.Println(err)
 	} else {
+		JsonPrint(res)
+	}
+
+	if err != nil {
+		t.Fatal(err)
+	}
+
+}
+
+func TestLiveUpdatePortCheckV2(t *testing.T) {
+
+	err := json.Unmarshal([]byte(updatePortCheckV2Body), &updatePortCheckV2Data)
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	//Update your client with the token
+	c := NewClient(token, realm)
+
+	fmt.Println(updatePortCheckV2Data)
+
+	// Make the request with your check settings and print result
+	res, reqDetail, err := c.UpdatePortCheckV2(3436, &updatePortCheckV2Data)
+	if err != nil {
+		fmt.Println(err)
+	} else {
+		fmt.Println(reqDetail)
 		JsonPrint(res)
 	}
 
