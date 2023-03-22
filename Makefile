@@ -1,7 +1,7 @@
 .PHONY: default all build clean test fmtcheck testacc sonarqube
 
-PKG_NAME=syntheticsclient
-FILES=./...
+PKG_NAME=syntheticsclientv2
+FILES=./syntheticsclientv2/...
 
 default: test 
 
