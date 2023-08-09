@@ -28,7 +28,7 @@ type Networkconnection struct {
 }
 
 type Advancedsettings struct {
-	Authentication     `json:"authentication"`
+	Authentication     *Authentication  `json:"authentication,omitempty"`
 	Cookiesv2          []Cookiesv2      `json:"cookies"`
 	BrowserHeaders     []BrowserHeaders `json:"headers,omitempty"`
 	HostOverrides      []HostOverrides  `json:"hostOverrides,omitempty"`
@@ -37,8 +37,8 @@ type Advancedsettings struct {
 }
 
 type Authentication struct {
-	Password string `json:"password"`
-	Username string `json:"username"`
+	Password string `json:"password,omitempty"`
+	Username string `json:"username,omitempty"`
 }
 
 type Cookiesv2 struct {
@@ -100,14 +100,14 @@ type Device struct {
 
 type Requests struct {
 	Configuration `json:"configuration,omitempty"`
-	Setup         []Setup       `json:"setup,omitempty"`
-	Validations   []Validations `json:"validations,omitempty"`
+	Setup         []Setup       `json:"setup"`
+	Validations   []Validations `json:"validations"`
 }
 
 type Configuration struct {
 	Body          string `json:"body"`
-	Headers       `json:"headers,omitempty"`
-	Name          string `json:"name,omitempty"`
+	Headers       `json:"headers"`
+	Name          string `json:"name"`
 	RequestMethod string `json:"requestMethod,omitempty"`
 	URL           string `json:"url,omitempty"`
 }
@@ -330,7 +330,7 @@ type BrowserCheckV2Input struct {
 		Frequency          int            `json:"frequency"`
 		Schedulingstrategy string         `json:"schedulingStrategy"`
 		Active             bool           `json:"active"`
-		Advancedsettings   `json:"advancedSettings"`
+		Advancedsettings   `json:"advancedSettings,omitempty"`
 	} `json:"test"`
 }
 
