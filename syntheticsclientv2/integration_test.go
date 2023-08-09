@@ -25,32 +25,34 @@ import (
 )
 
 var (
-	token                    = os.Getenv("API_ACCESS_TOKEN")
-	realm                    = os.Getenv("REALM")
-	getChecksV2Body          = `{"testType":"","page":1,"perPage":50,"search":"","orderBy":"id"}`
-	inputGetChecksV2         = GetChecksV2Options{}
-	createVariableV2Body     = `{"variable":{"description":"beep-var","name":"foodz","secret":false,"value":"bar"}}`
-	inputVariableV2Data      = VariableV2Input{}
-	updateVariableV2Body     = `{"variable":{"description":"My super awesome test variable22","name":"foodz","secret":false,"value":"bar"}}`
-	updateVariableV2Data     = VariableV2Input{}
-	createLocationV2Body     = `{"location":{"id":"private-data-center-go-test","label":"Data Center place", "default":false}}`
-	inputLocationV2Data      = LocationV2Input{}
-	createHttpCheckV2Body    = `{"test":{"name":"morebeeps-test","type":"http","url":"https://www.splunk.com","locationIds":["aws-us-east-1"],"frequency":10,"schedulingStrategy":"round_robin","active":true,"requestMethod":"GET","body":null,"headers":[{"name":"boop","value":"beep"}]}}`
-	inputHttpCheckV2Data     = HttpCheckV2Input{}
-	updateHttpCheckV2Body    = `{"test":{"name":"morebeeps-test","type":"http","url":"https://www.splunk.com/index/","locationIds":["aws-us-east-1"],"frequency":10,"schedulingStrategy":"round_robin","active":true,"requestMethod":"GET","body":null,"headers":[{"name":"boop","value":"beep"}]}}`
-	updateHttpCheckV2Data    = HttpCheckV2Input{}
-	createBrowserCheckV2Body = `{"test":{"name":"browser-beep-test","transactions":[{"name":"Synthetic transaction 1","steps":[{"name":"Go to URL","type":"go_to_url","url":"https://splunk.com","action":"go_to_url","options":{"url":"https://splunk.com"},"waitForNav":true},{"name":"click","type":"click_element","selectorType":"id","selector":"clicky","waitForNav":true},{"name":"fill in fieldz","type":"enter_value","selectorType":"id","selector":"beep","value":"{{env.beep-var}}","waitForNav":false},{"name":"accept---Alert","type":"accept_alert"},{"name":"Select-Val-Index","type":"select_option","selectorType":"id","selector":"selectionz","optionSelectorType":"index","optionSelector":"{{env.beep-var}}","waitForNav":false},{"name":"Select-val-text","type":"select_option","selectorType":"id","selector":"textzz","optionSelectorType":"text","optionSelector":"sdad","waitForNav":false},{"name":"Select-Val-Val","type":"select_option","selectorType":"id","selector":"valz","optionSelectorType":"value","optionSelector":"{{env.beep-var}}","waitForNav":false},{"name":"Run JS","type":"run_javascript","value":"beeeeeeep","waitForNav":true},{"name":"Save as text","type":"store_variable_from_element","selectorType":"link","selector":"beepval","variableName":"{{env.terraform-test-foo-301}}"},{"name":"Save JS return Val","type":"store_variable_from_javascript","value":"sdasds","variableName":"{{env.terraform-test-foo-301}}","waitForNav":true}]}],"urlProtocol":"https://","startUrl":"www.splunk.com","locationIds":["aws-us-east-1"],"deviceId":1,"frequency":5,"schedulingStrategy":"round_robin","active":true,"advancedSettings":{"verifyCertificates":true,"authentication":{"username":"boopuser","password":"{{env.beep-var}}"},"headers":[{"name":"batman","value":"Agentoz","domain":"www.batmansagent.com"}],"cookies":[{"key":"super","value":"duper","domain":"www.batmansagent.com","path":"/boom/goes/beep"}]}}}`
-	inputBrowserCheckV2Data  = BrowserCheckV2Input{}
-	updateBrowserCheckV2Body = `{"test":{"name":"browser-beep-test","transactions":[{"name":"Synthetic transaction 1","steps":[{"name":"Go to URL","type":"go_to_url","url":"https://splunk.com","action":"go_to_url","options":{"url":"https://splunk.com"},"waitForNav":true},{"name":"click","type":"click_element","selectorType":"id","selector":"clicky","waitForNav":true},{"name":"fill in fieldz","type":"enter_value","selectorType":"id","selector":"beep","value":"{{env.beep-var}}","waitForNav":false},{"name":"accept---Alert","type":"accept_alert"},{"name":"Select-Val-Index","type":"select_option","selectorType":"id","selector":"selectionz","optionSelectorType":"index","optionSelector":"{{env.beep-var}}","waitForNav":false},{"name":"Select-val-text","type":"select_option","selectorType":"id","selector":"textzz","optionSelectorType":"text","optionSelector":"sdad","waitForNav":false},{"name":"Select-Val-Val","type":"select_option","selectorType":"id","selector":"valz","optionSelectorType":"value","optionSelector":"{{env.beep-var}}","waitForNav":false},{"name":"Run JS","type":"run_javascript","value":"beeeeeeep","waitForNav":true},{"name":"Save as text","type":"store_variable_from_element","selectorType":"link","selector":"beepval","variableName":"{{env.terraform-test-foo-301}}"},{"name":"Save JS return Val","type":"store_variable_from_javascript","value":"sdasds","variableName":"{{env.terraform-test-foo-301}}","waitForNav":true}]}],"urlProtocol":"https://","startUrl":"www.splunk.com","locationIds":["aws-us-east-1"],"deviceId":1,"frequency":15,"schedulingStrategy":"round_robin","active":true,"advancedSettings":{"verifyCertificates":true,"authentication":{"username":"boopuser","password":"{{env.beep-var}}"},"headers":[{"name":"batman","value":"Agentoz","domain":"www.batmansagent.com"}],"cookies":[{"key":"super","value":"dooper","domain":"www.batmansagent.com","path":"/boom/goes/beep"}]}}}`
-	updateBrowserCheckV2Data = BrowserCheckV2Input{}
-	createPortCheckV2Body    = `{"test":{"name":"splunk - port 443","type":"port","url":"","port":443,"protocol":"tcp","host":"www.splunk.com","locationIds":["aws-us-east-1"],"frequency":10,"schedulingStrategy":"round_robin","active":true}}`
-	inputPortCheckV2Data     = PortCheckV2Input{}
-	updatePortCheckV2Body    = `{"test":{"name":"splunk - port 448","type":"port","url":"","port":448,"protocol":"tcp","host":"www.splunk.com","locationIds":["aws-us-east-1"],"frequency":10,"schedulingStrategy":"round_robin","active":true}}`
-	updatePortCheckV2Data    = PortCheckV2Input{}
-	createApiV2Body          = `{"test":{"active":true,"deviceId":1,"frequency":5,"locationIds":["aws-us-east-1"],"name":"boop-test","schedulingStrategy":"round_robin","requests":[{"configuration":{"name":"Get-Test","requestMethod": "GET","url":"https://api.us1.signalfx.com/v2/synthetics/tests/api/489","headers":{"X-SF-TOKEN":"jinglebellsbatmanshells", "beep":"boop"},"body":null},"setup":[{"name":"Extract from response body","type":"extract_json","source":"{{response.body}}","extractor":"$.requests","variable":"custom-varz"}],"validations":[{"name":"Assert response code equals 200","type":"assert_numeric","actual":"{{response.code}}","expected":"200","comparator":"equals"}]}]}}`
-	inputApiCheckV2Data      = ApiCheckV2Input{}
-	updateApiCheckV2Body     = `{"test":{"active":true,"deviceId":1,"frequency":5,"locationIds":["aws-us-east-1"],"name":"boop-test","schedulingStrategy":"round_robin","requests":[{"configuration":{"name":"Get-Test","requestMethod": "GET","url":"https://api.us1.signalfx.com/v2/synthetics/tests/api/4892","headers":{"X-SF-TOKEN":"jinglebellsbatmanshells", "beep":"boop"},"body":null},"setup":[{"name":"Extract from response body","type":"extract_json","source":"{{response.body}}","extractor":"$.requests","variable":"custom-varz"}],"validations":[{"name":"Assert response code equals 200","type":"assert_numeric","actual":"{{response.code}}","expected":"200","comparator":"equals"}]}]}}`
-	updateApiCheckV2Data     = ApiCheckV2Input{}
+	token                           = os.Getenv("API_ACCESS_TOKEN")
+	realm                           = os.Getenv("REALM")
+	getChecksV2Body                 = `{"testType":"","page":1,"perPage":50,"search":"","orderBy":"id"}`
+	inputGetChecksV2                = GetChecksV2Options{}
+	createVariableV2Body            = `{"variable":{"description":"beep-var","name":"foodz","secret":false,"value":"bar"}}`
+	inputVariableV2Data             = VariableV2Input{}
+	updateVariableV2Body            = `{"variable":{"description":"My super awesome test variable22","name":"foodz","secret":false,"value":"bar"}}`
+	updateVariableV2Data            = VariableV2Input{}
+	createLocationV2Body            = `{"location":{"id":"private-data-center-go-test","label":"Data Center place", "default":false}}`
+	inputLocationV2Data             = LocationV2Input{}
+	createHttpCheckV2Body           = `{"test":{"name":"morebeeps-test","type":"http","url":"https://www.splunk.com","locationIds":["aws-us-east-1"],"frequency":10,"schedulingStrategy":"round_robin","active":true,"requestMethod":"GET","body":null,"headers":[{"name":"boop","value":"beep"}]}}`
+	inputHttpCheckV2Data            = HttpCheckV2Input{}
+	updateHttpCheckV2Body           = `{"test":{"name":"morebeeps-test","type":"http","url":"https://www.splunk.com/index/","locationIds":["aws-us-east-1"],"frequency":10,"schedulingStrategy":"round_robin","active":true,"requestMethod":"GET","body":null,"headers":[{"name":"boop","value":"beep"}]}}`
+	updateHttpCheckV2Data           = HttpCheckV2Input{}
+	createBrowserCheckV2Body        = `{"test":{"name":"a-maximal-browser-beep-test","transactions":[{"name":"Synthetic transaction 1","steps":[{"name":"Go to URL","type":"go_to_url","url":"https://splunk.com","action":"go_to_url","options":{"url":"https://splunk.com"},"waitForNav":true},{"name":"click","type":"click_element","selectorType":"id","selector":"clicky","waitForNav":true},{"name":"fill in fieldz","type":"enter_value","selectorType":"id","selector":"beep","value":"{{env.beep-var}}","waitForNav":false},{"name":"accept---Alert","type":"accept_alert"},{"name":"Select-Val-Index","type":"select_option","selectorType":"id","selector":"selectionz","optionSelectorType":"index","optionSelector":"{{env.beep-var}}","waitForNav":false},{"name":"Select-val-text","type":"select_option","selectorType":"id","selector":"textzz","optionSelectorType":"text","optionSelector":"sdad","waitForNav":false},{"name":"Select-Val-Val","type":"select_option","selectorType":"id","selector":"valz","optionSelectorType":"value","optionSelector":"{{env.beep-var}}","waitForNav":false},{"name":"Run JS","type":"run_javascript","value":"beeeeeeep","waitForNav":true},{"name":"Save as text","type":"store_variable_from_element","selectorType":"link","selector":"beepval","variableName":"{{env.terraform-test-foo-301}}"},{"name":"Save JS return Val","type":"store_variable_from_javascript","value":"sdasds","variableName":"{{env.terraform-test-foo-301}}","waitForNav":true}]}],"urlProtocol":"https://","startUrl":"www.splunk.com","locationIds":["aws-us-east-1"],"deviceId":1,"frequency":5,"schedulingStrategy":"round_robin","active":true,"advancedSettings":{"verifyCertificates":true,"authentication":{"username":"boopuser","password":"{{env.beep-var}}"},"headers":[{"name":"batman","value":"Agentoz","domain":"www.batmansagent.com"}],"cookies":[{"key":"super","value":"duper","domain":"www.batmansagent.com","path":"/boom/goes/beep"}]}}}`
+	createMinimalBrowserCheckV2Body = `{"test":{"name":"a-minimal-browser-beep-test","transactions":[{"name":"Synthetic transaction 1","steps":[{"name":"Go to URL","type":"go_to_url","url":"https://splunk.com","action":"go_to_url"}]}],"locationIds":["aws-us-east-1"],"deviceId":1,"frequency":5,"schedulingStrategy":"round_robin","active":true,"advancedSettings":{"verifyCertificates":true}}}`
+	inputBrowserCheckV2Data         = BrowserCheckV2Input{}
+	updateBrowserCheckV2Body        = `{"test":{"name":"browser-beep-test","transactions":[{"name":"Synthetic transaction 1","steps":[{"name":"Go to URL","type":"go_to_url","url":"https://splunk.com","action":"go_to_url","options":{"url":"https://splunk.com"},"waitForNav":true},{"name":"click","type":"click_element","selectorType":"id","selector":"clicky","waitForNav":true},{"name":"fill in fieldz","type":"enter_value","selectorType":"id","selector":"beep","value":"{{env.beep-var}}","waitForNav":false},{"name":"accept---Alert","type":"accept_alert"},{"name":"Select-Val-Index","type":"select_option","selectorType":"id","selector":"selectionz","optionSelectorType":"index","optionSelector":"{{env.beep-var}}","waitForNav":false},{"name":"Select-val-text","type":"select_option","selectorType":"id","selector":"textzz","optionSelectorType":"text","optionSelector":"sdad","waitForNav":false},{"name":"Select-Val-Val","type":"select_option","selectorType":"id","selector":"valz","optionSelectorType":"value","optionSelector":"{{env.beep-var}}","waitForNav":false},{"name":"Run JS","type":"run_javascript","value":"beeeeeeep","waitForNav":true},{"name":"Save as text","type":"store_variable_from_element","selectorType":"link","selector":"beepval","variableName":"{{env.terraform-test-foo-301}}"},{"name":"Save JS return Val","type":"store_variable_from_javascript","value":"sdasds","variableName":"{{env.terraform-test-foo-301}}","waitForNav":true}]}],"urlProtocol":"https://","startUrl":"www.splunk.com","locationIds":["aws-us-east-1"],"deviceId":1,"frequency":15,"schedulingStrategy":"round_robin","active":true,"advancedSettings":{"verifyCertificates":true,"authentication":{"username":"boopuser","password":"{{env.beep-var}}"},"headers":[{"name":"batman","value":"Agentoz","domain":"www.batmansagent.com"}],"cookies":[{"key":"super","value":"dooper","domain":"www.batmansagent.com","path":"/boom/goes/beep"}]}}}`
+	updateBrowserCheckV2Data        = BrowserCheckV2Input{}
+	createPortCheckV2Body           = `{"test":{"name":"splunk - port 443","type":"port","url":"","port":443,"protocol":"tcp","host":"www.splunk.com","locationIds":["aws-us-east-1"],"frequency":10,"schedulingStrategy":"round_robin","active":true}}`
+	inputPortCheckV2Data            = PortCheckV2Input{}
+	updatePortCheckV2Body           = `{"test":{"name":"splunk - port 448","type":"port","url":"","port":448,"protocol":"tcp","host":"www.splunk.com","locationIds":["aws-us-east-1"],"frequency":10,"schedulingStrategy":"round_robin","active":true}}`
+	updatePortCheckV2Data           = PortCheckV2Input{}
+	createApiV2Body                 = `{"test":{"active":true,"deviceId":1,"frequency":5,"locationIds":["aws-us-east-1"],"name":"a-maximual-boop-test","schedulingStrategy":"round_robin","requests":[{"configuration":{"name":"Get-Test","requestMethod": "GET","url":"https://api.us1.signalfx.com/v2/synthetics/tests/api/489","headers":{"X-SF-TOKEN":"jinglebellsbatmanshells", "beep":"boop"},"body":null},"setup":[{"name":"Extract from response body","type":"extract_json","source":"{{response.body}}","extractor":"$.requests","variable":"custom-varz"}],"validations":[{"name":"Assert response code equals 200","type":"assert_numeric","actual":"{{response.code}}","expected":"200","comparator":"equals"}]}]}}`
+	createMinimalApiV2Body          = `{"test":{"active":true,"deviceId":1,"frequency":5,"locationIds":["aws-us-east-1"],"name":"a-minimal-boop-test","schedulingStrategy":"round_robin","requests":[{"configuration":{"name":"apishortGet-Test","requestMethod":"GET","url":"https://api.us1.signalfx.com/v2/synthetics/tests/api/489"}}]}}`
+	inputApiCheckV2Data             = ApiCheckV2Input{}
+	updateApiCheckV2Body            = `{"test":{"active":true,"deviceId":1,"frequency":5,"locationIds":["aws-us-east-1"],"name":"boop-test","schedulingStrategy":"round_robin","requests":[{"configuration":{"name":"Get-Test","requestMethod": "GET","url":"https://api.us1.signalfx.com/v2/synthetics/tests/api/4892","headers":{"X-SF-TOKEN":"jinglebellsbatmanshells", "beep":"boop"},"body":null},"setup":[{"name":"Extract from response body","type":"extract_json","source":"{{response.body}}","extractor":"$.requests","variable":"custom-varz"}],"validations":[{"name":"Assert response code equals 200","type":"assert_numeric","actual":"{{response.code}}","expected":"200","comparator":"equals"}]}]}}`
+	updateApiCheckV2Data            = ApiCheckV2Input{}
 )
 
 // You will need to fill in values for the get and delete tests
@@ -310,6 +312,33 @@ func TestLiveCreateBrowserCheckV2(t *testing.T) {
 
 }
 
+func TestLiveCreateMinimalBrowserCheckV2(t *testing.T) {
+
+	err := json.Unmarshal([]byte(createMinimalBrowserCheckV2Body), &inputBrowserCheckV2Data)
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	//Create your client with the token
+	c := NewClient(token, realm)
+
+	fmt.Println(inputBrowserCheckV2Data)
+
+	// Make the request with your check settings and print result
+	res, reqDetail, err := c.CreateBrowserCheckV2(&inputBrowserCheckV2Data)
+	if err != nil {
+		fmt.Println(err)
+	} else {
+		fmt.Println(reqDetail)
+		JsonPrint(res)
+	}
+
+	if err != nil {
+		t.Fatal(err)
+	}
+
+}
+
 func TestLiveGetBrowserCheckV2(t *testing.T) {
 
 	//Create your client with the token
@@ -378,6 +407,31 @@ func TestLiveDeleteBrowserCheckV2(t *testing.T) {
 func TestLiveCreateApiCheckV2(t *testing.T) {
 
 	err := json.Unmarshal([]byte(createApiV2Body), &inputApiCheckV2Data)
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	//Create your client with the token
+	c := NewClient(token, realm)
+
+	// Make the request with your check settings and print result
+	res, reqDetail, err := c.CreateApiCheckV2(&inputApiCheckV2Data)
+	if err != nil {
+		fmt.Println(err)
+	} else {
+		fmt.Println(reqDetail)
+		JsonPrint(res)
+	}
+
+	if err != nil {
+		t.Fatal(err)
+	}
+
+}
+
+func TestLiveCreateMinimalApiCheckV2(t *testing.T) {
+
+	err := json.Unmarshal([]byte(createMinimalApiV2Body), &inputApiCheckV2Data)
 	if err != nil {
 		t.Fatal(err)
 	}
