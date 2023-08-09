@@ -33,7 +33,7 @@ type Advancedsettings struct {
 	BrowserHeaders     []BrowserHeaders `json:"headers,omitempty"`
 	HostOverrides      []HostOverrides  `json:"hostOverrides,omitempty"`
 	UserAgent          string           `json:"userAgent,omitempty"`
-	Verifycertificates bool             `json:"verifyCertificates,omitempty"`
+	Verifycertificates bool             `json:"verifyCertificates"`
 }
 
 type Authentication struct {
@@ -305,7 +305,7 @@ type ApiCheckV2Input struct {
 
 type ApiCheckV2Response struct {
 	Test struct {
-		Active             bool      `json:"active,omitempty"`
+		Active             bool      `json:"active"`
 		Createdat          time.Time `json:"createdAt"`
 		Device             `json:"device,omitempty"`
 		Frequency          int        `json:"frequency,omitempty"`
