@@ -28,7 +28,7 @@ type Networkconnection struct {
 }
 
 type Advancedsettings struct {
-	Authentication     *Authentication  `json:"authentication,omitempty"`
+	Authentication     *Authentication  `json:"authentication"`
 	Cookiesv2          []Cookiesv2      `json:"cookies"`
 	BrowserHeaders     []BrowserHeaders `json:"headers,omitempty"`
 	HostOverrides      []HostOverrides  `json:"hostOverrides,omitempty"`
@@ -260,34 +260,40 @@ type PortCheckV2Input struct {
 
 type HttpCheckV2Response struct {
 	Test struct {
-		ID                 int           `json:"id"`
-		Name               string        `json:"name"`
-		Active             bool          `json:"active"`
-		Frequency          int           `json:"frequency"`
-		SchedulingStrategy string        `json:"schedulingStrategy"`
-		CreatedAt          time.Time     `json:"createdAt,omitempty"`
-		UpdatedAt          time.Time     `json:"updatedAt,omitempty"`
-		LocationIds        []string      `json:"locationIds"`
-		Type               string        `json:"type"`
-		URL                string        `json:"url"`
-		RequestMethod      string        `json:"requestMethod"`
-		Body               string        `json:"body,omitempty"`
-		HttpHeaders        []HttpHeaders `json:"headers,omitempty"`
+		ID                 int             `json:"id"`
+		Name               string          `json:"name"`
+		Active             bool            `json:"active"`
+		Frequency          int             `json:"frequency"`
+		SchedulingStrategy string          `json:"schedulingStrategy"`
+		CreatedAt          time.Time       `json:"createdAt,omitempty"`
+		UpdatedAt          time.Time       `json:"updatedAt,omitempty"`
+		LocationIds        []string        `json:"locationIds"`
+		Type               string          `json:"type"`
+		URL                string          `json:"url"`
+		RequestMethod      string          `json:"requestMethod"`
+		Body               string          `json:"body,omitempty"`
+		Authentication     *Authentication `json:"authentication"`
+		UserAgent          string          `json:"userAgent,omitempty"`
+		Verifycertificates bool            `json:"verifyCertificates"`
+		HttpHeaders        []HttpHeaders   `json:"headers,omitempty"`
 	} `json:"test"`
 }
 
 type HttpCheckV2Input struct {
 	Test struct {
-		Name               string        `json:"name"`
-		Type               string        `json:"type"`
-		URL                string        `json:"url"`
-		LocationIds        []string      `json:"locationIds"`
-		Frequency          int           `json:"frequency"`
-		SchedulingStrategy string        `json:"schedulingStrategy"`
-		Active             bool          `json:"active"`
-		RequestMethod      string        `json:"requestMethod"`
-		Body               string        `json:"body,omitempty"`
-		HttpHeaders        []HttpHeaders `json:"headers,omitempty"`
+		Name               string          `json:"name"`
+		Type               string          `json:"type"`
+		URL                string          `json:"url"`
+		LocationIds        []string        `json:"locationIds"`
+		Frequency          int             `json:"frequency"`
+		SchedulingStrategy string          `json:"schedulingStrategy"`
+		Active             bool            `json:"active"`
+		RequestMethod      string          `json:"requestMethod"`
+		Body               string          `json:"body,omitempty"`
+		Authentication     *Authentication `json:"authentication"`
+		UserAgent          string          `json:"userAgent,omitempty"`
+		Verifycertificates bool            `json:"verifyCertificates"`
+		HttpHeaders        []HttpHeaders   `json:"headers,omitempty"`
 	} `json:"test"`
 }
 
