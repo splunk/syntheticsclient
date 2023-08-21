@@ -28,12 +28,13 @@ type Networkconnection struct {
 }
 
 type Advancedsettings struct {
-	Authentication     *Authentication  `json:"authentication"`
-	Cookiesv2          []Cookiesv2      `json:"cookies"`
-	BrowserHeaders     []BrowserHeaders `json:"headers,omitempty"`
-	HostOverrides      []HostOverrides  `json:"hostOverrides,omitempty"`
-	UserAgent          string           `json:"userAgent,omitempty"`
-	Verifycertificates bool             `json:"verifyCertificates"`
+	Authentication            *Authentication  `json:"authentication"`
+	Cookiesv2                 []Cookiesv2      `json:"cookies"`
+	BrowserHeaders            []BrowserHeaders `json:"headers,omitempty"`
+	HostOverrides             []HostOverrides  `json:"hostOverrides,omitempty"`
+	UserAgent                 *string          `json:"userAgent"`
+	CollectInteractiveMetrics bool             `json:"collectInteractiveMetrics"`
+	Verifycertificates        bool             `json:"verifyCertificates"`
 }
 
 type Authentication struct {
@@ -83,6 +84,7 @@ type StepsV2 struct {
 	VariableName       string  `json:"variableName,omitempty"`
 	Value              string  `json:"value,omitempty"`
 	Options            Options `json:"options,omitempty"`
+	Duration           int     `json:"duration,omitempty"`
 }
 
 type Options struct {
@@ -120,14 +122,21 @@ type Setup struct {
 	Source    string `json:"source,omitempty"`
 	Type      string `json:"type,omitempty"`
 	Variable  string `json:"variable,omitempty"`
+	Code      string `json:"code,omitempty"`
+	Value     string `json:"value,omitempty"`
 }
 
 type Validations struct {
 	Actual     string `json:"actual,omitempty"`
 	Comparator string `json:"comparator,omitempty"`
 	Expected   string `json:"expected,omitempty"`
+	Extractor  string `json:"extractor,omitempty"`
 	Name       string `json:"name,omitempty"`
+	Source     string `json:"source,omitempty"`
 	Type       string `json:"type,omitempty"`
+	Variable   string `json:"variable,omitempty"`
+	Code       string `json:"code,omitempty"`
+	Value      string `json:"value,omitempty"`
 }
 
 type Tests []struct {
@@ -273,7 +282,7 @@ type HttpCheckV2Response struct {
 		RequestMethod      string          `json:"requestMethod"`
 		Body               string          `json:"body,omitempty"`
 		Authentication     *Authentication `json:"authentication"`
-		UserAgent          string          `json:"userAgent,omitempty"`
+		UserAgent          *string         `json:"userAgent"`
 		Verifycertificates bool            `json:"verifyCertificates"`
 		HttpHeaders        []HttpHeaders   `json:"headers,omitempty"`
 	} `json:"test"`
@@ -291,7 +300,7 @@ type HttpCheckV2Input struct {
 		RequestMethod      string          `json:"requestMethod"`
 		Body               string          `json:"body,omitempty"`
 		Authentication     *Authentication `json:"authentication"`
-		UserAgent          string          `json:"userAgent,omitempty"`
+		UserAgent          *string         `json:"userAgent"`
 		Verifycertificates bool            `json:"verifyCertificates"`
 		HttpHeaders        []HttpHeaders   `json:"headers,omitempty"`
 	} `json:"test"`
