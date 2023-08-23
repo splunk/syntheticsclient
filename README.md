@@ -18,7 +18,7 @@ import (
 	"fmt"
 	"os"
 	"encoding/json"
-	sc2 "github.com/splunk/syntheticsclient/syntheticsclientv2"
+	sc2 "github.com/splunk/syntheticsclient/v2/syntheticsclientv2"
 )
 
 func main() {
