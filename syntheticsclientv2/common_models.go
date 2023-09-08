@@ -284,7 +284,8 @@ type HttpCheckV2Response struct {
 		Authentication     *Authentication `json:"authentication"`
 		UserAgent          *string         `json:"userAgent"`
 		Verifycertificates bool            `json:"verifyCertificates"`
-		HttpHeaders        []HttpHeaders   `json:"headers"`
+		HttpHeaders        []HttpHeaders   `json:"headers,omitempty"`
+		Validations        []Validations   `json:"validations"`
 	} `json:"test"`
 }
 
@@ -302,7 +303,8 @@ type HttpCheckV2Input struct {
 		Authentication     *Authentication `json:"authentication"`
 		UserAgent          *string         `json:"userAgent"`
 		Verifycertificates bool            `json:"verifyCertificates"`
-		HttpHeaders        []HttpHeaders   `json:"headers"`
+		HttpHeaders        []HttpHeaders   `json:"headers,omitempty"`
+		Validations        []Validations   `json:"validations"`
 	} `json:"test"`
 }
 

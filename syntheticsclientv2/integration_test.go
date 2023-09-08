@@ -245,12 +245,13 @@ func CreateHttpCheckV2(test string, c *Client) (int, error) {
 	}
 	fmt.Printf("\nReq was: \n%v\n", reqDetail)
 	JsonPrint(res)
+	inputHttpCheckV2Data = HttpCheckV2Input{}
 
 	return res.Test.ID, nil
 }
 
 func UpdateHttpCheckV2(checkId int, test string, c *Client) error {
-
+	
 	err := json.Unmarshal([]byte(test), &inputHttpCheckV2Data)
 	if err != nil {
 		return err
@@ -263,6 +264,7 @@ func UpdateHttpCheckV2(checkId int, test string, c *Client) error {
 	}
 	fmt.Printf("\nReq was: \n%v\n", reqDetail)
 	JsonPrint(res)
+	inputHttpCheckV2Data = HttpCheckV2Input{}
 
 	return nil
 }
