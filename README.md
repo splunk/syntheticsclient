@@ -1,5 +1,5 @@
 # syntheticsclient
-A Splunk Synthetics (Formerly Rigor) client for golang.
+A Splunk Synthetics for Splunk Observability (Formerly Rigor) client for golang.
 
 ## Installation
 `go get https://github.com/splunk/syntheticsclient.git`
@@ -18,7 +18,7 @@ import (
 	"fmt"
 	"os"
 	"encoding/json"
-	sc2 "github.com/splunk/syntheticsclient/syntheticsclientv2"
+	sc2 "github.com/splunk/syntheticsclient/v2/syntheticsclientv2"
 )
 
 func main() {
@@ -53,3 +53,22 @@ API Docs are [available here](https://dev.splunk.com/observability/reference)
 
 ## Additional Information
 This client is largely a copypasta mutation of the [go-victor](https://github.com/victorops/go-victorops) client for Splunk On-Call (formerly known as VictorOps).
+
+## Contributions
+Contributions are welcome and encouraged!
+
+Please see [CONTRIBUTING.md](./CONTRIBUTING.md) for details on contributing to this repository.
+
+Before your contribution can be accepted, you will be asked to sign our
+[Splunk Contributor License Agreement (CLA)](https://github.com/splunk/cla-agreement/blob/main/CLA.md).
+
+To agree to the CLA and COC please comment these in **separate individual messages** on your PR:
+
+CLA:
+```
+I have read the CLA Document and I hereby sign the CLA
+```
+
+Code of Conduct:
+```
+I have read the Code of Conduct and I hereby accept the Terms
