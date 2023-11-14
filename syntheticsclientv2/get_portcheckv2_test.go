@@ -25,7 +25,7 @@ import (
 )
 
 var (
-	getPortCheckV2Body  = `{"test":{"id":1647,"name":"splunk - port 443","active":true,"frequency":10,"scheduling_strategy":"round_robin","created_at":"2022-11-21T15:38:54.546Z","updated_at":"2022-11-21T15:38:54.554Z","location_ids":["aws-us-east-1"],"type":"port","protocol":"tcp","host":"www.splunk.com","port":443}}`
+	getPortCheckV2Body  = `{"test":{"id":1647, "customProperties": [{"key": "Test_Key", "value": "Test Custom Properties"}], "name":"splunk - port 443","active":true,"frequency":10,"scheduling_strategy":"round_robin","created_at":"2022-11-21T15:38:54.546Z","updated_at":"2022-11-21T15:38:54.554Z","location_ids":["aws-us-east-1"],"type":"port","protocol":"tcp","host":"www.splunk.com","port":443}}`
 	inputGetPortCheckV2 = verifyPortCheckV2Input(string(getPortCheckV2Body))
 )
 
@@ -86,6 +86,9 @@ func TestGetPortCheckV2(t *testing.T) {
 		t.Errorf("returned \n\n%#v want \n\n%#v", resp.Test.Port, inputGetPortCheckV2.Test.Port)
 	}
 
+	if !reflect.DeepEqual(resp.Test.Customproperties, inputGetPortCheckV2.Test.Customproperties) {
+		t.Errorf("returned \n\n%#v want \n\n%#v", resp.Test.Customproperties, inputGetPortCheckV2.Test.Customproperties)
+	}
 }
 
 func verifyPortCheckV2Input(stringInput string) *PortCheckV2Response {

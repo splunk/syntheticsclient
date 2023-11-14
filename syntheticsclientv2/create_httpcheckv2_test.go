@@ -26,7 +26,7 @@ import (
 )
 
 var (
-	createHttpCheckV2Body = `{"test":{"name":"morebeeps-test","type":"http","url":"https://www.splunk.com","location_ids":["aws-us-east-1"],"frequency":10,"scheduling_strategy":"round_robin","active":true,"request_method":"GET","body":null,"headers":[{"name":"boop","value":"beep"}]}}`
+	createHttpCheckV2Body = `{"test":{"customProperties": [{"key": "Test_Key", "value": "Test Custom Properties"}], "name":"morebeeps-test","type":"http","url":"https://www.splunk.com","location_ids":["aws-us-east-1"],"frequency":10,"scheduling_strategy":"round_robin","active":true,"request_method":"GET","body":null,"headers":[{"name":"boop","value":"beep"}]}}`
 	inputHttpCheckV2Data  = HttpCheckV2Input{}
 )
 
@@ -83,4 +83,7 @@ func TestCreateHttpCheckV2(t *testing.T) {
 		t.Errorf("returned \n\n%#v want \n\n%#v", resp.Test.SchedulingStrategy, inputHttpCheckV2Data.Test.SchedulingStrategy)
 	}
 
+	if !reflect.DeepEqual(resp.Test.Customproperties, inputHttpCheckV2Data.Test.Customproperties) {
+		t.Errorf("returned \n\n%#v want \n\n%#v", resp.Test.Customproperties, inputHttpCheckV2Data.Test.Customproperties)
+	}
 }
