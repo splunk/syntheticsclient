@@ -1,5 +1,5 @@
 # syntheticsclient
-A Splunk Synthetics (Formerly Rigor) client for golang.
+A Splunk Synthetics for Splunk Observability (Formerly Rigor) client for golang.
 
 ## Installation
 `go get https://github.com/splunk/syntheticsclient.git`
