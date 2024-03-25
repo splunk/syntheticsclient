@@ -29,7 +29,10 @@ func TestDeleteHttpCheck(t *testing.T) {
 
 	testMux.HandleFunc("/v2/checks/http/19", func(w http.ResponseWriter, r *http.Request) {
 		testMethod(t, r, "DELETE")
-		w.Write([]byte(deleteHttpRespBody))
+		_, err := w.Write([]byte(deleteHttpRespBody))
+		if err != nil {
+			t.Errorf("returned error: %#v", err)
+		}
 	})
 
 	resp, err := testClient.DeleteHttpCheck(19)
