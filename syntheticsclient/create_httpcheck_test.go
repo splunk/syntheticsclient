@@ -31,7 +31,10 @@ func TestCreateHttpCheck(t *testing.T) {
 
 	testMux.HandleFunc("/v2/checks/http", func(w http.ResponseWriter, r *http.Request) {
 		testMethod(t, r, "POST")
-		w.Write([]byte(createHttpBody))
+		_, err := w.Write([]byte(createHttpBody))
+		if err != nil {
+			t.Errorf("returned error: %#v", err)
+		}
 	})
 
 	resp, _, err := testClient.CreateHttpCheck(&HttpCheckInput{

@@ -32,7 +32,10 @@ func TestGetBrowserCheck(t *testing.T) {
 
 	testMux.HandleFunc("/v2/checks/206537", func(w http.ResponseWriter, r *http.Request) {
 		testMethod(t, r, "GET")
-		w.Write([]byte(getBrowserBody))
+		_, err := w.Write([]byte(getBrowserBody))
+		if err != nil {
+			t.Errorf("returned error: %#v", err)
+		}
 	})
 
 	resp, _, err := testClient.GetCheck(206537)
