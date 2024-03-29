@@ -260,16 +260,17 @@ type PortCheckV2Response struct {
 
 type PortCheckV2Input struct {
 	Test struct {
-		Name               string   `json:"name"`
-		Type               string   `json:"type"`
-		URL                string   `json:"url"`
-		Port               int      `json:"port"`
-		Protocol           string   `json:"protocol"`
-		Host               string   `json:"host"`
-		LocationIds        []string `json:"locationIds"`
-		Frequency          int      `json:"frequency"`
-		SchedulingStrategy string   `json:"schedulingStrategy"`
-		Active             bool     `json:"active"`
+		Name               string             `json:"name"`
+		Type               string             `json:"type"`
+		URL                string             `json:"url"`
+		Port               int                `json:"port"`
+		Protocol           string             `json:"protocol"`
+		Host               string             `json:"host"`
+		LocationIds        []string           `json:"locationIds"`
+		Frequency          int                `json:"frequency"`
+		SchedulingStrategy string             `json:"schedulingStrategy"`
+		Active             bool               `json:"active"`
+		Customproperties   []CustomProperties `json:"customProperties"`
 	} `json:"test"`
 }
 
@@ -300,31 +301,34 @@ type HttpCheckV2Response struct {
 
 type HttpCheckV2Input struct {
 	Test struct {
-		Name               string          `json:"name"`
-		Type               string          `json:"type"`
-		URL                string          `json:"url"`
-		LocationIds        []string        `json:"locationIds"`
-		Frequency          int             `json:"frequency"`
-		SchedulingStrategy string          `json:"schedulingStrategy"`
-		Active             bool            `json:"active"`
-		RequestMethod      string          `json:"requestMethod"`
-		Body               string          `json:"body,omitempty"`
-		Authentication     *Authentication `json:"authentication"`
-		UserAgent          *string         `json:"userAgent"`
-		Verifycertificates bool            `json:"verifyCertificates"`
-		HttpHeaders        []HttpHeaders   `json:"headers"`
+		Name               string             `json:"name"`
+		Type               string             `json:"type"`
+		URL                string             `json:"url"`
+		LocationIds        []string           `json:"locationIds"`
+		Frequency          int                `json:"frequency"`
+		SchedulingStrategy string             `json:"schedulingStrategy"`
+		Active             bool               `json:"active"`
+		RequestMethod      string             `json:"requestMethod"`
+		Body               string             `json:"body,omitempty"`
+		Authentication     *Authentication    `json:"authentication"`
+		UserAgent          *string            `json:"userAgent"`
+		Verifycertificates bool               `json:"verifyCertificates"`
+		HttpHeaders        []HttpHeaders      `json:"headers,omitempty"`
+		Validations        []Validations      `json:"validations"`
+		Customproperties   []CustomProperties `json:"customProperties"`
 	} `json:"test"`
 }
 
 type ApiCheckV2Input struct {
 	Test struct {
-		Active             bool       `json:"active"`
-		Deviceid           int        `json:"deviceId"`
-		Frequency          int        `json:"frequency"`
-		Locationids        []string   `json:"locationIds"`
-		Name               string     `json:"name"`
-		Requests           []Requests `json:"requests"`
-		Schedulingstrategy string     `json:"schedulingStrategy"`
+		Active             bool               `json:"active"`
+		Deviceid           int                `json:"deviceId"`
+		Frequency          int                `json:"frequency"`
+		Locationids        []string           `json:"locationIds"`
+		Name               string             `json:"name"`
+		Requests           []Requests         `json:"requests"`
+		Schedulingstrategy string             `json:"schedulingStrategy"`
+		Customproperties   []CustomProperties `json:"customProperties"`
 	} `json:"test"`
 }
 
@@ -359,6 +363,7 @@ type BrowserCheckV2Input struct {
 		Schedulingstrategy string         `json:"schedulingStrategy"`
 		Active             bool           `json:"active"`
 		Advancedsettings   `json:"advancedSettings,omitempty"`
+		Customproperties   []CustomProperties `json:"customProperties"`
 	} `json:"test"`
 }
 
@@ -380,4 +385,9 @@ type BrowserCheckV2Response struct {
 		Lastrunstatus      string             `json:"lastRunStatus"`
 		Lastrunat          time.Time          `json:"lastRunAt"`
 	} `json:"test"`
+}
+
+type CustomProperties struct {
+	Key   string `json:"key"`
+	Value string `json:"value"`
 }

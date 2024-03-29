@@ -86,6 +86,9 @@ func TestGetPortCheckV2(t *testing.T) {
 		t.Errorf("returned \n\n%#v want \n\n%#v", resp.Test.Port, inputGetPortCheckV2.Test.Port)
 	}
 
+	if !reflect.DeepEqual(resp.Test.Customproperties, inputGetPortCheckV2.Test.Customproperties) {
+		t.Errorf("returned \n\n%#v want \n\n%#v", resp.Test.Customproperties, inputGetPortCheckV2.Test.Customproperties)
+	}
 }
 
 func verifyPortCheckV2Input(stringInput string) *PortCheckV2Response {

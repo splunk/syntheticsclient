@@ -98,6 +98,9 @@ func TestGetHttpCheckV2(t *testing.T) {
 		t.Errorf("returned \n\n%#v want \n\n%#v", resp.Test.CreatedAt, inputGetHttpCheckV2.Test.CreatedAt)
 	}
 
+	if !reflect.DeepEqual(resp.Test.Customproperties, inputGetHttpCheckV2.Test.Customproperties) {
+		t.Errorf("returned \n\n%#v want \n\n%#v", resp.Test.Customproperties, inputGetHttpCheckV2.Test.Customproperties)
+	}
 }
 
 func verifyHttpCheckV2Input(stringInput string) *HttpCheckV2Response {

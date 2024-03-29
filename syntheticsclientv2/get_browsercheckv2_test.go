@@ -86,6 +86,9 @@ func TestGetBrowserCheckV2(t *testing.T) {
 		t.Errorf("returned \n\n%#v want \n\n%#v", resp.Test.Transactions, inputGetBrowserCheckV2.Test.Transactions)
 	}
 
+	if !reflect.DeepEqual(resp.Test.Customproperties, inputGetBrowserCheckV2.Test.Customproperties) {
+		t.Errorf("returned \n\n%#v want \n\n%#v", resp.Test.Customproperties, inputGetBrowserCheckV2.Test.Customproperties)
+	}
 }
 
 func verifyBrowserCheckV2Input(stringInput string) *BrowserCheckV2Response {

@@ -86,6 +86,9 @@ func TestGetApiCheckV2(t *testing.T) {
 		t.Errorf("returned \n\n%#v want \n\n%#v", resp.Test.Requests, inputGetApiCheckV2.Test.Requests)
 	}
 
+	if !reflect.DeepEqual(resp.Test.Customproperties, inputGetApiCheckV2.Test.Customproperties) {
+		t.Errorf("returned \n\n%#v want \n\n%#v", resp.Test.Customproperties, inputGetApiCheckV2.Test.Customproperties)
+	}
 }
 
 func verifyApiCheckV2Input(stringInput string) *ApiCheckV2Response {
