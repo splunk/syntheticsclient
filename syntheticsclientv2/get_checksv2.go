@@ -86,7 +86,7 @@ func (c Client) GetChecksV2(params *GetChecksV2Options) (*ChecksV2Response, *Req
 }
 
 func activeQueryParam(param *bool) (string) {
-	if *param {
+	if param != nil {
 		boolString := strconv.FormatBool(*param)
 		return fmt.Sprintf("&active=%s", boolString)
 	}
