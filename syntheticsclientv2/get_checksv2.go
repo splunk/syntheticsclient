@@ -19,6 +19,7 @@ import (
 	"encoding/json"
 	"fmt"
 	"strings"
+	"strconv"
 )
 
 func parseChecksV2Response(response string) (*ChecksV2Response, error) {
@@ -60,7 +61,7 @@ func (c Client) GetChecksV2(params *GetChecksV2Options) (*ChecksV2Response, *Req
 			params.PerPage,
 			params.OrderBy,
 			params.Search,
-			activeQueryParam(params.active),
+			activeQueryParam(params.Active),
 			params.SchedulingStrategy,
 			customPropsQueryParam(params.CustomProperties),
 			stringsQueryParam(params.LastRunStatus, "&lastRunStatus[]="),
@@ -84,14 +85,15 @@ func (c Client) GetChecksV2(params *GetChecksV2Options) (*ChecksV2Response, *Req
 	return check, details, nil
 }
 
-func activeQueryParam(param boolean) {
-	if param == nil {
-		return ""
+func activeQueryParam(param *bool) (string) {
+	if *param {
+		boolString := strconv.FormatBool(*param)
+		return fmt.Sprintf("&active=%s", boolString)
 	}
-	return fmt.Sprintf("&active=%t", param)
+	return ""
 }
 
-func customPropsQueryParam(params []CustomProperties) {
+func customPropsQueryParam(params []CustomProperties) (string) {
 	if len(params) == 0 {
 		return ""
 	}
@@ -102,14 +104,14 @@ func customPropsQueryParam(params []CustomProperties) {
 	return result
 }
 
-func integersQueryParam(params []int, queryParamName string) {
+func integersQueryParam(params []int, queryParamName string) (string) {
 	if len(params) == 0 {
 		return ""
 	}
 	return queryParamName + strings.Trim(strings.Replace(fmt.Sprint(params), " ", queryParamName, -1), "[]")
 }
 
-func stringsQueryParam(params []string, queryParamName string) {
+func stringsQueryParam(params []string, queryParamName string) (string) {
 	if len(params) == 0 {
 		return ""
 	}

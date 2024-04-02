@@ -158,7 +158,7 @@ type GetChecksV2Options struct {
 	Page               int                `json:"page"`
 	Search             string             `json:"search"`
 	OrderBy            string             `json:"orderBy"`
-	Active             bool               `json:"active"`
+	Active             *bool              `json:"active"`
 	CustomProperties   []CustomProperties `json:"customProperties"`
 	Frequencies        []int              `json:"frequencies"`
 	LastRunStatus      []string           `json:"lastRunStatus"`
