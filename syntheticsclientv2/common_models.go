@@ -303,6 +303,7 @@ type HttpCheckV2Response struct {
 		Customproperties   []CustomProperties `json:"customProperties"`
 		Lastrunstatus      string             `json:"lastRunStatus"`
 		Lastrunat          time.Time          `json:"lastRunAt"`
+    Port               int                `json:"port"`
 	} `json:"test"`
 }
 
@@ -323,6 +324,7 @@ type HttpCheckV2Input struct {
 		HttpHeaders        []HttpHeaders      `json:"headers,omitempty"`
 		Validations        []Validations      `json:"validations"`
 		Customproperties   []CustomProperties `json:"customProperties"`
+    Port               int                `json:"port"`
 	} `json:"test"`
 }
 
