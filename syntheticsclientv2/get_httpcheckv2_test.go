@@ -101,6 +101,10 @@ func TestGetHttpCheckV2(t *testing.T) {
 	if !reflect.DeepEqual(resp.Test.Customproperties, inputGetHttpCheckV2.Test.Customproperties) {
 		t.Errorf("returned \n\n%#v want \n\n%#v", resp.Test.Customproperties, inputGetHttpCheckV2.Test.Customproperties)
 	}
+
+	if !reflect.DeepEqual(resp.Test.Port, inputGetHttpCheckV2.Test.Port) {
+		t.Errorf("returned \n\n%#v want \n\n%#v", resp.Test.Port, inputGetHttpCheckV2.Test.Port)
+	}
 }
 
 func verifyHttpCheckV2Input(stringInput string) *HttpCheckV2Response {
