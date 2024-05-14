@@ -156,11 +156,18 @@ type Tests []struct {
 }
 
 type GetChecksV2Options struct {
-	TestType string `json:"testType"`
-	PerPage  int    `json:"perPage"`
-	Page     int    `json:"page"`
-	Search   string `json:"search"`
-	OrderBy  string `json:"orderBy"`
+	TestType           string             `json:"testType"`
+	PerPage            int                `json:"perPage"`
+	Page               int                `json:"page"`
+	Search             string             `json:"search"`
+	OrderBy            string             `json:"orderBy"`
+	Active             *bool              `json:"active"`
+	CustomProperties   []CustomProperties `json:"customProperties"`
+	Frequencies        []int              `json:"frequencies"`
+	LastRunStatus      []string           `json:"lastRunStatus"`
+	LocationIds        []string           `json:"locationIds"`
+	SchedulingStrategy string             `json:"schedulingStrategy"`
+	TestTypes          []string           `json:"testTypes"`
 }
 
 type Errors []struct {
@@ -300,6 +307,7 @@ type HttpCheckV2Response struct {
 		Lastrunstatus      string             `json:"lastRunStatus"`
 		Lastrunat          time.Time          `json:"lastRunAt"`
 		Automaticretries   int                `json:"automaticRetries"`
+    Port               int                `json:"port"`
 	} `json:"test"`
 }
 
@@ -321,6 +329,7 @@ type HttpCheckV2Input struct {
 		Validations        []Validations      `json:"validations"`
 		Customproperties   []CustomProperties `json:"customProperties"`
 		Automaticretries   int                `json:"automaticRetries"`
+    Port               int                `json:"port"`
 	} `json:"test"`
 }
 
