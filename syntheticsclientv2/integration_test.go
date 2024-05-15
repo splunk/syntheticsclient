@@ -54,6 +54,8 @@ var (
 	inputApiCheckV2Data             = ApiCheckV2Input{}
 	updateApiCheckV2Body            = `{"test":{"active":true,"deviceId":1,"frequency":5, "automaticRetries": 1, "customProperties": [{"key": "Test_Key", "value": "Test Custom Properties"}],"locationIds":["aws-us-east-1"],"name":"a-API-boop-test","schedulingStrategy":"round_robin","requests":[{"configuration":{"name":"Get-Test","requestMethod": "GET","url":"https://api.us1.signalfx.com/v2/synthetics/tests/api/4892","headers":{"X-SF-TOKEN":"jinglebellsbatmanshells", "beep":"boop"},"body":null},"setup":[{"name":"Extract from response body","type":"extract_json","source":"{{response.body}}","extractor":"$.requests","variable":"custom-varz"}],"validations":[{"name":"Assert response code equals 200","type":"assert_numeric","actual":"{{response.code}}","expected":"200","comparator":"equals"}]}]}}`
 	updateApiCheckV2Data            = ApiCheckV2Input{}
+	inputDowntimeConfigurationV2Data  = DowntimeConfigurationV2Input{}
+	updateDowntimeConfigurationV2Data = DowntimeConfigurationV2Input{}
 )
 
 // You will need to fill in values for the get and delete tests
@@ -838,4 +840,105 @@ func TestLiveDeleteLocationV2(t *testing.T) {
 		t.Fatal(err)
 	}
 
+}
+
+func TestLiveDowntimeConfigurationCreateUpdateAndDeleteV2(t *testing.T) {
+
+	//Create your client with the token
+	c := NewClient(token, realm)
+	var err error
+
+	//There are restrictions on startTime and endTime for a downtime_configuration so we set the startTime to 10 days
+	//in the future and the endTime to be 1 hour after the startTime
+	year, month, day := time.Now().Add(10 * time.Day).Date()
+	startTime := fmt.Sprintf("%s-%s-%sT20:00:00.000Z", year, int(month), day)
+	endTime := fmt.Sprintf("%s-%s-%sT21:00:00.000Z", year, int(month), day)
+
+	createDowntimeConfigurationV2Body := fmt.Sprintf("{\"downtimeConfiguration\":{\"name\":\"dc test\",\"description\":\"My super awesome test downtimeConfiguration\",\"rule\":\"augment_data\",\"testIds\":[1111],\"startTime\":\"%s\",\"endTime\":\"%s\"}}", startTime, endTime)
+
+	downtimeConfigId, err := CreateDowntimeConfigurationV2(createDowntimeConfigurationV2Body, c)
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	err = GetDowntimeConfigurationV2(downtimeConfigId, c)
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	updateDowntimeConfigurationV2Body := fmt.Sprintf("{\"downtimeConfiguration\":{\"name\":\"dc test\",\"description\":\"My super awesome test downtimeConfiguration\",\"rule\":\"pause_tests\",\"testIds\":[1111],\"startTime\":\"%s\",\"endTime\":\"%s\"}}", startTime, endTime)
+
+	err = UpdateDowntimeConfigurationV2(downtimeConfigId, updateDowntimeConfigurationV2Body, c)
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	err = GetDowntimeConfigurationV2(downtimeConfigId, c)
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	err = DeleteDowntimeConfigurationV2(downtimeConfigId, c)
+	if err != nil {
+		t.Fatal(err)
+	}
+
+}
+
+func CreateDowntimeConfigurationV2(downtimeConfiguration string, c *Client) (int, error) {
+
+	err := json.Unmarshal([]byte(downtimeConfiguration), &inputDowntimeConfigurationV2Data)
+	if err != nil {
+		return 0, err
+	}
+
+	// Make the request with your check settings and print result
+	res, reqDetail, err := c.CreateDowntimeConfigurationV2(&inputDowntimeConfigurationV2Data)
+	if err != nil {
+		return 0, err
+	}
+	fmt.Println(reqDetail)
+	JsonPrint(res)
+
+	return res.DowntimeConfiguration.ID, nil
+}
+
+func UpdateDowntimeConfigurationV2(downtimeConfigId int, downtimeConfiguration string, c *Client) error {
+
+	err := json.Unmarshal([]byte(downtimeConfiguration), &updateDowntimeConfigurationV2Data)
+	if err != nil {
+		return err
+	}
+
+	// Make the request with your check settings and print result
+	res, reqDetail, err := c.UpdateDowntimeConfigurationV2(downtimeConfigId, &updateDowntimeConfigurationV2Data)
+	if err != nil {
+		return err
+	}
+	fmt.Println(reqDetail)
+	JsonPrint(res)
+
+	return nil
+}
+
+func GetDowntimeConfigurationV2(downtimeConfigId int, c *Client) error {
+	// Make the request with your check settings and print result
+	res, _, err := c.GetDowntimeConfigurationV2(downtimeConfigId)
+	if err != nil {
+		return err
+	}
+	JsonPrint(res)
+
+	return nil
+}
+
+func DeleteDowntimeConfigurationV2(downtimeConfigId int, c *Client) error {
+	// Make the request with your check settings and print result
+	res, err := c.DeleteDowntimeConfigurationV2(downtimeConfigId)
+	if err != nil {
+		return err
+	}
+	JsonPrint(res)
+
+	return nil
 }

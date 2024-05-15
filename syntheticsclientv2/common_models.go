@@ -190,6 +190,21 @@ type Variable struct {
 	Value       string    `json:"value"`
 }
 
+type DowntimeConfiguration struct {
+	Createdat      time.Time `json:"createdAt,omitempty"`
+	Description    string    `json:"description,omitempty"`
+	ID             int       `json:"id,omitempty"`
+	Name           string    `json:"name"`
+	Updatedat      time.Time `json:"updatedAt,omitempty"`
+	Rule           string    `json:"rule"`
+	Starttime      time.Time `json:"startTime"`
+	Endtime        time.Time `json:"endTime"`
+	Status         string    `json:"status,omitempty"`
+	Testsupdatedat time.Time `json:"testsUpdatedAt,omitempty"`
+	Testcount      int       `json:"testCount,omitempty"`
+	Testids        []int     `json:"testIds,omitempty"`
+}
+
 type DeleteCheck struct {
 	Result  string `json:"result"`
 	Message string `json:"message"`
@@ -211,6 +226,21 @@ type Meta struct {
 
 type DevicesV2Response struct {
 	Devices []Device `json:"devices"`
+}
+
+type DowntimeConfigurationV2Response struct {
+	DowntimeConfiguration `json:"downtimeConfiguration"`
+}
+
+type DowntimeConfigurationV2Input struct {
+	DowntimeConfiguration `json:"downtimeConfiguration"`
+}
+
+type DowntimeConfigurationsV2Response struct {
+	Page                   int                     `json:"nextPageLink"`
+	Pagelimt               int                     `json:"perPage"`
+	Totalcount             int                     `json:"totalCount"`
+	Downtimeconfigurations []DowntimeConfiguration `json:"downtimeConfigurations"`
 }
 
 type VariableV2Response struct {
