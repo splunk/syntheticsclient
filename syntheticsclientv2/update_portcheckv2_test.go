@@ -26,7 +26,7 @@ import (
 )
 
 var (
-	updatePortCheckV2Body  = `{"test":{"name":"splunk - port 443", "customProperties": [{"key": "Test_Key", "value": "Test Custom Properties"}], "type":"port","url":"","port":80,"protocol":"tcp","host":"www.splunk.com","location_ids":["aws-us-east-1"],"frequency":10,"scheduling_strategy":"round_robin","active":true}}`
+	updatePortCheckV2Body  = `{"test":{"name":"splunk - port 443", "automaticRetries": 1, "customProperties": [{"key": "Test_Key", "value": "Test Custom Properties"}], "type":"port","url":"","port":80,"protocol":"tcp","host":"www.splunk.com","location_ids":["aws-us-east-1"],"frequency":10,"scheduling_strategy":"round_robin","active":true}}`
 	inputPortCheckV2Update = PortCheckV2Input{}
 )
 
