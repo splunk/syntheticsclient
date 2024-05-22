@@ -848,13 +848,19 @@ func TestLiveDowntimeConfigurationCreateUpdateAndDeleteV2(t *testing.T) {
 	c := NewClient(token, realm)
 	var err error
 
+	checkId, err := CreateApiCheckV2(createApiV2Body, c)
+	if err != nil {
+		t.Fatal(err)
+	}
+
 	//There are restrictions on startTime and endTime for a downtime_configuration so we set the startTime to 10 days
 	//in the future and the endTime to be 1 hour after the startTime
-	year, month, day := time.Now().Add(10 * time.Day).Date()
+	tenDaysFromNow := time.Now().AddDate(0, 0, 10)
+	year, month, day := tenDaysFromNow.Date()
 	startTime := fmt.Sprintf("%s-%s-%sT20:00:00.000Z", year, int(month), day)
 	endTime := fmt.Sprintf("%s-%s-%sT21:00:00.000Z", year, int(month), day)
 
-	createDowntimeConfigurationV2Body := fmt.Sprintf("{\"downtimeConfiguration\":{\"name\":\"dc test\",\"description\":\"My super awesome test downtimeConfiguration\",\"rule\":\"augment_data\",\"testIds\":[1111],\"startTime\":\"%s\",\"endTime\":\"%s\"}}", startTime, endTime)
+	createDowntimeConfigurationV2Body := fmt.Sprintf("{\"downtimeConfiguration\":{\"name\":\"dc test\",\"description\":\"My super awesome test downtimeConfiguration\",\"rule\":\"augment_data\",\"testIds\":[%d],\"startTime\":\"%s\",\"endTime\":\"%s\"}}", checkId, startTime, endTime)
 
 	downtimeConfigId, err := CreateDowntimeConfigurationV2(createDowntimeConfigurationV2Body, c)
 	if err != nil {
@@ -866,7 +872,7 @@ func TestLiveDowntimeConfigurationCreateUpdateAndDeleteV2(t *testing.T) {
 		t.Fatal(err)
 	}
 
-	updateDowntimeConfigurationV2Body := fmt.Sprintf("{\"downtimeConfiguration\":{\"name\":\"dc test\",\"description\":\"My super awesome test downtimeConfiguration\",\"rule\":\"pause_tests\",\"testIds\":[1111],\"startTime\":\"%s\",\"endTime\":\"%s\"}}", startTime, endTime)
+	updateDowntimeConfigurationV2Body := fmt.Sprintf("{\"downtimeConfiguration\":{\"name\":\"dc test\",\"description\":\"My super awesome test downtimeConfiguration\",\"rule\":\"pause_tests\",\"testIds\":[%d],\"startTime\":\"%s\",\"endTime\":\"%s\"}}", checkId, startTime, endTime)
 
 	err = UpdateDowntimeConfigurationV2(downtimeConfigId, updateDowntimeConfigurationV2Body, c)
 	if err != nil {
@@ -879,6 +885,11 @@ func TestLiveDowntimeConfigurationCreateUpdateAndDeleteV2(t *testing.T) {
 	}
 
 	err = DeleteDowntimeConfigurationV2(downtimeConfigId, c)
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	err = DeleteApiCheckV2(checkId, c)
 	if err != nil {
 		t.Fatal(err)
 	}
