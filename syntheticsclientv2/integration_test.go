@@ -26,34 +26,36 @@ import (
 )
 
 var (
-	token                           = os.Getenv("API_ACCESS_TOKEN")
-	realm                           = os.Getenv("REALM")
-	getChecksV2Body                 = `{"testType":"","page":1,"perPage":50,"search":"","orderBy":"id"}`
-	inputGetChecksV2                = GetChecksV2Options{}
-	createVariableV2Body            = `{"variable":{"description":"beep-var","name":"a-variable-named-foodz","secret":false,"value":"bar"}}`
-	inputVariableV2Data             = VariableV2Input{}
-	updateVariableV2Body            = `{"variable":{"description":"My super awesome test variable22","name":"a-variable-named-foodz","secret":false,"value":"bar"}}`
-	updateVariableV2Data            = VariableV2Input{}
-	createLocationV2Body            = `{"location":{"id":"private-data-center-go-test","label":"Data Center place", "default":false}}`
-	inputLocationV2Data             = LocationV2Input{}
-	createHttpCheckV2Body           = `{"test":{"name":"a-minimal-http-integration-test","type":"http", "automaticRetries": 1, "customProperties": [{"key": "Test_Key", "value": "Test Custom Properties"}],"url":"https://www.splunk.com","locationIds":["aws-us-east-1"],"frequency":10,"schedulingStrategy":"round_robin","active":true,"requestMethod":"GET","body":null,"userAgent":null,"authentication":null,"verifyCertificates":false}}`
-	inputHttpCheckV2Data            = HttpCheckV2Input{}
-	updateHttpCheckV2Body           = `{"test":{"name":"a-maximal-http-integration-test-update","type":"http", "automaticRetries": 1, "customProperties": [{"key": "Test_Key", "value": "Test Custom Properties"}],"url":"https://www.splunk.com/updated","locationIds":["aws-us-east-1","aws-ap-southeast-2","aws-ap-southeast-4"],"frequency":30,"schedulingStrategy":"round_robin","active":true,"requestMethod":"GET","body":null,"headers":[{"name":"header-1","value":"value-1"},{"name":"header_2","value":"value_2"}],"validations":[{"type":"assert_string","actual":"{{response.first_byte_time}}","expected":"100","comparator":"equals"},{"type":"assert_string","actual":"{{headers.Content-Length}}","expected":"100","comparator":"does_not_equal"}],"userAgent":"user-agent_standards met","authentication":{"username":"beepusers","password":"{{env.terraform-test-foo-301}}"},"verifyCertificates":true}}`
-	updateHttpCheckV2Data           = HttpCheckV2Input{}
-	createMaximalBrowserCheckV2Body = `{"test":{"name":"a-maximal-browser-beep-test", "automaticRetries": 1, "customProperties": [{"key": "Test_Key", "value": "Test Custom Properties"}],"transactions":[{"name":"Synthetic transaction 1","steps":[{"name":"Go to URL","type":"go_to_url","url":"https://splunk.com","action":"go_to_url","options":{"url":"https://splunk.com"},"waitForNav":true},{"name":"click","type":"click_element","selectorType":"id","selector":"clicky","waitForNav":true},{"name":"fill in fieldz","type":"enter_value","selectorType":"id","selector":"beep","value":"{{env.beep-var}}","waitForNav":false},{"name":"accept---Alert","type":"accept_alert"},{"name":"Select-Val-Index","type":"select_option","selectorType":"id","selector":"selectionz","optionSelectorType":"index","optionSelector":"{{env.beep-var}}","waitForNav":false},{"name":"Select-val-text","type":"select_option","selectorType":"id","selector":"textzz","optionSelectorType":"text","optionSelector":"sdad","waitForNav":false},{"name":"Select-Val-Val","type":"select_option","selectorType":"id","selector":"valz","optionSelectorType":"value","optionSelector":"{{env.beep-var}}","waitForNav":false},{"name":"Run JS","type":"run_javascript","value":"beeeeeeep","waitForNav":true},{"name":"Save as text","type":"store_variable_from_element","selectorType":"link","selector":"beepval","variableName":"{{env.terraform-test-foo-301}}"},{"name":"Wait","type":"wait","duration":1312},{"name":"Save JS return Val","type":"store_variable_from_javascript","value":"sdasds","variableName":"{{env.terraform-test-foo-301}}","waitForNav":true}]}],"urlProtocol":"https://","startUrl":"www.splunk.com","locationIds":["aws-us-east-1"],"deviceId":1,"frequency":5,"schedulingStrategy":"round_robin","active":true,"advancedSettings":{"verifyCertificates":true,"authentication":{"username":"boopuser","password":"{{env.beep-var}}"},"headers":[{"name":"batman","value":"Agentoz","domain":"www.batmansagent.com"}],"cookies":[{"key":"super","value":"duper","domain":"www.batmansagent.com","path":"/boom/goes/beep"}]}}}`
-	createMinimalBrowserCheckV2Body = `{"test":{"name":"a-minimal-browser-beep-test", "automaticRetries": 1, "customProperties": [{"key": "Test_Key", "value": "Test Custom Properties"}],"transactions":[{"name":"Synthetic transaction 1","steps":[{"name":"Go to URL","type":"go_to_url","url":"https://splunk.com","action":"go_to_url"}]}],"locationIds":["aws-us-east-1"],"deviceId":1,"frequency":5,"schedulingStrategy":"round_robin","active":true,"advancedSettings":{"verifyCertificates":true}}}`
-	inputBrowserCheckV2Data         = BrowserCheckV2Input{}
-	updateBrowserCheckV2Body        = `{"test":{"name":"a-browser-beep-test", "automaticRetries": 1, "customProperties": [{"key": "Test_Key", "value": "Test Custom Properties"}],"transactions":[{"name":"Synthetic transaction 1","steps":[{"name":"Go to URL","type":"go_to_url","url":"https://splunk.com","action":"go_to_url","options":{"url":"https://splunk.com"},"waitForNav":true},{"name":"click","type":"click_element","selectorType":"id","selector":"clicky","waitForNav":true},{"name":"fill in fieldz","type":"enter_value","selectorType":"id","selector":"beep","value":"{{env.beep-var}}","waitForNav":false},{"name":"accept---Alert","type":"accept_alert"},{"name":"Select-Val-Index","type":"select_option","selectorType":"id","selector":"selectionz","optionSelectorType":"index","optionSelector":"{{env.beep-var}}","waitForNav":false},{"name":"Select-val-text","type":"select_option","selectorType":"id","selector":"textzz","optionSelectorType":"text","optionSelector":"sdad","waitForNav":false},{"name":"Select-Val-Val","type":"select_option","selectorType":"id","selector":"valz","optionSelectorType":"value","optionSelector":"{{env.beep-var}}","waitForNav":false},{"name":"Run JS","type":"run_javascript","value":"beeeeeeep","waitForNav":true},{"name":"Save as text","type":"store_variable_from_element","selectorType":"link","selector":"beepval","variableName":"{{env.terraform-test-foo-301}}"},{"name":"Save JS return Val","type":"store_variable_from_javascript","value":"sdasds","variableName":"{{env.terraform-test-foo-301}}","waitForNav":true}]}],"urlProtocol":"https://","startUrl":"www.splunk.com","locationIds":["aws-us-east-1"],"deviceId":1,"frequency":15,"schedulingStrategy":"round_robin","active":true,"advancedSettings":{"verifyCertificates":true,"authentication":{"username":"boopuser","password":"{{env.beep-var}}"},"headers":[{"name":"batman","value":"Agentoz","domain":"www.batmansagent.com"}],"cookies":[{"key":"super","value":"dooper","domain":"www.batmansagent.com","path":"/boom/goes/beep"}]}}}`
-	updateBrowserCheckV2Data        = BrowserCheckV2Input{}
-	createPortCheckV2Body           = `{"test":{"name":"a - port 443 check","type":"port", "automaticRetries": 1, "customProperties": [{"key": "Test_Key", "value": "Test Custom Properties"}],"url":"","port":443,"protocol":"tcp","host":"www.splunk.com","locationIds":["aws-us-east-1"],"frequency":10,"schedulingStrategy":"round_robin","active":true}}`
-	inputPortCheckV2Data            = PortCheckV2Input{}
-	updatePortCheckV2Body           = `{"test":{"name":"a2 - port 443 check","type":"port", "automaticRetries": 1, "customProperties": [{"key": "Test_Key", "value": "Test Custom Properties"}],"url":"","port":448,"protocol":"tcp","host":"www.splunk.com","locationIds":["aws-us-east-1"],"frequency":10,"schedulingStrategy":"round_robin","active":true}}`
-	updatePortCheckV2Data           = PortCheckV2Input{}
-	createApiV2Body                 = `{"test":{"active":true,"deviceId":1,"frequency":5, "automaticRetries": 1, "customProperties": [{"key": "Test_Key", "value": "Test Custom Properties"}],"locationIds":["aws-us-east-1"],"name":"a-maximual-API-boop-test","schedulingStrategy":"round_robin","requests":[{"configuration":{"name":"Get-Test","requestMethod":"GET","url":"https://api.us1.signalfx.com/v2/synthetics/tests/api/489","headers":{"X-SF-TOKEN":"jinglebellsbatmanshells","beep":"boop"},"body":null},"setup":[{"name":"Extract from response body","type":"extract_json","source":"{{response.body}}","extractor":"sd","variable":"extractsetupvar"},{"name":"JavaScript run","type":"javascript","code":"asdasd","variable":"jsvarsetup"},{"name":"Save response body","type":"save","value":"{{response.body}}","variable":"savesetupvar"}],"validations":[{"name":"JavaScript run","type":"javascript","code":"codetorun","variable":"jscodevar"},{"name":"Save response body","type":"save","value":"{{response.body}}","variable":"saverespvar"},{"name":"Assert response code equals 200","type":"assert_numeric","actual":"{{response.code}}","expected":"200","comparator":"equals"},{"name":"Extract from response body","type":"extract_json","source":"{{response.body}}","extractor":"js.extractor","variable":"extractjvar"}]}]}}`
-	createMinimalApiV2Body          = `{"test":{"active":true,"deviceId":1,"frequency":5, "automaticRetries": 1, "customProperties": [{"key": "Test_Key", "value": "Test Custom Properties"}],"locationIds":["aws-us-east-1"],"name":"a-minimal-API-boop-test","schedulingStrategy":"round_robin","requests":[{"configuration":{"name":"apishortGet-Test","requestMethod":"GET","url":"https://api.us1.signalfx.com/v2/synthetics/tests/api/489"}}]}}`
-	inputApiCheckV2Data             = ApiCheckV2Input{}
-	updateApiCheckV2Body            = `{"test":{"active":true,"deviceId":1,"frequency":5, "automaticRetries": 1, "customProperties": [{"key": "Test_Key", "value": "Test Custom Properties"}],"locationIds":["aws-us-east-1"],"name":"a-API-boop-test","schedulingStrategy":"round_robin","requests":[{"configuration":{"name":"Get-Test","requestMethod": "GET","url":"https://api.us1.signalfx.com/v2/synthetics/tests/api/4892","headers":{"X-SF-TOKEN":"jinglebellsbatmanshells", "beep":"boop"},"body":null},"setup":[{"name":"Extract from response body","type":"extract_json","source":"{{response.body}}","extractor":"$.requests","variable":"custom-varz"}],"validations":[{"name":"Assert response code equals 200","type":"assert_numeric","actual":"{{response.code}}","expected":"200","comparator":"equals"}]}]}}`
-	updateApiCheckV2Data            = ApiCheckV2Input{}
+	token                             = os.Getenv("API_ACCESS_TOKEN")
+	realm                             = os.Getenv("REALM")
+	getChecksV2Body                   = `{"testType":"","page":1,"perPage":50,"search":"","orderBy":"id"}`
+	inputGetChecksV2                  = GetChecksV2Options{}
+	createVariableV2Body              = `{"variable":{"description":"beep-var","name":"a-variable-named-foodz","secret":false,"value":"bar"}}`
+	inputVariableV2Data               = VariableV2Input{}
+	updateVariableV2Body              = `{"variable":{"description":"My super awesome test variable22","name":"a-variable-named-foodz","secret":false,"value":"bar"}}`
+	updateVariableV2Data              = VariableV2Input{}
+	createLocationV2Body              = `{"location":{"id":"private-data-center-go-test","label":"Data Center place", "default":false}}`
+	inputLocationV2Data               = LocationV2Input{}
+	createHttpCheckV2Body             = `{"test":{"name":"a-minimal-http-integration-test","type":"http", "automaticRetries": 1, "customProperties": [{"key": "Test_Key", "value": "Test Custom Properties"}],"url":"https://www.splunk.com","locationIds":["aws-us-east-1"],"frequency":10,"schedulingStrategy":"round_robin","active":true,"requestMethod":"GET","body":null,"userAgent":null,"authentication":null,"verifyCertificates":false}}`
+	inputHttpCheckV2Data              = HttpCheckV2Input{}
+	updateHttpCheckV2Body             = `{"test":{"name":"a-maximal-http-integration-test-update","type":"http", "automaticRetries": 1, "customProperties": [{"key": "Test_Key", "value": "Test Custom Properties"}],"url":"https://www.splunk.com/updated","locationIds":["aws-us-east-1","aws-ap-southeast-2","aws-ap-southeast-4"],"frequency":30,"schedulingStrategy":"round_robin","active":true,"requestMethod":"GET","body":null,"headers":[{"name":"header-1","value":"value-1"},{"name":"header_2","value":"value_2"}],"validations":[{"type":"assert_string","actual":"{{response.first_byte_time}}","expected":"100","comparator":"equals"},{"type":"assert_string","actual":"{{headers.Content-Length}}","expected":"100","comparator":"does_not_equal"}],"userAgent":"user-agent_standards met","authentication":{"username":"beepusers","password":"{{env.terraform-test-foo-301}}"},"verifyCertificates":true}}`
+	updateHttpCheckV2Data             = HttpCheckV2Input{}
+	createMaximalBrowserCheckV2Body   = `{"test":{"name":"a-maximal-browser-beep-test", "automaticRetries": 1, "customProperties": [{"key": "Test_Key", "value": "Test Custom Properties"}],"transactions":[{"name":"Synthetic transaction 1","steps":[{"name":"Go to URL","type":"go_to_url","url":"https://splunk.com","action":"go_to_url","options":{"url":"https://splunk.com"},"waitForNav":true},{"name":"click","type":"click_element","selectorType":"id","selector":"clicky","waitForNav":true},{"name":"fill in fieldz","type":"enter_value","selectorType":"id","selector":"beep","value":"{{env.beep-var}}","waitForNav":false},{"name":"accept---Alert","type":"accept_alert"},{"name":"Select-Val-Index","type":"select_option","selectorType":"id","selector":"selectionz","optionSelectorType":"index","optionSelector":"{{env.beep-var}}","waitForNav":false},{"name":"Select-val-text","type":"select_option","selectorType":"id","selector":"textzz","optionSelectorType":"text","optionSelector":"sdad","waitForNav":false},{"name":"Select-Val-Val","type":"select_option","selectorType":"id","selector":"valz","optionSelectorType":"value","optionSelector":"{{env.beep-var}}","waitForNav":false},{"name":"Run JS","type":"run_javascript","value":"beeeeeeep","waitForNav":true},{"name":"Save as text","type":"store_variable_from_element","selectorType":"link","selector":"beepval","variableName":"{{env.terraform-test-foo-301}}"},{"name":"Wait","type":"wait","duration":1312},{"name":"Save JS return Val","type":"store_variable_from_javascript","value":"sdasds","variableName":"{{env.terraform-test-foo-301}}","waitForNav":true}]}],"urlProtocol":"https://","startUrl":"www.splunk.com","locationIds":["aws-us-east-1"],"deviceId":1,"frequency":5,"schedulingStrategy":"round_robin","active":true,"advancedSettings":{"verifyCertificates":true,"authentication":{"username":"boopuser","password":"{{env.beep-var}}"},"headers":[{"name":"batman","value":"Agentoz","domain":"www.batmansagent.com"}],"cookies":[{"key":"super","value":"duper","domain":"www.batmansagent.com","path":"/boom/goes/beep"}]}}}`
+	createMinimalBrowserCheckV2Body   = `{"test":{"name":"a-minimal-browser-beep-test", "automaticRetries": 1, "customProperties": [{"key": "Test_Key", "value": "Test Custom Properties"}],"transactions":[{"name":"Synthetic transaction 1","steps":[{"name":"Go to URL","type":"go_to_url","url":"https://splunk.com","action":"go_to_url"}]}],"locationIds":["aws-us-east-1"],"deviceId":1,"frequency":5,"schedulingStrategy":"round_robin","active":true,"advancedSettings":{"verifyCertificates":true}}}`
+	inputBrowserCheckV2Data           = BrowserCheckV2Input{}
+	updateBrowserCheckV2Body          = `{"test":{"name":"a-browser-beep-test", "automaticRetries": 1, "customProperties": [{"key": "Test_Key", "value": "Test Custom Properties"}],"transactions":[{"name":"Synthetic transaction 1","steps":[{"name":"Go to URL","type":"go_to_url","url":"https://splunk.com","action":"go_to_url","options":{"url":"https://splunk.com"},"waitForNav":true},{"name":"click","type":"click_element","selectorType":"id","selector":"clicky","waitForNav":true},{"name":"fill in fieldz","type":"enter_value","selectorType":"id","selector":"beep","value":"{{env.beep-var}}","waitForNav":false},{"name":"accept---Alert","type":"accept_alert"},{"name":"Select-Val-Index","type":"select_option","selectorType":"id","selector":"selectionz","optionSelectorType":"index","optionSelector":"{{env.beep-var}}","waitForNav":false},{"name":"Select-val-text","type":"select_option","selectorType":"id","selector":"textzz","optionSelectorType":"text","optionSelector":"sdad","waitForNav":false},{"name":"Select-Val-Val","type":"select_option","selectorType":"id","selector":"valz","optionSelectorType":"value","optionSelector":"{{env.beep-var}}","waitForNav":false},{"name":"Run JS","type":"run_javascript","value":"beeeeeeep","waitForNav":true},{"name":"Save as text","type":"store_variable_from_element","selectorType":"link","selector":"beepval","variableName":"{{env.terraform-test-foo-301}}"},{"name":"Save JS return Val","type":"store_variable_from_javascript","value":"sdasds","variableName":"{{env.terraform-test-foo-301}}","waitForNav":true}]}],"urlProtocol":"https://","startUrl":"www.splunk.com","locationIds":["aws-us-east-1"],"deviceId":1,"frequency":15,"schedulingStrategy":"round_robin","active":true,"advancedSettings":{"verifyCertificates":true,"authentication":{"username":"boopuser","password":"{{env.beep-var}}"},"headers":[{"name":"batman","value":"Agentoz","domain":"www.batmansagent.com"}],"cookies":[{"key":"super","value":"dooper","domain":"www.batmansagent.com","path":"/boom/goes/beep"}]}}}`
+	updateBrowserCheckV2Data          = BrowserCheckV2Input{}
+	createPortCheckV2Body             = `{"test":{"name":"a - port 443 check","type":"port", "automaticRetries": 1, "customProperties": [{"key": "Test_Key", "value": "Test Custom Properties"}],"url":"","port":443,"protocol":"tcp","host":"www.splunk.com","locationIds":["aws-us-east-1"],"frequency":10,"schedulingStrategy":"round_robin","active":true}}`
+	inputPortCheckV2Data              = PortCheckV2Input{}
+	updatePortCheckV2Body             = `{"test":{"name":"a2 - port 443 check","type":"port", "automaticRetries": 1, "customProperties": [{"key": "Test_Key", "value": "Test Custom Properties"}],"url":"","port":448,"protocol":"tcp","host":"www.splunk.com","locationIds":["aws-us-east-1"],"frequency":10,"schedulingStrategy":"round_robin","active":true}}`
+	updatePortCheckV2Data             = PortCheckV2Input{}
+	createApiV2Body                   = `{"test":{"active":true,"deviceId":1,"frequency":5, "automaticRetries": 1, "customProperties": [{"key": "Test_Key", "value": "Test Custom Properties"}],"locationIds":["aws-us-east-1"],"name":"a-maximual-API-boop-test","schedulingStrategy":"round_robin","requests":[{"configuration":{"name":"Get-Test","requestMethod":"GET","url":"https://api.us1.signalfx.com/v2/synthetics/tests/api/489","headers":{"X-SF-TOKEN":"jinglebellsbatmanshells","beep":"boop"},"body":null},"setup":[{"name":"Extract from response body","type":"extract_json","source":"{{response.body}}","extractor":"sd","variable":"extractsetupvar"},{"name":"JavaScript run","type":"javascript","code":"asdasd","variable":"jsvarsetup"},{"name":"Save response body","type":"save","value":"{{response.body}}","variable":"savesetupvar"}],"validations":[{"name":"JavaScript run","type":"javascript","code":"codetorun","variable":"jscodevar"},{"name":"Save response body","type":"save","value":"{{response.body}}","variable":"saverespvar"},{"name":"Assert response code equals 200","type":"assert_numeric","actual":"{{response.code}}","expected":"200","comparator":"equals"},{"name":"Extract from response body","type":"extract_json","source":"{{response.body}}","extractor":"js.extractor","variable":"extractjvar"}]}]}}`
+	createMinimalApiV2Body            = `{"test":{"active":true,"deviceId":1,"frequency":5, "automaticRetries": 1, "customProperties": [{"key": "Test_Key", "value": "Test Custom Properties"}],"locationIds":["aws-us-east-1"],"name":"a-minimal-API-boop-test","schedulingStrategy":"round_robin","requests":[{"configuration":{"name":"apishortGet-Test","requestMethod":"GET","url":"https://api.us1.signalfx.com/v2/synthetics/tests/api/489"}}]}}`
+	inputApiCheckV2Data               = ApiCheckV2Input{}
+	updateApiCheckV2Body              = `{"test":{"active":true,"deviceId":1,"frequency":5, "automaticRetries": 1, "customProperties": [{"key": "Test_Key", "value": "Test Custom Properties"}],"locationIds":["aws-us-east-1"],"name":"a-API-boop-test","schedulingStrategy":"round_robin","requests":[{"configuration":{"name":"Get-Test","requestMethod": "GET","url":"https://api.us1.signalfx.com/v2/synthetics/tests/api/4892","headers":{"X-SF-TOKEN":"jinglebellsbatmanshells", "beep":"boop"},"body":null},"setup":[{"name":"Extract from response body","type":"extract_json","source":"{{response.body}}","extractor":"$.requests","variable":"custom-varz"}],"validations":[{"name":"Assert response code equals 200","type":"assert_numeric","actual":"{{response.code}}","expected":"200","comparator":"equals"}]}]}}`
+	updateApiCheckV2Data              = ApiCheckV2Input{}
+	inputDowntimeConfigurationV2Data  = DowntimeConfigurationV2Input{}
+	updateDowntimeConfigurationV2Data = DowntimeConfigurationV2Input{}
 )
 
 // You will need to fill in values for the get and delete tests
@@ -838,4 +840,116 @@ func TestLiveDeleteLocationV2(t *testing.T) {
 		t.Fatal(err)
 	}
 
+}
+
+func TestLiveDowntimeConfigurationCreateUpdateAndDeleteV2(t *testing.T) {
+
+	//Create your client with the token
+	c := NewClient(token, realm)
+	var err error
+
+	checkId, err := CreateApiCheckV2(createApiV2Body, c)
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	//There are restrictions on startTime and endTime for a downtime_configuration so we set the startTime to 10 days
+	//in the future and the endTime to be 1 hour after the startTime
+	tenDaysFromNow := time.Now().AddDate(0, 0, 10)
+	year, month, day := tenDaysFromNow.Date()
+	startTime := fmt.Sprintf("%s-%s-%sT20:00:00.000Z", year, int(month), day)
+	endTime := fmt.Sprintf("%s-%s-%sT21:00:00.000Z", year, int(month), day)
+
+	createDowntimeConfigurationV2Body := fmt.Sprintf("{\"downtimeConfiguration\":{\"name\":\"dc test\",\"description\":\"My super awesome test downtimeConfiguration\",\"rule\":\"augment_data\",\"testIds\":[%d],\"startTime\":\"%s\",\"endTime\":\"%s\"}}", checkId, startTime, endTime)
+
+	downtimeConfigId, err := CreateDowntimeConfigurationV2(createDowntimeConfigurationV2Body, c)
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	err = GetDowntimeConfigurationV2(downtimeConfigId, c)
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	updateDowntimeConfigurationV2Body := fmt.Sprintf("{\"downtimeConfiguration\":{\"name\":\"dc test\",\"description\":\"My super awesome test downtimeConfiguration\",\"rule\":\"pause_tests\",\"testIds\":[%d],\"startTime\":\"%s\",\"endTime\":\"%s\"}}", checkId, startTime, endTime)
+
+	err = UpdateDowntimeConfigurationV2(downtimeConfigId, updateDowntimeConfigurationV2Body, c)
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	err = GetDowntimeConfigurationV2(downtimeConfigId, c)
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	err = DeleteDowntimeConfigurationV2(downtimeConfigId, c)
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	err = DeleteApiCheckV2(checkId, c)
+	if err != nil {
+		t.Fatal(err)
+	}
+
+}
+
+func CreateDowntimeConfigurationV2(downtimeConfiguration string, c *Client) (int, error) {
+
+	err := json.Unmarshal([]byte(downtimeConfiguration), &inputDowntimeConfigurationV2Data)
+	if err != nil {
+		return 0, err
+	}
+
+	// Make the request with your check settings and print result
+	res, reqDetail, err := c.CreateDowntimeConfigurationV2(&inputDowntimeConfigurationV2Data)
+	if err != nil {
+		return 0, err
+	}
+	fmt.Println(reqDetail)
+	JsonPrint(res)
+
+	return res.DowntimeConfiguration.ID, nil
+}
+
+func UpdateDowntimeConfigurationV2(downtimeConfigId int, downtimeConfiguration string, c *Client) error {
+
+	err := json.Unmarshal([]byte(downtimeConfiguration), &updateDowntimeConfigurationV2Data)
+	if err != nil {
+		return err
+	}
+
+	// Make the request with your check settings and print result
+	res, reqDetail, err := c.UpdateDowntimeConfigurationV2(downtimeConfigId, &updateDowntimeConfigurationV2Data)
+	if err != nil {
+		return err
+	}
+	fmt.Println(reqDetail)
+	JsonPrint(res)
+
+	return nil
+}
+
+func GetDowntimeConfigurationV2(downtimeConfigId int, c *Client) error {
+	// Make the request with your check settings and print result
+	res, _, err := c.GetDowntimeConfigurationV2(downtimeConfigId)
+	if err != nil {
+		return err
+	}
+	JsonPrint(res)
+
+	return nil
+}
+
+func DeleteDowntimeConfigurationV2(downtimeConfigId int, c *Client) error {
+	// Make the request with your check settings and print result
+	res, err := c.DeleteDowntimeConfigurationV2(downtimeConfigId)
+	if err != nil {
+		return err
+	}
+	JsonPrint(res)
+
+	return nil
 }

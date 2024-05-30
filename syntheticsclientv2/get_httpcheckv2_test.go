@@ -25,7 +25,7 @@ import (
 )
 
 var (
-  getHttpCheckV2Body  = `{"test":{"automaticRetries": 1, "customProperties": [{"key": "Test_Key", "value": "Test Custom Properties"}], "active":true,"createdAt":"2022-09-14T14:35:37.801Z","frequency":5,"id":1,"locationIds":["na-us-virginia"],"name":"My Test","schedulingStrategy":"round_robin","type":"http","updatedAt":"2022-09-14T14:35:38.099Z","lastRunAt":"2024-03-07T00:47:43.741Z","lastRunStatus":"success","url":"https://splunk.com","requestMethod":"GET","body":null,"headers":[{"name":"Accept","value":"application/json","domain":"splunk.com"}],"userAgent":null,"validations":[],"verifyCertificates":false,"authentication":null,"port":null}}`
+	getHttpCheckV2Body  = `{"test":{"automaticRetries": 1, "customProperties": [{"key": "Test_Key", "value": "Test Custom Properties"}], "active":true,"createdAt":"2022-09-14T14:35:37.801Z","frequency":5,"id":1,"locationIds":["na-us-virginia"],"name":"My Test","schedulingStrategy":"round_robin","type":"http","updatedAt":"2022-09-14T14:35:38.099Z","lastRunAt":"2024-03-07T00:47:43.741Z","lastRunStatus":"success","url":"https://splunk.com","requestMethod":"GET","body":null,"headers":[{"name":"Accept","value":"application/json","domain":"splunk.com"}],"userAgent":null,"validations":[],"verifyCertificates":false,"authentication":null,"port":null}}`
 	inputGetHttpCheckV2 = verifyHttpCheckV2Input(string(getHttpCheckV2Body))
 )
 
