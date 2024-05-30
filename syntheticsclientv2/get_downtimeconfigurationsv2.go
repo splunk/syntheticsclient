@@ -18,6 +18,7 @@ import (
 	"bytes"
 	"encoding/json"
 	"fmt"
+	"strings"
 )
 
 func parseDowntimeConfigurationV2Response(response string) (*DowntimeConfigurationV2Response, error) {
@@ -61,10 +62,27 @@ func parseDowntimeConfigurationsV2Response(response string) (*DowntimeConfigurat
 	return &check, err
 }
 
-func (c Client) GetDowntimeConfigurationsV2() (*DowntimeConfigurationsV2Response, *RequestDetails, error) {
-
-	details, err := c.makePublicAPICall("GET",
-		"/downtime_configurations",
+func (c Client) GetDowntimeConfigurationsV2(params *GetDowntimeConfigurationsV2Options) (*DowntimeConfigurationsV2Response, *RequestDetails, error) {
+	// Check for default params
+	if params.Search == "" {
+		params.Search = ""
+	}
+	if params.Page == 0 {
+		params.Page = int(1)
+	}
+	if params.PerPage == 0 {
+		params.PerPage = int(50)
+	}
+	details, err := c.makePublicAPICall(
+		"GET",
+		fmt.Sprintf("/downtime_configurations?page=%d&perPage=%d&orderBy=%s&search=%s%s%s",
+			params.Page,
+			params.PerPage,
+			params.OrderBy,
+			params.Search,
+			dcStringsQueryParam(params.Rule, "&rule[]="),
+			dcStringsQueryParam(params.Status, "&status[]="),
+		),
 		bytes.NewBufferString("{}"),
 		nil)
 
@@ -78,4 +96,11 @@ func (c Client) GetDowntimeConfigurationsV2() (*DowntimeConfigurationsV2Response
 	}
 
 	return check, details, nil
+}
+
+func dcStringsQueryParam(params []string, queryParamName string) string {
+	if len(params) == 0 {
+		return ""
+	}
+	return queryParamName + strings.Join(params, queryParamName)
 }

@@ -25,10 +25,12 @@ import (
 )
 
 var (
-	getDowntimeConfigurationV2Body   = `{"downtimeConfiguration":{"id":329,"name":"dc test","description":"My super awesome test downtimeConfiguration","rule":"pause_tests","startTime":"2024-05-16T20:23:00.000Z","endTime":"2024-05-16T20:38:00.000Z","status":"scheduled","createdAt":"2024-05-15T20:24:07.541Z","updatedAt":"2024-05-15T20:25:44.211Z","testsUpdatedAt":"2024-05-15T20:24:07.541Z","testIds":[29976]}}`
-	inputGetDowntimeConfigurationV2  = verifyDowntimeConfigurationV2Input(string(getDowntimeConfigurationV2Body))
-	getDowntimeConfigurationsV2Body  = `{"downtimeConfigurations":[{"id":329,"name":"dc test","description":"My super awesome test downtimeConfiguration","rule":"pause_tests","startTime":"2024-05-16T20:23:00.000Z","endTime":"2024-05-16T20:38:00.000Z","status":"scheduled","createdAt":"2024-05-15T20:24:07.541Z","updatedAt":"2024-05-15T20:25:44.211Z","testsUpdatedAt":"2024-05-15T20:24:07.541Z","testCount":1}],"page":1,"pageLimit":1,"totalCount":1}`
-	inputGetDowntimeConfigurationsV2 = verifyDowntimeConfigurationsV2Input(string(getDowntimeConfigurationsV2Body))
+	getDowntimeConfigurationsV2Body   = `{"page":1,"perPage":50}`
+	inputGetDowntimeConfigurationsV2  = verifyDowntimeConfigurationsV2Input(string(getDowntimeConfigurationsV2Body))
+	getDowntimeConfigurationsV2Output = `{"downtimeConfigurations":[{"id":1,"name":"dc test","description":"My super awesome test downtimeConfiguration","rule":"pause_tests","startTime":"2024-05-16T20:23:00.000Z","endTime":"2024-05-16T20:38:00.000Z","status":"scheduled","createdAt":"2024-05-15T20:24:07.541Z","updatedAt":"2024-05-15T20:25:44.211Z","testsUpdatedAt":"2024-05-15T20:24:07.541Z","testCount":1}],"page":1,"pageLimit":1,"totalCount":1}`
+	downtimeConfigurationsV2Output    = &DowntimeConfigurationsV2Response{}
+	getDowntimeConfigurationV2Body    = `{"downtimeConfiguration":{"id":1,"name":"dc test","description":"My super awesome test downtimeConfiguration","rule":"pause_tests","startTime":"2024-05-16T20:23:00.000Z","endTime":"2024-05-16T20:38:00.000Z","status":"scheduled","createdAt":"2024-05-15T20:24:07.541Z","updatedAt":"2024-05-15T20:25:44.211Z","testsUpdatedAt":"2024-05-15T20:24:07.541Z","testIds":[29976]}}`
+	inputGetDowntimeConfigurationV2   = verifyDowntimeConfigurationV2Input(string(getDowntimeConfigurationV2Body))
 )
 
 func TestGetDowntimeConfigurationV2(t *testing.T) {
@@ -105,61 +107,30 @@ func TestGetDowntimeConfigurationsV2(t *testing.T) {
 
 	testMux.HandleFunc("/downtime_configurations", func(w http.ResponseWriter, r *http.Request) {
 		testMethod(t, r, "GET")
-		_, err := w.Write([]byte(getDowntimeConfigurationsV2Body))
+		_, err := w.Write([]byte(getDowntimeConfigurationsV2Output))
 		if err != nil {
 			t.Fatal(err)
 		}
 	})
 
-	resp, _, err := testClient.GetDowntimeConfigurationsV2()
+	err := json.Unmarshal([]byte(getDowntimeConfigurationsV2Output), downtimeConfigurationsV2Output)
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	resp, _, err := testClient.GetDowntimeConfigurationsV2(inputGetDowntimeConfigurationsV2)
 
 	if err != nil {
 		t.Fatal(err)
 	}
-	if !reflect.DeepEqual(resp.Downtimeconfigurations[0].ID, inputGetDowntimeConfigurationsV2.Downtimeconfigurations[0].ID) {
-		t.Errorf("returned \n\n%#v want \n\n%#v", resp.Downtimeconfigurations[0].ID, inputGetDowntimeConfigurationsV2.Downtimeconfigurations[0].ID)
-	}
-
-	if !reflect.DeepEqual(resp.Downtimeconfigurations[0].Name, inputGetDowntimeConfigurationsV2.Downtimeconfigurations[0].Name) {
-		t.Errorf("returned \n\n%#v want \n\n%#v", resp.Downtimeconfigurations[0].Name, inputGetDowntimeConfigurationsV2.Downtimeconfigurations[0].Name)
-	}
-
-	if !reflect.DeepEqual(resp.Downtimeconfigurations[0].Description, inputGetDowntimeConfigurationsV2.Downtimeconfigurations[0].Description) {
-		t.Errorf("returned \n\n%#v want \n\n%#v", resp.Downtimeconfigurations[0].Description, inputGetDowntimeConfigurationsV2.Downtimeconfigurations[0].Description)
-	}
-
-	if !reflect.DeepEqual(resp.Downtimeconfigurations[0].Rule, inputGetDowntimeConfigurationsV2.Downtimeconfigurations[0].Rule) {
-		t.Errorf("returned \n\n%#v want \n\n%#v", resp.Downtimeconfigurations[0].Rule, inputGetDowntimeConfigurationsV2.Downtimeconfigurations[0].Rule)
-	}
-
-	if !reflect.DeepEqual(resp.Downtimeconfigurations[0].Starttime, inputGetDowntimeConfigurationsV2.Downtimeconfigurations[0].Starttime) {
-		t.Errorf("returned \n\n%#v want \n\n%#v", resp.Downtimeconfigurations[0].Starttime, inputGetDowntimeConfigurationsV2.Downtimeconfigurations[0].Starttime)
-	}
-
-	if !reflect.DeepEqual(resp.Downtimeconfigurations[0].Endtime, inputGetDowntimeConfigurationsV2.Downtimeconfigurations[0].Endtime) {
-		t.Errorf("returned \n\n%#v want \n\n%#v", resp.Downtimeconfigurations[0].Endtime, inputGetDowntimeConfigurationsV2.Downtimeconfigurations[0].Endtime)
-	}
-
-	if !reflect.DeepEqual(resp.Downtimeconfigurations[0].Status, inputGetDowntimeConfigurationsV2.Downtimeconfigurations[0].Status) {
-		t.Errorf("returned \n\n%#v want \n\n%#v", resp.Downtimeconfigurations[0].Status, inputGetDowntimeConfigurationsV2.Downtimeconfigurations[0].Status)
-	}
-
-	if !reflect.DeepEqual(resp.Downtimeconfigurations[0].Createdat, inputGetDowntimeConfigurationsV2.Downtimeconfigurations[0].Createdat) {
-		t.Errorf("returned \n\n%#v want \n\n%#v", resp.Downtimeconfigurations[0].Createdat, inputGetDowntimeConfigurationsV2.Downtimeconfigurations[0].Createdat)
-	}
-
-	if !reflect.DeepEqual(resp.Downtimeconfigurations[0].Updatedat, inputGetDowntimeConfigurationsV2.Downtimeconfigurations[0].Updatedat) {
-		t.Errorf("returned \n\n%#v want \n\n%#v", resp.Downtimeconfigurations[0].Updatedat, inputGetDowntimeConfigurationsV2.Downtimeconfigurations[0].Updatedat)
-	}
-
-	if !reflect.DeepEqual(resp.Downtimeconfigurations[0].Testsupdatedat, inputGetDowntimeConfigurationsV2.Downtimeconfigurations[0].Testsupdatedat) {
-		t.Errorf("returned \n\n%#v want \n\n%#v", resp.Downtimeconfigurations[0].Testsupdatedat, inputGetDowntimeConfigurationsV2.Downtimeconfigurations[0].Testsupdatedat)
+	if !reflect.DeepEqual(resp.Downtimeconfigurations, downtimeConfigurationsV2Output.Downtimeconfigurations) {
+		t.Errorf("returned \n\n%#v want \n\n%#v", resp.Downtimeconfigurations, downtimeConfigurationsV2Output.Downtimeconfigurations)
 	}
 
 }
 
-func verifyDowntimeConfigurationsV2Input(stringInput string) *DowntimeConfigurationsV2Response {
-	check := &DowntimeConfigurationsV2Response{}
+func verifyDowntimeConfigurationsV2Input(stringInput string) *GetDowntimeConfigurationsV2Options {
+	check := &GetDowntimeConfigurationsV2Options{}
 	err := json.Unmarshal([]byte(stringInput), check)
 	if err != nil {
 		panic(err)
