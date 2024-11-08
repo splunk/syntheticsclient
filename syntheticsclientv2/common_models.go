@@ -35,6 +35,16 @@ type Advancedsettings struct {
 	UserAgent                 *string          `json:"userAgent"`
 	CollectInteractiveMetrics bool             `json:"collectInteractiveMetrics"`
 	Verifycertificates        bool             `json:"verifyCertificates"`
+	ChromeFlags               []ChromeFlag     `json:"chromeFlags"`
+}
+
+type ChromeFlag struct {
+    Name         string `json:"name"`
+    Value        string `json:"value"`
+}
+
+type ChromeFlagsResponse struct {
+    ChromeFlags []ChromeFlag `json:"chromeFlags"`
 }
 
 type Authentication struct {
