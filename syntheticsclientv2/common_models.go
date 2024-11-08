@@ -39,12 +39,12 @@ type Advancedsettings struct {
 }
 
 type ChromeFlag struct {
-    Name         string `json:"name"`
-    Value        string `json:"value"`
+	Name  string `json:"name"`
+	Value string `json:"value"`
 }
 
 type ChromeFlagsResponse struct {
-    ChromeFlags []ChromeFlag `json:"chromeFlags"`
+	ChromeFlags []ChromeFlag `json:"chromeFlags"`
 }
 
 type Authentication struct {
