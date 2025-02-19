@@ -98,3 +98,26 @@ func TestConfigurableClientTimeout(t *testing.T) {
 		t.Errorf("expected to see timeout error, but saw: %s", err.Error())
 	}
 }
+
+func TestConfigurableClientErrorStatusCode(t *testing.T) {
+	testMux = http.NewServeMux()
+	testServer = httptest.NewServer(testMux)
+
+	testMux.HandleFunc("/tests", func(w http.ResponseWriter, r *http.Request) {
+		w.WriteHeader(http.StatusNotFound)
+		w.Write([]byte(`{"status":"404"}`))
+	})
+
+	testConfigurableClient := NewConfigurableClient("apiKey", "realm", ClientArgs{
+		publicBaseUrl: testServer.URL,
+	})
+	details, err := testConfigurableClient.makePublicAPICall("GET", "/tests", nil, nil)
+
+	if !strings.Contains(err.Error(), "404 Not Found") {
+		t.Errorf("expected to see 404 error, but saw: %s", err.Error())
+	}
+
+	if details.StatusCode != http.StatusNotFound {
+		t.Errorf("expected to see 404 status code, but saw: %d", details.StatusCode)
+	}
+}
