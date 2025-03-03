@@ -26,7 +26,7 @@ import (
 )
 
 var (
-	createDowntimeConfigurationV2Body = `{"downtimeConfiguration":{"name":"dc test","description":"My super awesome test downtimeConfiguration","rule":"augment_data","testIds":[482],"startTime":"2024-05-16T20:23:00.000Z","endTime":"2024-05-16T20:38:00.000Z"}}`
+	createDowntimeConfigurationV2Body = `{"downtimeConfiguration":{"name":"dc test","description":"My super awesome test downtimeConfiguration","rule":"augment_data","testIds":[482],"startTime":"2024-05-16T20:23:00.000Z","endTime":"2024-05-16T20:38:00.000Z","recurrence":{"repeats":{"type":"daily"},"end":{"type":"after","value":"10"}}}}`
 	inputDowntimeConfigurationV2Data  = DowntimeConfigurationV2Input{}
 )
 
@@ -77,6 +77,10 @@ func TestCreateDowntimeConfigurationV2(t *testing.T) {
 
 	if !reflect.DeepEqual(resp.DowntimeConfiguration.Endtime, inputDowntimeConfigurationV2Data.DowntimeConfiguration.Endtime) {
 		t.Errorf("returned \n\n%#v want \n\n%#v", resp.DowntimeConfiguration.Endtime, inputDowntimeConfigurationV2Data.DowntimeConfiguration.Endtime)
+	}
+
+	if !reflect.DeepEqual(resp.DowntimeConfiguration.Recurrence, inputDowntimeConfigurationV2Data.DowntimeConfiguration.Recurrence) {
+		t.Errorf("returned \n\n%#v want \n\n%#v", resp.DowntimeConfiguration.Recurrence, inputDowntimeConfigurationV2Data.DowntimeConfiguration.Recurrence)
 	}
 
 }
