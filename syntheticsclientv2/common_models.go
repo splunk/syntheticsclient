@@ -483,7 +483,7 @@ type Recurrence struct {
 
 type Repeats struct {
 	Type            string `json:"type,omitempty"`
-	Customvalue     string `json:"customValue,omitempty"`
+	Customvalue     int    `json:"customValue,omitempty"`
 	Customfrequency string `json:"customFrequency,omitempty"`
 }
 
