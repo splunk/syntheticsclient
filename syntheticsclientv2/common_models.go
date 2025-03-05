@@ -216,18 +216,19 @@ type Variable struct {
 }
 
 type DowntimeConfiguration struct {
-	Createdat      time.Time `json:"createdAt,omitempty"`
-	Description    string    `json:"description,omitempty"`
-	ID             int       `json:"id,omitempty"`
-	Name           string    `json:"name"`
-	Updatedat      time.Time `json:"updatedAt,omitempty"`
-	Rule           string    `json:"rule"`
-	Starttime      time.Time `json:"startTime"`
-	Endtime        time.Time `json:"endTime"`
-	Status         string    `json:"status,omitempty"`
-	Testsupdatedat time.Time `json:"testsUpdatedAt,omitempty"`
-	Testcount      int       `json:"testCount,omitempty"`
-	Testids        []int     `json:"testIds,omitempty"`
+	Createdat      time.Time  `json:"createdAt,omitempty"`
+	Description    string     `json:"description,omitempty"`
+	ID             int        `json:"id,omitempty"`
+	Name           string     `json:"name"`
+	Updatedat      time.Time  `json:"updatedAt,omitempty"`
+	Rule           string     `json:"rule"`
+	Starttime      time.Time  `json:"startTime"`
+	Endtime        time.Time  `json:"endTime"`
+	Status         string     `json:"status,omitempty"`
+	Testsupdatedat time.Time  `json:"testsUpdatedAt,omitempty"`
+	Testcount      int        `json:"testCount,omitempty"`
+	Testids        []int      `json:"testIds,omitempty"`
+	Recurrence     Recurrence `json:"recurrence,omitempty"`
 }
 
 type DeleteCheck struct {
@@ -473,4 +474,20 @@ type BrowserCheckV2ResponseTest struct {
 type CustomProperties struct {
 	Key   string `json:"key"`
 	Value string `json:"value"`
+}
+
+type Recurrence struct {
+	Repeats Repeats `json:"repeats,omitempty"`
+	End     End     `json:"end,omitempty"`
+}
+
+type Repeats struct {
+	Type            string `json:"type,omitempty"`
+	Customvalue     int    `json:"customValue,omitempty"`
+	Customfrequency string `json:"customFrequency,omitempty"`
+}
+
+type End struct {
+	Type  string `json:"type,omitempty"`
+	Value string `json:"value,omitempty"`
 }
