@@ -216,19 +216,19 @@ type Variable struct {
 }
 
 type DowntimeConfiguration struct {
-	Createdat      time.Time  `json:"createdAt,omitempty"`
-	Description    string     `json:"description,omitempty"`
-	ID             int        `json:"id,omitempty"`
-	Name           string     `json:"name"`
-	Updatedat      time.Time  `json:"updatedAt,omitempty"`
-	Rule           string     `json:"rule"`
-	Starttime      time.Time  `json:"startTime"`
-	Endtime        time.Time  `json:"endTime"`
-	Status         string     `json:"status,omitempty"`
-	Testsupdatedat time.Time  `json:"testsUpdatedAt,omitempty"`
-	Testcount      int        `json:"testCount,omitempty"`
-	Testids        []int      `json:"testIds,omitempty"`
-	Recurrence     Recurrence `json:"recurrence,omitempty"`
+	Createdat      time.Time   `json:"createdAt,omitempty"`
+	Description    string      `json:"description,omitempty"`
+	ID             int         `json:"id,omitempty"`
+	Name           string      `json:"name"`
+	Updatedat      time.Time   `json:"updatedAt,omitempty"`
+	Rule           string      `json:"rule"`
+	Starttime      time.Time   `json:"startTime"`
+	Endtime        time.Time   `json:"endTime"`
+	Status         string      `json:"status,omitempty"`
+	Testsupdatedat time.Time   `json:"testsUpdatedAt,omitempty"`
+	Testcount      int         `json:"testCount,omitempty"`
+	Testids        []int       `json:"testIds,omitempty"`
+	Recurrence     *Recurrence `json:"recurrence"`
 }
 
 type DeleteCheck struct {
@@ -477,17 +477,17 @@ type CustomProperties struct {
 }
 
 type Recurrence struct {
-	Repeats Repeats `json:"repeats,omitempty"`
-	End     End     `json:"end,omitempty"`
+	Repeats Repeats `json:"repeats"`
+	End     *End    `json:"end"`
 }
 
 type Repeats struct {
-	Type            string `json:"type,omitempty"`
-	Customvalue     int    `json:"customValue,omitempty"`
-	Customfrequency string `json:"customFrequency,omitempty"`
+	Type            string  `json:"type"`
+	Customvalue     *int    `json:"customValue"`
+	Customfrequency *string `json:"customFrequency"`
 }
 
 type End struct {
-	Type  string `json:"type,omitempty"`
-	Value string `json:"value,omitempty"`
+	Type  string `json:"type"`
+	Value string `json:"value"`
 }
