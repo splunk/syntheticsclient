@@ -26,7 +26,7 @@ import (
 )
 
 var (
-	getBrowserCheckV2Body  = `{"test":{"automaticRetries": 1, "customProperties": [{"key": "Test_Key", "value": "Test Custom Properties"}], "active":true,"advancedSettings":{"authentication":{"password":"password123","username":"myuser"},"cookies":[{"key":"qux","value":"qux","domain":"splunk.com","path":"/qux"}],"headers":[{"name":"Accept","value":"application/json","domain":"splunk.com"}],"verifyCertificates":true},"createdAt":"2022-09-14T14:35:37.801Z","device":{"id":1,"label":"iPhone","networkConnection":{"description":"Mobile LTE","downloadBandwidth":12000,"latency":70,"packetLoss":0,"uploadBandwidth":12000},"viewportHeight":844,"viewportWidth":375},"frequency":5,"id":1,"locationIds":["na-us-virginia"],"name":"My Test","schedulingStrategy":"round_robin","transactions":[{"name":"Example transaction","steps":[{"name":"element step","selector":".main","selectorType":"css","type":"click_element","waitForNav":true,"waitForNavTimeout":2000,"waitForNavTimeoutDefault":true,"maxWaitTime":10000,"maxWaitTimeDefault":true}]}],"type":"browser","updatedAt":"2022-09-14T14:35:38.099Z","lastRunAt":"2024-03-07T00:47:43.741Z","lastRunStatus":"success","createdBy":"abc1234","updatedBy":"abc1234"}}`
+	getBrowserCheckV2Body  = `{"test":{"automaticRetries": 1, "customProperties": [{"key": "Test_Key", "value": "Test Custom Properties"}], "active":true,"advancedSettings":{"authentication":{"password":"password123","username":"myuser"},"cookies":[{"key":"qux","value":"qux","domain":"splunk.com","path":"/qux"}],"headers":[{"name":"Accept","value":"application/json","domain":"splunk.com"}],"verifyCertificates":true,"excludedFiles": [{"type": "google_analytics"},{"type": "custom","regex": "some-domain.com"},{"type": "all_except","regex": "another-domain.com"}]},"createdAt":"2022-09-14T14:35:37.801Z","device":{"id":1,"label":"iPhone","networkConnection":{"description":"Mobile LTE","downloadBandwidth":12000,"latency":70,"packetLoss":0,"uploadBandwidth":12000},"viewportHeight":844,"viewportWidth":375},"frequency":5,"id":1,"locationIds":["na-us-virginia"],"name":"My Test","schedulingStrategy":"round_robin","transactions":[{"name":"Example transaction","steps":[{"name":"element step","selector":".main","selectorType":"css","type":"click_element","waitForNav":true,"waitForNavTimeout":2000,"waitForNavTimeoutDefault":true,"maxWaitTime":10000,"maxWaitTimeDefault":true}]}],"type":"browser","updatedAt":"2022-09-14T14:35:38.099Z","lastRunAt":"2024-03-07T00:47:43.741Z","lastRunStatus":"success","createdBy":"abc1234","updatedBy":"abc1234"}}`
 	inputGetBrowserCheckV2 = verifyBrowserCheckV2Input(string(getBrowserCheckV2Body))
 	expectedBrowserCheckV2 = BrowserCheckV2Response{
 		Test: BrowserCheckV2ResponseTest{
@@ -45,6 +45,11 @@ var (
 				},
 				BrowserHeaders: []BrowserHeaders{
 					{Name: "Accept", Value: "application/json", Domain: "splunk.com"},
+				},
+				ExcludedFiles: []ExcludedFile{
+					{Type: "google_analytics"},
+					{Type: "custom", Regex: "some-domain.com"},
+					{Type: "all_except", Regex: "another-domain.com"},
 				},
 				Verifycertificates: true,
 			},
