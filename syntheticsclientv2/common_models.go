@@ -229,6 +229,7 @@ type DowntimeConfiguration struct {
 	Testcount      int         `json:"testCount,omitempty"`
 	Testids        []int       `json:"testIds,omitempty"`
 	Recurrence     *Recurrence `json:"recurrence"`
+	Timezone       *string     `json:"timezone,omitempty"`
 }
 
 type DeleteCheck struct {

@@ -27,9 +27,9 @@ import (
 var (
 	getDowntimeConfigurationsV2Body   = `{"page":1,"perPage":50}`
 	inputGetDowntimeConfigurationsV2  = verifyDowntimeConfigurationsV2Input(string(getDowntimeConfigurationsV2Body))
-	getDowntimeConfigurationsV2Output = `{"downtimeConfigurations":[{"id":1,"name":"dc test","description":"My super awesome test downtimeConfiguration","rule":"pause_tests","startTime":"2024-05-16T20:23:00.000Z","endTime":"2024-05-16T20:38:00.000Z","status":"scheduled","createdAt":"2024-05-15T20:24:07.541Z","updatedAt":"2024-05-15T20:25:44.211Z","testsUpdatedAt":"2024-05-15T20:24:07.541Z","testCount":1,"recurrence":{"repeats":{"type":"daily"},"end":{"type":"after","value":"10"}}}],"page":1,"pageLimit":1,"totalCount":1}`
+	getDowntimeConfigurationsV2Output = `{"downtimeConfigurations":[{"id":1,"name":"dc test","description":"My super awesome test downtimeConfiguration","rule":"pause_tests","startTime":"2024-05-16T20:23:00.000Z","endTime":"2024-05-16T20:38:00.000Z","status":"scheduled","createdAt":"2024-05-15T20:24:07.541Z","updatedAt":"2024-05-15T20:25:44.211Z","testsUpdatedAt":"2024-05-15T20:24:07.541Z","testCount":1,"timezone":"UTC","recurrence":{"repeats":{"type":"daily"},"end":{"type":"after","value":"10"}}}],"page":1,"pageLimit":1,"totalCount":1}`
 	downtimeConfigurationsV2Output    = &DowntimeConfigurationsV2Response{}
-	getDowntimeConfigurationV2Body    = `{"downtimeConfiguration":{"id":1,"name":"dc test","description":"My super awesome test downtimeConfiguration","rule":"pause_tests","startTime":"2024-05-16T20:23:00.000Z","endTime":"2024-05-16T20:38:00.000Z","status":"scheduled","createdAt":"2024-05-15T20:24:07.541Z","updatedAt":"2024-05-15T20:25:44.211Z","testsUpdatedAt":"2024-05-15T20:24:07.541Z","testIds":[29976],"recurrence":{"repeats":{"type":"daily"},"end":{"type":"after","value":"10"}}}}`
+	getDowntimeConfigurationV2Body    = `{"downtimeConfiguration":{"id":1,"name":"dc test","description":"My super awesome test downtimeConfiguration","rule":"pause_tests","startTime":"2024-05-16T20:23:00.000Z","endTime":"2024-05-16T20:38:00.000Z","status":"scheduled","createdAt":"2024-05-15T20:24:07.541Z","updatedAt":"2024-05-15T20:25:44.211Z","testsUpdatedAt":"2024-05-15T20:24:07.541Z","testIds":[29976],"timezone":"UTC","recurrence":{"repeats":{"type":"daily"},"end":{"type":"after","value":"10"}}}}`
 	inputGetDowntimeConfigurationV2   = verifyDowntimeConfigurationV2Input(string(getDowntimeConfigurationV2Body))
 )
 
@@ -92,6 +92,10 @@ func TestGetDowntimeConfigurationV2(t *testing.T) {
 
 	if !reflect.DeepEqual(resp.DowntimeConfiguration.Recurrence, inputGetDowntimeConfigurationV2.DowntimeConfiguration.Recurrence) {
 		t.Errorf("returned \n\n%#v want \n\n%#v", resp.DowntimeConfiguration.Recurrence, inputGetDowntimeConfigurationV2.DowntimeConfiguration.Recurrence)
+	}
+
+	if !reflect.DeepEqual(resp.DowntimeConfiguration.Timezone, inputGetDowntimeConfigurationV2.DowntimeConfiguration.Timezone) {
+		t.Errorf("returned \n\n%#v want \n\n%#v", resp.DowntimeConfiguration.Timezone, inputGetDowntimeConfigurationV2.DowntimeConfiguration.Timezone)
 	}
 
 }
