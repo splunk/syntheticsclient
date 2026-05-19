@@ -421,9 +421,9 @@ type ApiCheckV2Input struct {
 
 type ApiCheckV2Response struct {
 	Test struct {
-		Active             bool      `json:"active"`
-		Createdat          time.Time `json:"createdAt"`
-		Deviceid           int       `json:"deviceId,omitempty"`
+		Active             bool               `json:"active"`
+		Createdat          time.Time          `json:"createdAt"`
+		Deviceid           int                `json:"deviceId,omitempty"`
 		Frequency          int                `json:"frequency,omitempty"`
 		ID                 int                `json:"id,omitempty"`
 		Locationids        []string           `json:"locationIds,omitempty"`
@@ -465,7 +465,7 @@ type BrowserCheckV2Response struct {
 type BrowserCheckV2ResponseTest struct {
 	Active             bool `json:"active"`
 	Advancedsettings   `json:"advancedSettings"`
-	Createdat          time.Time `json:"createdAt"`
+	Createdat          time.Time          `json:"createdAt"`
 	Deviceid           int                `json:"deviceId"`
 	Frequency          int                `json:"frequency"`
 	ID                 int                `json:"id"`
