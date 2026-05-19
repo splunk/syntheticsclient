@@ -26,7 +26,7 @@ import (
 )
 
 var (
-	createApiV2Body = `{"test":{"automaticRetries": 1,"customProperties": [{"key": "Test_Key", "value": "Test Custom Properties"}], "active":true,"device_id":1,"frequency":5,"location_ids":["aws-us-east-1"],"name":"boop-test","scheduling_strategy":"round_robin","requests":[{"configuration":{"name":"Get-Test","requestMethod":"GET","url":"https://api.us1.signalfx.com/v2/synthetics/tests/api/489","headers":{"X-SF-TOKEN":"jinglebellsbatmanshells", "beep":"boop"},"body":null},"setup":[{"name":"Extract from response body","type":"extract_json","source":"{{response.body}}","extractor":"$.requests","variable":"custom-varz"}],"validations":[{"name":"Assert response code equals 200","type":"assert_numeric","actual":"{{response.code}}","expected":"200","comparator":"equals"}]}]}}`
+	createApiV2Body = `{"test":{"automaticRetries": 1,"customProperties": [{"key": "Test_Key", "value": "Test Custom Properties"}], "active":true,"deviceId":1,"frequency":5,"location_ids":["aws-us-east-1"],"name":"boop-test","scheduling_strategy":"round_robin","requests":[{"configuration":{"name":"Get-Test","requestMethod":"GET","url":"https://api.us1.signalfx.com/v2/synthetics/v2/tests/api/489","headers":{"X-SF-TOKEN":"jinglebellsbatmanshells", "beep":"boop"},"body":null},"setup":[{"name":"Extract from response body","type":"extract_json","source":"{{response.body}}","extractor":"$.requests","variable":"custom-varz"}],"validations":[{"name":"Assert response code equals 200","type":"assert_numeric","actual":"{{response.code}}","expected":"200","comparator":"equals"}]}]}}`
 	inputData       = ApiCheckV2Input{}
 )
 
@@ -34,7 +34,7 @@ func TestCreateApiCheckV2(t *testing.T) {
 	setup()
 	defer teardown()
 
-	testMux.HandleFunc("/tests/api", func(w http.ResponseWriter, r *http.Request) {
+	testMux.HandleFunc("/v2/tests/api", func(w http.ResponseWriter, r *http.Request) {
 		testMethod(t, r, "POST")
 		_, err := w.Write([]byte(createApiV2Body))
 		if err != nil {

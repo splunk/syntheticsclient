@@ -25,7 +25,7 @@ import (
 )
 
 var (
-	getApiCheckV2Body  = `{"test":{"id":489,"name":"Appinspect login API","active":true, "automaticRetries": 1, "customProperties": [{"key": "Test_Key", "value": "Test Custom Properties"}], "frequency":5,"scheduling_strategy":"round_robin","created_at":"2022-08-16T15:47:43.730Z","updated_at":"2022-08-16T15:47:43.741Z","lastRunAt":"2024-03-07T00:47:43.741Z","lastRunStatus":"success","createdBy":"abc1234","updatedBy":"abc1234","location_ids":["aws-us-east-1"],"type":"api","device":{"id":1,"label":"Desktop","user_agent":"Mozilla/5.0 (X11; Linux x86_64; Splunk Synthetics) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/91.0.4472.114 Safari/537.36","viewport_width":1366,"viewport_height":768,"network_connection":{"description":"Standard Cable","upload_bandwidth":5000,"download_bandwidth":20000,"latency":28,"packet_loss":null}},"requests":[{"configuration":{"name":"Login","url":"https://api.splunk.com/2.0/rest/login/splunk","requestMethod":"GET","headers":{},"body":null},"setup":[],"validations":[]}]}}`
+	getApiCheckV2Body  = `{"test":{"id":489,"name":"Appinspect login API","active":true, "automaticRetries": 1, "customProperties": [{"key": "Test_Key", "value": "Test Custom Properties"}], "frequency":5,"scheduling_strategy":"round_robin","created_at":"2022-08-16T15:47:43.730Z","updated_at":"2022-08-16T15:47:43.741Z","lastRunAt":"2024-03-07T00:47:43.741Z","lastRunStatus":"success","createdBy":"abc1234","updatedBy":"abc1234","location_ids":["aws-us-east-1"],"type":"api","deviceId":1,"requests":[{"configuration":{"name":"Login","url":"https://api.splunk.com/2.0/rest/login/splunk","requestMethod":"GET","headers":{},"body":null},"setup":[],"validations":[]}]}}`
 	inputGetApiCheckV2 = verifyApiCheckV2Input(string(getApiCheckV2Body))
 )
 
@@ -33,7 +33,7 @@ func TestGetApiCheckV2(t *testing.T) {
 	setup()
 	defer teardown()
 
-	testMux.HandleFunc("/tests/api/489", func(w http.ResponseWriter, r *http.Request) {
+	testMux.HandleFunc("/v2/tests/api/489", func(w http.ResponseWriter, r *http.Request) {
 		testMethod(t, r, "GET")
 		_, err := w.Write([]byte(getApiCheckV2Body))
 		if err != nil {
@@ -74,12 +74,8 @@ func TestGetApiCheckV2(t *testing.T) {
 		t.Errorf("returned \n\n%#v want \n\n%#v", resp.Test.Updatedat, inputGetApiCheckV2.Test.Updatedat)
 	}
 
-	if !reflect.DeepEqual(resp.Test.Device, inputGetApiCheckV2.Test.Device) {
-		t.Errorf("returned \n\n%#v want \n\n%#v", resp.Test.Device, inputGetApiCheckV2.Test.Device)
-	}
-
-	if !reflect.DeepEqual(resp.Test.Device.Viewportheight, inputGetApiCheckV2.Test.Device.Viewportheight) {
-		t.Errorf("returned \n\n%#v want \n\n%#v", resp.Test.Device.Viewportheight, inputGetApiCheckV2.Test.Device.Viewportheight)
+	if !reflect.DeepEqual(resp.Test.Deviceid, inputGetApiCheckV2.Test.Deviceid) {
+		t.Errorf("returned \n\n%#v want \n\n%#v", resp.Test.Deviceid, inputGetApiCheckV2.Test.Deviceid)
 	}
 
 	if !reflect.DeepEqual(resp.Test.Requests, inputGetApiCheckV2.Test.Requests) {
