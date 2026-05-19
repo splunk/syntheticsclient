@@ -84,7 +84,7 @@ func TestConfigurableClientTimeout(t *testing.T) {
 	testMux = http.NewServeMux()
 	testServer = httptest.NewServer(testMux)
 
-	testMux.HandleFunc("/tests/browser/12", func(w http.ResponseWriter, r *http.Request) {
+	testMux.HandleFunc("/v2/tests/browser/12", func(w http.ResponseWriter, r *http.Request) {
 		time.Sleep(2 * time.Second)
 	})
 

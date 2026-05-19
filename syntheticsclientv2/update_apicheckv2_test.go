@@ -26,7 +26,7 @@ import (
 )
 
 var (
-	updateApiCheckV2Body  = `{"test":{"automaticRetries": 1, "customProperties": [{"key": "Test_Key", "value": "Test Custom Properties"}], "active":true,"device_id":4,"frequency":5,"location_ids":["aws-us-east-1","aws-ap-northeast-1"],"name":"boop-test","scheduling_strategy":"round_robin","requests":[{"configuration":{"name":"Get-Test","requestMethod":"GET","url":"https://api.us1.signalfx.com/v2/synthetics/tests/api/489","headers":{"beep":"boop","X-SF-TOKEN":"jinglebellsbatmanshells"},"body":null},"setup":[{"name":"Extract from response body","type":"extract_json","source":"{{response.body}}","extractor":"$.requests","variable":"custom-varz"}],"validations":[{"name":"Assert response code equals 200","type":"assert_numeric","actual":"{{response.code}}","expected":"200","comparator":"equals"}]}]}}`
+	updateApiCheckV2Body  = `{"test":{"automaticRetries": 1, "customProperties": [{"key": "Test_Key", "value": "Test Custom Properties"}], "active":true,"deviceId":4,"frequency":5,"location_ids":["aws-us-east-1","aws-ap-northeast-1"],"name":"boop-test","scheduling_strategy":"round_robin","requests":[{"configuration":{"name":"Get-Test","requestMethod":"GET","url":"https://api.us1.signalfx.com/v2/synthetics/v2/tests/api/489","headers":{"beep":"boop","X-SF-TOKEN":"jinglebellsbatmanshells"},"body":null},"setup":[{"name":"Extract from response body","type":"extract_json","source":"{{response.body}}","extractor":"$.requests","variable":"custom-varz"}],"validations":[{"name":"Assert response code equals 200","type":"assert_numeric","actual":"{{response.code}}","expected":"200","comparator":"equals"}]}]}}`
 	inputApiCheckV2Update = ApiCheckV2Input{}
 )
 
@@ -34,7 +34,7 @@ func TestUpdateApiCheckV2(t *testing.T) {
 	setup()
 	defer teardown()
 
-	testMux.HandleFunc("/tests/api/10", func(w http.ResponseWriter, r *http.Request) {
+	testMux.HandleFunc("/v2/tests/api/10", func(w http.ResponseWriter, r *http.Request) {
 		testMethod(t, r, "PUT")
 		_, err := w.Write([]byte(updateApiCheckV2Body))
 		if err != nil {

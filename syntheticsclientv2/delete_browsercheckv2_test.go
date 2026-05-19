@@ -31,7 +31,7 @@ func TestDeleteBrowserCheckV2(t *testing.T) {
 	setup()
 	defer teardown()
 
-	testMux.HandleFunc("/tests/browser/19", func(w http.ResponseWriter, r *http.Request) {
+	testMux.HandleFunc("/v2/tests/browser/19", func(w http.ResponseWriter, r *http.Request) {
 		testMethod(t, r, "DELETE")
 		_, err := w.Write([]byte(deleteBrowserCheckV2RespBody))
 		if err != nil {

@@ -26,7 +26,7 @@ import (
 )
 
 var (
-	getBrowserCheckV2Body  = `{"test":{"automaticRetries": 1, "customProperties": [{"key": "Test_Key", "value": "Test Custom Properties"}], "active":true,"advancedSettings":{"authentication":{"password":"password123","username":"myuser"},"cookies":[{"key":"qux","value":"qux","domain":"splunk.com","path":"/qux"}],"headers":[{"name":"Accept","value":"application/json","domain":"splunk.com"}],"verifyCertificates":true,"excludedFiles": [{"type": "google_analytics"},{"type": "custom","regex": "some-domain.com"},{"type": "all_except","regex": "another-domain.com"}]},"createdAt":"2022-09-14T14:35:37.801Z","device":{"id":1,"label":"iPhone","networkConnection":{"description":"Mobile LTE","downloadBandwidth":12000,"latency":70,"packetLoss":0,"uploadBandwidth":12000},"viewportHeight":844,"viewportWidth":375},"frequency":5,"id":1,"locationIds":["na-us-virginia"],"name":"My Test","schedulingStrategy":"round_robin","transactions":[{"name":"Example transaction","steps":[{"name":"element step","selector":".main","selectorType":"css","type":"click_element","waitForNav":true,"waitForNavTimeout":2000,"waitForNavTimeoutDefault":true,"maxWaitTime":10000,"maxWaitTimeDefault":true}]}],"type":"browser","updatedAt":"2022-09-14T14:35:38.099Z","lastRunAt":"2024-03-07T00:47:43.741Z","lastRunStatus":"success","createdBy":"abc1234","updatedBy":"abc1234"}}`
+	getBrowserCheckV2Body  = `{"test":{"automaticRetries": 1, "customProperties": [{"key": "Test_Key", "value": "Test Custom Properties"}], "active":true,"advancedSettings":{"authentication":{"password":"password123","username":"myuser"},"cookies":[{"key":"qux","value":"qux","domain":"splunk.com","path":"/qux"}],"headers":[{"name":"Accept","value":"application/json","domain":"splunk.com"}],"verifyCertificates":true,"excludedFiles": [{"type": "google_analytics"},{"type": "custom","regex": "some-domain.com"},{"type": "all_except","regex": "another-domain.com"}]},"createdAt":"2022-09-14T14:35:37.801Z","deviceId":1,"frequency":5,"id":1,"locationIds":["na-us-virginia"],"name":"My Test","schedulingStrategy":"round_robin","transactions":[{"name":"Example transaction","steps":[{"name":"element step","selectors":[{"type":"css","value":".main"}],"type":"click_element","waitForNav":true,"waitForNavTimeout":2000,"waitForNavTimeoutDefault":true,"maxWaitTime":10000,"maxWaitTimeDefault":true}]}],"type":"browser","updatedAt":"2022-09-14T14:35:38.099Z","lastRunAt":"2024-03-07T00:47:43.741Z","lastRunStatus":"success","createdBy":"abc1234","updatedBy":"abc1234"}}`
 	inputGetBrowserCheckV2 = verifyBrowserCheckV2Input(string(getBrowserCheckV2Body))
 	expectedBrowserCheckV2 = BrowserCheckV2Response{
 		Test: BrowserCheckV2ResponseTest{
@@ -54,20 +54,8 @@ var (
 				Verifycertificates: true,
 			},
 			Createdat: time.Date(2022, 9, 14, 14, 35, 37, 801000000, time.UTC),
-			Device: Device{
-				ID:    1,
-				Label: "iPhone",
-				Networkconnection: Networkconnection{
-					Description:       "Mobile LTE",
-					Downloadbandwidth: 12000,
-					Latency:           70,
-					Packetloss:        0,
-					Uploadbandwidth:   12000,
-				},
-				Viewportheight: 844,
-				Viewportwidth:  375,
-			},
-			Frequency:          5,
+			Deviceid:  1,
+			Frequency: 5,
 			ID:                 1,
 			Locationids:        []string{"na-us-virginia"},
 			Name:               "My Test",
@@ -78,8 +66,7 @@ var (
 					StepsV2: []StepsV2{
 						{
 							Name:                     "element step",
-							Selector:                 ".main",
-							SelectorType:             "css",
+							Selectors:                []Selector{{Type: "css", Value: ".main"}},
 							Type:                     "click_element",
 							WaitForNav:               true,
 							WaitForNavTimeout:        2000,
@@ -104,7 +91,7 @@ func TestGetBrowserCheckV2(t *testing.T) {
 	setup()
 	defer teardown()
 
-	testMux.HandleFunc("/tests/browser/1", func(w http.ResponseWriter, r *http.Request) {
+	testMux.HandleFunc("/v2/tests/browser/1", func(w http.ResponseWriter, r *http.Request) {
 		testMethod(t, r, "GET")
 		_, err := w.Write([]byte(getBrowserCheckV2Body))
 		if err != nil {
@@ -150,8 +137,8 @@ func TestGetBrowserCheckV2(t *testing.T) {
 		t.Errorf("returned \n\n%#v want \n\n%#v", resp.Test.Updatedat, inputGetBrowserCheckV2.Test.Updatedat)
 	}
 
-	if !reflect.DeepEqual(resp.Test.Device, inputGetBrowserCheckV2.Test.Device) {
-		t.Errorf("returned \n\n%#v want \n\n%#v", resp.Test.Device, inputGetBrowserCheckV2.Test.Device)
+	if !reflect.DeepEqual(resp.Test.Deviceid, inputGetBrowserCheckV2.Test.Deviceid) {
+		t.Errorf("returned \n\n%#v want \n\n%#v", resp.Test.Deviceid, inputGetBrowserCheckV2.Test.Deviceid)
 	}
 
 	if !reflect.DeepEqual(resp.Test.Advancedsettings, inputGetBrowserCheckV2.Test.Advancedsettings) {
