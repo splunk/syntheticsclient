@@ -314,6 +314,40 @@ type ChecksV2Response struct {
 	Totalcount   int `json:"totalCount"`
 }
 
+type CaCertificate struct {
+	ID            int       `json:"id,omitempty"`
+	Name          string    `json:"name"`
+	Description   string    `json:"description,omitempty"`
+	Content       string    `json:"content,omitempty"`
+	FileExtension string    `json:"fileExtension,omitempty"`
+	Filename      string    `json:"filename,omitempty"`
+	ExpiresAt     time.Time `json:"expiresAt,omitempty"`
+	CreatedAt     time.Time `json:"createdAt,omitempty"`
+	CreatedBy     string    `json:"createdBy,omitempty"`
+	UpdatedAt     time.Time `json:"updatedAt,omitempty"`
+	UpdatedBy     string    `json:"updatedBy,omitempty"`
+}
+
+type CaCertificateInput struct {
+	Name          string `json:"name"`
+	Description   string `json:"description,omitempty"`
+	Content       string `json:"content,omitempty"`
+	FileExtension string `json:"fileExtension,omitempty"`
+	Filename      string `json:"filename,omitempty"`
+}
+
+type CaCertificateV2Input struct {
+	CaCert CaCertificateInput `json:"cacert"`
+}
+
+type CaCertificateV2Response struct {
+	CaCert CaCertificate `json:"cacert"`
+}
+
+type CaCertificatesV2Response struct {
+	CaCerts []CaCertificate `json:"cacerts"`
+}
+
 type SslCheckV2Response struct {
 	Test struct {
 		ID                            int                `json:"id,omitempty"`
