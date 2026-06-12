@@ -314,6 +314,55 @@ type ChecksV2Response struct {
 	Totalcount   int `json:"totalCount"`
 }
 
+type SslCheckV2Response struct {
+	Test struct {
+		ID                            int                `json:"id,omitempty"`
+		Name                          string             `json:"name,omitempty"`
+		Active                        bool               `json:"active"`
+		Frequency                     int                `json:"frequency,omitempty"`
+		SchedulingStrategy            string             `json:"schedulingStrategy,omitempty"`
+		CreatedAt                     time.Time          `json:"createdAt,omitempty"`
+		UpdatedAt                     time.Time          `json:"updatedAt,omitempty"`
+		LocationIds                   []string           `json:"locationIds,omitempty"`
+		Type                          string             `json:"type,omitempty"`
+		Host                          string             `json:"host,omitempty"`
+		Port                          int                `json:"port,omitempty"`
+		ServerName                    string             `json:"serverName,omitempty"`
+		AllowSelfSigned               bool               `json:"allowSelfSigned"`
+		AllowUntrustedRoot            bool               `json:"allowUntrustedRoot"`
+		CaCertificateID               *int               `json:"caCertificateId"`
+		Validations                   []Validations      `json:"validations"`
+		Customproperties              []CustomProperties `json:"customProperties"`
+		Lastrunstatus                 string             `json:"lastRunStatus"`
+		Lastrunat                     time.Time          `json:"lastRunAt"`
+		LastRunCoreMetricsPublishedAt time.Time          `json:"lastRunCoreMetricsPublishedAt"`
+		LastRunLocationId             string             `json:"lastRunLocationId"`
+		LastRunId                     int                `json:"lastRunId"`
+		Automaticretries              int                `json:"automaticRetries"`
+		Createdby                     string             `json:"createdBy"`
+		Updatedby                     string             `json:"updatedBy"`
+	} `json:"test"`
+}
+
+type SslCheckV2Input struct {
+	Test struct {
+		Name               string             `json:"name"`
+		LocationIds        []string           `json:"locationIds"`
+		Frequency          int                `json:"frequency"`
+		SchedulingStrategy string             `json:"schedulingStrategy"`
+		Active             bool               `json:"active"`
+		Customproperties   []CustomProperties `json:"customProperties"`
+		Automaticretries   int                `json:"automaticRetries"`
+		Host               string             `json:"host"`
+		Port               int                `json:"port"`
+		ServerName         string             `json:"serverName"`
+		AllowSelfSigned    bool               `json:"allowSelfSigned"`
+		AllowUntrustedRoot bool               `json:"allowUntrustedRoot"`
+		CaCertificateID    *int               `json:"caCertificateId"`
+		Validations        []Validations      `json:"validations"`
+	} `json:"test"`
+}
+
 type PortCheckV2Response struct {
 	Test struct {
 		ID                 int                `json:"id"`
