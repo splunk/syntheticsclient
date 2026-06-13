@@ -32,7 +32,7 @@ func parseUpdateCaCertificateV2Response(response string) (*CaCertificateV2Respon
 	return &updateCaCertificateV2, nil
 }
 
-func (c Client) UpdateCaCertificateV2(id int, CaCertificateV2Details *CaCertificateV2Input) (*CaCertificateV2Response, *RequestDetails, error) {
+func (c Client) UpdateCaCertificateV2(id int, CaCertificateV2Details *CaCertificateV2UpdateInput) (*CaCertificateV2Response, *RequestDetails, error) {
 	body, err := json.Marshal(CaCertificateV2Details)
 	if err != nil {
 		return nil, nil, err

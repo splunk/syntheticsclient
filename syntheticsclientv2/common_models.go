@@ -15,10 +15,79 @@
 package syntheticsclientv2
 
 import (
+	"encoding/json"
 	"time"
 )
 
 // Common and shared struct models used for more complex requests
+type NullableString struct {
+	Value *string
+}
+
+func NewNullableString(value string) *NullableString {
+	return &NullableString{Value: &value}
+}
+
+func NewNullString() *NullableString {
+	return &NullableString{}
+}
+
+func (n NullableString) MarshalJSON() ([]byte, error) {
+	if n.Value == nil {
+		return []byte("null"), nil
+	}
+
+	return json.Marshal(*n.Value)
+}
+
+func (n *NullableString) UnmarshalJSON(data []byte) error {
+	if string(data) == "null" {
+		n.Value = nil
+		return nil
+	}
+
+	var value string
+	if err := json.Unmarshal(data, &value); err != nil {
+		return err
+	}
+	n.Value = &value
+	return nil
+}
+
+type NullableInt struct {
+	Value *int
+}
+
+func NewNullableInt(value int) *NullableInt {
+	return &NullableInt{Value: &value}
+}
+
+func NewNullInt() *NullableInt {
+	return &NullableInt{}
+}
+
+func (n NullableInt) MarshalJSON() ([]byte, error) {
+	if n.Value == nil {
+		return []byte("null"), nil
+	}
+
+	return json.Marshal(*n.Value)
+}
+
+func (n *NullableInt) UnmarshalJSON(data []byte) error {
+	if string(data) == "null" {
+		n.Value = nil
+		return nil
+	}
+
+	var value int
+	if err := json.Unmarshal(data, &value); err != nil {
+		return err
+	}
+	n.Value = &value
+	return nil
+}
+
 type Networkconnection struct {
 	Description       string `json:"description,omitempty"`
 	Downloadbandwidth int    `json:"downloadBandwidth,omitempty"`
@@ -336,8 +405,20 @@ type CaCertificateInput struct {
 	Filename      string `json:"filename,omitempty"`
 }
 
+type CaCertificateUpdateInput struct {
+	Name          *string `json:"name,omitempty"`
+	Description   *string `json:"description,omitempty"`
+	Content       *string `json:"content,omitempty"`
+	FileExtension *string `json:"fileExtension,omitempty"`
+	Filename      *string `json:"filename,omitempty"`
+}
+
 type CaCertificateV2Input struct {
 	CaCert CaCertificateInput `json:"cacert"`
+}
+
+type CaCertificateV2UpdateInput struct {
+	CaCert CaCertificateUpdateInput `json:"cacert"`
 }
 
 type CaCertificateV2Response struct {
@@ -394,6 +475,25 @@ type SslCheckV2Input struct {
 		AllowUntrustedRoot bool               `json:"allowUntrustedRoot"`
 		CaCertificateID    *int               `json:"caCertificateId"`
 		Validations        []Validations      `json:"validations"`
+	} `json:"test"`
+}
+
+type SslCheckV2UpdateInput struct {
+	Test struct {
+		Name               *string             `json:"name,omitempty"`
+		LocationIds        *[]string           `json:"locationIds,omitempty"`
+		Frequency          *int                `json:"frequency,omitempty"`
+		SchedulingStrategy *string             `json:"schedulingStrategy,omitempty"`
+		Active             *bool               `json:"active,omitempty"`
+		Customproperties   *[]CustomProperties `json:"customProperties,omitempty"`
+		Automaticretries   *int                `json:"automaticRetries,omitempty"`
+		Host               *string             `json:"host,omitempty"`
+		Port               *int                `json:"port,omitempty"`
+		ServerName         *NullableString     `json:"serverName,omitempty"`
+		AllowSelfSigned    *bool               `json:"allowSelfSigned,omitempty"`
+		AllowUntrustedRoot *bool               `json:"allowUntrustedRoot,omitempty"`
+		CaCertificateID    *NullableInt        `json:"caCertificateId,omitempty"`
+		Validations        *[]Validations      `json:"validations,omitempty"`
 	} `json:"test"`
 }
 

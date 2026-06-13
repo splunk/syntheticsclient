@@ -26,7 +26,7 @@ import (
 
 var (
 	updateCaCertificateV2Body  = `{"cacert":{"description":"Updated CA certificate","content":"Q2VydGlmaWNhdGU=","fileExtension":"pem","filename":"updated_ca_cert_file"}}`
-	inputCaCertificateV2Update = CaCertificateV2Input{}
+	inputCaCertificateV2Update = CaCertificateV2UpdateInput{}
 )
 
 func TestUpdateCaCertificateV2(t *testing.T) {
@@ -53,29 +53,56 @@ func TestUpdateCaCertificateV2(t *testing.T) {
 	}
 }
 
+func TestUpdateCaCertificateV2AllowsEmptyDescription(t *testing.T) {
+	setup()
+	defer teardown()
+
+	description := ""
+	inputCaCertificateV2Update := CaCertificateV2UpdateInput{}
+	inputCaCertificateV2Update.CaCert.Description = &description
+
+	testMux.HandleFunc("/cacerts/2", func(w http.ResponseWriter, r *http.Request) {
+		testMethod(t, r, "PUT")
+		assertSingleCaCertificateUpdateField(t, r, "description", `""`)
+		w.WriteHeader(http.StatusOK)
+	})
+
+	resp, _, err := testClient.UpdateCaCertificateV2(2, &inputCaCertificateV2Update)
+	if err != nil {
+		t.Fatal(err)
+	}
+	if resp == nil {
+		t.Fatal("expected non-nil response for blank successful update body")
+	}
+}
+
+func TestUpdateCaCertificateV2AllowsNameUpdate(t *testing.T) {
+	setup()
+	defer teardown()
+
+	name := "updated-ca-cert-name"
+	inputCaCertificateV2Update := CaCertificateV2UpdateInput{}
+	inputCaCertificateV2Update.CaCert.Name = &name
+
+	testMux.HandleFunc("/cacerts/3", func(w http.ResponseWriter, r *http.Request) {
+		testMethod(t, r, "PUT")
+		assertSingleCaCertificateUpdateField(t, r, "name", `"updated-ca-cert-name"`)
+		w.WriteHeader(http.StatusOK)
+	})
+
+	resp, _, err := testClient.UpdateCaCertificateV2(3, &inputCaCertificateV2Update)
+	if err != nil {
+		t.Fatal(err)
+	}
+	if resp == nil {
+		t.Fatal("expected non-nil response for blank successful update body")
+	}
+}
+
 func assertCaCertificateUpdateRequestBody(t *testing.T, r *http.Request) {
 	t.Helper()
 
-	requestBody, err := io.ReadAll(r.Body)
-	if err != nil {
-		t.Fatal(err)
-	}
-
-	var requestEnvelope map[string]json.RawMessage
-	err = json.Unmarshal(requestBody, &requestEnvelope)
-	if err != nil {
-		t.Fatal(err)
-	}
-	rawCaCert, ok := requestEnvelope["cacert"]
-	if !ok {
-		t.Fatal("request body missing cacert envelope")
-	}
-
-	var requestCaCertFields map[string]json.RawMessage
-	err = json.Unmarshal(rawCaCert, &requestCaCertFields)
-	if err != nil {
-		t.Fatal(err)
-	}
+	_, requestCaCertFields := readCaCertificateUpdateRequestFields(t, r)
 
 	expectedFields := map[string]string{
 		"description":   `"Updated CA certificate"`,
@@ -101,4 +128,48 @@ func assertCaCertificateUpdateRequestBody(t *testing.T, r *http.Request) {
 			t.Errorf("request body should not include cacert.%s", field)
 		}
 	}
+}
+
+func assertSingleCaCertificateUpdateField(t *testing.T, r *http.Request, field string, expected string) {
+	t.Helper()
+
+	requestBody, requestCaCertFields := readCaCertificateUpdateRequestFields(t, r)
+	if len(requestCaCertFields) != 1 {
+		t.Fatalf("request body cacert field count %d want 1: %s", len(requestCaCertFields), requestBody)
+	}
+
+	rawValue, ok := requestCaCertFields[field]
+	if !ok {
+		t.Fatalf("request body missing cacert.%s", field)
+	}
+	if string(rawValue) != expected {
+		t.Fatalf("request body cacert.%s %s want %s", field, rawValue, expected)
+	}
+}
+
+func readCaCertificateUpdateRequestFields(t *testing.T, r *http.Request) ([]byte, map[string]json.RawMessage) {
+	t.Helper()
+
+	requestBody, err := io.ReadAll(r.Body)
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	var requestEnvelope map[string]json.RawMessage
+	err = json.Unmarshal(requestBody, &requestEnvelope)
+	if err != nil {
+		t.Fatal(err)
+	}
+	rawCaCert, ok := requestEnvelope["cacert"]
+	if !ok {
+		t.Fatal("request body missing cacert envelope")
+	}
+
+	var requestCaCertFields map[string]json.RawMessage
+	err = json.Unmarshal(rawCaCert, &requestCaCertFields)
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	return requestBody, requestCaCertFields
 }

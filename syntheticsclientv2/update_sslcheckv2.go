@@ -32,12 +32,7 @@ func parseUpdateSslCheckV2Response(response string) (*SslCheckV2Response, error)
 	return &updateSslCheckV2, nil
 }
 
-func (c Client) UpdateSslCheckV2(id int, SslCheckV2Details *SslCheckV2Input) (*SslCheckV2Response, *RequestDetails, error) {
-	if SslCheckV2Details.Test.Validations == nil {
-		validation := make([]Validations, 0)
-		SslCheckV2Details.Test.Validations = validation
-	}
-
+func (c Client) UpdateSslCheckV2(id int, SslCheckV2Details *SslCheckV2UpdateInput) (*SslCheckV2Response, *RequestDetails, error) {
 	body, err := json.Marshal(SslCheckV2Details)
 	if err != nil {
 		return nil, nil, err

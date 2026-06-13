@@ -22,13 +22,12 @@ import (
 	"io"
 	"net/http"
 	"reflect"
-	"strings"
 	"testing"
 )
 
 var (
 	updateSslCheckV2Body  = `{"test":{"name":"ssl-check-updated","frequency":10,"schedulingStrategy":"concurrent","active":false,"locationIds":["aws-us-east-1"],"customProperties":[{"key":"env","value":"stage"}],"automaticRetries":2,"host":"example.com","port":8443,"serverName":"example.com","allowSelfSigned":false,"allowUntrustedRoot":true,"caCertificateId":42,"validations":[{"name":"Certificate expires later","type":"assert_numeric","actual":"{{certificate.days_until_expiration}}","expected":"15","comparator":"is_greater_than"}]}}`
-	inputSslCheckV2Update = SslCheckV2Input{}
+	inputSslCheckV2Update = SslCheckV2UpdateInput{}
 )
 
 func TestUpdateSslCheckV2(t *testing.T) {
@@ -80,31 +79,37 @@ func TestUpdateSslCheckV2(t *testing.T) {
 			}
 		}
 
-		requestSslCheckV2Data := SslCheckV2Input{}
+		requestSslCheckV2Data := SslCheckV2UpdateInput{}
 		err = json.Unmarshal(requestBody, &requestSslCheckV2Data)
 		if err != nil {
 			t.Fatal(err)
 		}
-		if !reflect.DeepEqual(requestSslCheckV2Data.Test.Host, "example.com") {
+		if requestSslCheckV2Data.Test.Host == nil || !reflect.DeepEqual(*requestSslCheckV2Data.Test.Host, "example.com") {
 			t.Errorf("request body host \n\n%#v want \n\n%#v", requestSslCheckV2Data.Test.Host, "example.com")
 		}
-		if !reflect.DeepEqual(requestSslCheckV2Data.Test.Port, 8443) {
+		if requestSslCheckV2Data.Test.Port == nil || !reflect.DeepEqual(*requestSslCheckV2Data.Test.Port, 8443) {
 			t.Errorf("request body port \n\n%#v want \n\n%#v", requestSslCheckV2Data.Test.Port, 8443)
 		}
-		assertStringPtr(t, requestSslCheckV2Data.Test.ServerName, "example.com")
-		if !reflect.DeepEqual(requestSslCheckV2Data.Test.AllowSelfSigned, false) {
+		if requestSslCheckV2Data.Test.ServerName == nil ||
+			requestSslCheckV2Data.Test.ServerName.Value == nil ||
+			!reflect.DeepEqual(*requestSslCheckV2Data.Test.ServerName.Value, "example.com") {
+			t.Errorf("request body server name \n\n%#v want \n\n%#v", requestSslCheckV2Data.Test.ServerName, "example.com")
+		}
+		if requestSslCheckV2Data.Test.AllowSelfSigned == nil || !reflect.DeepEqual(*requestSslCheckV2Data.Test.AllowSelfSigned, false) {
 			t.Errorf("request body allow self signed \n\n%#v want \n\n%#v", requestSslCheckV2Data.Test.AllowSelfSigned, false)
 		}
-		if !reflect.DeepEqual(requestSslCheckV2Data.Test.AllowUntrustedRoot, true) {
+		if requestSslCheckV2Data.Test.AllowUntrustedRoot == nil || !reflect.DeepEqual(*requestSslCheckV2Data.Test.AllowUntrustedRoot, true) {
 			t.Errorf("request body allow untrusted root \n\n%#v want \n\n%#v", requestSslCheckV2Data.Test.AllowUntrustedRoot, true)
 		}
-		if requestSslCheckV2Data.Test.CaCertificateID == nil || !reflect.DeepEqual(*requestSslCheckV2Data.Test.CaCertificateID, expectedCaCertificateID) {
+		if requestSslCheckV2Data.Test.CaCertificateID == nil ||
+			requestSslCheckV2Data.Test.CaCertificateID.Value == nil ||
+			!reflect.DeepEqual(*requestSslCheckV2Data.Test.CaCertificateID.Value, expectedCaCertificateID) {
 			t.Errorf("request body ca certificate id \n\n%#v want \n\n%#v", requestSslCheckV2Data.Test.CaCertificateID, expectedCaCertificateID)
 		}
-		if !reflect.DeepEqual(requestSslCheckV2Data.Test.Validations, expectedValidations) {
+		if requestSslCheckV2Data.Test.Validations == nil || !reflect.DeepEqual(*requestSslCheckV2Data.Test.Validations, expectedValidations) {
 			t.Errorf("request body validations \n\n%#v want \n\n%#v", requestSslCheckV2Data.Test.Validations, expectedValidations)
 		}
-		if !reflect.DeepEqual(requestSslCheckV2Data.Test.Customproperties, expectedCustomProperties) {
+		if requestSslCheckV2Data.Test.Customproperties == nil || !reflect.DeepEqual(*requestSslCheckV2Data.Test.Customproperties, expectedCustomProperties) {
 			t.Errorf("request body custom properties \n\n%#v want \n\n%#v", requestSslCheckV2Data.Test.Customproperties, expectedCustomProperties)
 		}
 
@@ -124,33 +129,86 @@ func TestUpdateSslCheckV2(t *testing.T) {
 		t.Fatal(err)
 	}
 
-	if !reflect.DeepEqual(resp.Test.Name, inputSslCheckV2Update.Test.Name) {
-		t.Errorf("returned \n\n%#v want \n\n%#v", resp.Test.Name, inputSslCheckV2Update.Test.Name)
+	if !reflect.DeepEqual(resp.Test.Name, "ssl-check-updated") {
+		t.Errorf("returned \n\n%#v want \n\n%#v", resp.Test.Name, "ssl-check-updated")
 	}
-	if !reflect.DeepEqual(resp.Test.Host, inputSslCheckV2Update.Test.Host) {
-		t.Errorf("returned \n\n%#v want \n\n%#v", resp.Test.Host, inputSslCheckV2Update.Test.Host)
+	if !reflect.DeepEqual(resp.Test.Host, "example.com") {
+		t.Errorf("returned \n\n%#v want \n\n%#v", resp.Test.Host, "example.com")
 	}
-	if !reflect.DeepEqual(resp.Test.Port, inputSslCheckV2Update.Test.Port) {
-		t.Errorf("returned \n\n%#v want \n\n%#v", resp.Test.Port, inputSslCheckV2Update.Test.Port)
+	if !reflect.DeepEqual(resp.Test.Port, 8443) {
+		t.Errorf("returned \n\n%#v want \n\n%#v", resp.Test.Port, 8443)
 	}
-	if !reflect.DeepEqual(resp.Test.CaCertificateID, inputSslCheckV2Update.Test.CaCertificateID) {
-		t.Errorf("returned \n\n%#v want \n\n%#v", resp.Test.CaCertificateID, inputSslCheckV2Update.Test.CaCertificateID)
+	if resp.Test.CaCertificateID == nil || !reflect.DeepEqual(*resp.Test.CaCertificateID, expectedCaCertificateID) {
+		t.Errorf("returned \n\n%#v want \n\n%#v", resp.Test.CaCertificateID, expectedCaCertificateID)
 	}
-	if !reflect.DeepEqual(resp.Test.Validations, inputSslCheckV2Update.Test.Validations) {
-		t.Errorf("returned \n\n%#v want \n\n%#v", resp.Test.Validations, inputSslCheckV2Update.Test.Validations)
+	if !reflect.DeepEqual(resp.Test.Validations, expectedValidations) {
+		t.Errorf("returned \n\n%#v want \n\n%#v", resp.Test.Validations, expectedValidations)
 	}
 }
 
-func TestUpdateSslCheckV2DefaultsNilValidations(t *testing.T) {
+func TestUpdateSslCheckV2AllowsPartialPayload(t *testing.T) {
 	setup()
 	defer teardown()
 
-	inputSslCheckV2Data := SslCheckV2Input{}
-	err := json.Unmarshal([]byte(updateSslCheckV2Body), &inputSslCheckV2Data)
+	active := false
+	inputSslCheckV2Update := SslCheckV2UpdateInput{}
+	inputSslCheckV2Update.Test.Active = &active
+
+	testMux.HandleFunc("/tests/ssl/1654", func(w http.ResponseWriter, r *http.Request) {
+		testMethod(t, r, "PUT")
+
+		requestBody, err := io.ReadAll(r.Body)
+		if err != nil {
+			t.Fatal(err)
+		}
+
+		var requestEnvelope map[string]json.RawMessage
+		err = json.Unmarshal(requestBody, &requestEnvelope)
+		if err != nil {
+			t.Fatal(err)
+		}
+
+		rawTest, ok := requestEnvelope["test"]
+		if !ok {
+			t.Fatal("request body missing test envelope")
+		}
+
+		var requestTestFields map[string]json.RawMessage
+		err = json.Unmarshal(rawTest, &requestTestFields)
+		if err != nil {
+			t.Fatal(err)
+		}
+
+		if len(requestTestFields) != 1 {
+			t.Fatalf("request body test field count %d want 1: %s", len(requestTestFields), requestBody)
+		}
+		rawActive, ok := requestTestFields["active"]
+		if !ok {
+			t.Fatal("request body missing test.active")
+		}
+		if string(rawActive) != "false" {
+			t.Fatalf("request body test.active %s want false", rawActive)
+		}
+
+		w.WriteHeader(http.StatusOK)
+	})
+
+	resp, _, err := testClient.UpdateSslCheckV2(1654, &inputSslCheckV2Update)
 	if err != nil {
 		t.Fatal(err)
 	}
-	inputSslCheckV2Data.Test.Validations = nil
+	if resp == nil {
+		t.Fatal("expected non-nil response for blank successful update body")
+	}
+}
+
+func TestUpdateSslCheckV2AllowsEmptyValidations(t *testing.T) {
+	setup()
+	defer teardown()
+
+	inputSslCheckV2Data := SslCheckV2UpdateInput{}
+	validations := make([]Validations, 0)
+	inputSslCheckV2Data.Test.Validations = &validations
 
 	testMux.HandleFunc("/tests/ssl/1651", func(w http.ResponseWriter, r *http.Request) {
 		testMethod(t, r, "PUT")
@@ -197,7 +255,7 @@ func TestUpdateSslCheckV2DefaultsNilValidations(t *testing.T) {
 		}
 	})
 
-	_, _, err = testClient.UpdateSslCheckV2(1651, &inputSslCheckV2Data)
+	_, _, err := testClient.UpdateSslCheckV2(1651, &inputSslCheckV2Data)
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -207,12 +265,8 @@ func TestUpdateSslCheckV2PreservesNilServerName(t *testing.T) {
 	setup()
 	defer teardown()
 
-	inputBody := strings.Replace(updateSslCheckV2Body, `"serverName":"example.com"`, `"serverName":null`, 1)
-	inputSslCheckV2Data := SslCheckV2Input{}
-	err := json.Unmarshal([]byte(inputBody), &inputSslCheckV2Data)
-	if err != nil {
-		t.Fatal(err)
-	}
+	inputSslCheckV2Data := SslCheckV2UpdateInput{}
+	inputSslCheckV2Data.Test.ServerName = NewNullString()
 
 	testMux.HandleFunc("/tests/ssl/1653", func(w http.ResponseWriter, r *http.Request) {
 		testMethod(t, r, "PUT")
@@ -250,7 +304,7 @@ func TestUpdateSslCheckV2PreservesNilServerName(t *testing.T) {
 		}
 	})
 
-	_, _, err = testClient.UpdateSslCheckV2(1653, &inputSslCheckV2Data)
+	_, _, err := testClient.UpdateSslCheckV2(1653, &inputSslCheckV2Data)
 	if err != nil {
 		t.Fatal(err)
 	}
