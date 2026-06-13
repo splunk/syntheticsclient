@@ -361,7 +361,7 @@ type SslCheckV2Response struct {
 		Type                          string             `json:"type,omitempty"`
 		Host                          string             `json:"host,omitempty"`
 		Port                          int                `json:"port,omitempty"`
-		ServerName                    string             `json:"serverName,omitempty"`
+		ServerName                    *string            `json:"serverName,omitempty"`
 		AllowSelfSigned               bool               `json:"allowSelfSigned"`
 		AllowUntrustedRoot            bool               `json:"allowUntrustedRoot"`
 		CaCertificateID               *int               `json:"caCertificateId"`
@@ -389,7 +389,7 @@ type SslCheckV2Input struct {
 		Automaticretries   int                `json:"automaticRetries"`
 		Host               string             `json:"host"`
 		Port               int                `json:"port"`
-		ServerName         string             `json:"serverName"`
+		ServerName         *string            `json:"serverName"`
 		AllowSelfSigned    bool               `json:"allowSelfSigned"`
 		AllowUntrustedRoot bool               `json:"allowUntrustedRoot"`
 		CaCertificateID    *int               `json:"caCertificateId"`

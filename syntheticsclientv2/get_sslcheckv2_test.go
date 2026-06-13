@@ -21,6 +21,7 @@ import (
 	"encoding/json"
 	"net/http"
 	"reflect"
+	"strings"
 	"testing"
 )
 
@@ -75,6 +76,30 @@ func TestGetSslCheckV2(t *testing.T) {
 	}
 	if !reflect.DeepEqual(resp.Test.Validations, inputGetSslCheckV2.Test.Validations) {
 		t.Errorf("returned \n\n%#v want \n\n%#v", resp.Test.Validations, inputGetSslCheckV2.Test.Validations)
+	}
+}
+
+func TestGetSslCheckV2PreservesNilServerName(t *testing.T) {
+	setup()
+	defer teardown()
+
+	responseBody := strings.Replace(getSslCheckV2Body, `"serverName":"www.splunk.com"`, `"serverName":null`, 1)
+
+	testMux.HandleFunc("/tests/ssl/1", func(w http.ResponseWriter, r *http.Request) {
+		testMethod(t, r, "GET")
+		_, err := w.Write([]byte(responseBody))
+		if err != nil {
+			t.Fatal(err)
+		}
+	})
+
+	resp, _, err := testClient.GetSslCheckV2(1)
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	if resp.Test.ServerName != nil {
+		t.Fatalf("returned server name \n\n%#v want nil", resp.Test.ServerName)
 	}
 }
 

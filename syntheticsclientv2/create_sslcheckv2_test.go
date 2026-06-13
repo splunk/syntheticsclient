@@ -22,6 +22,7 @@ import (
 	"io"
 	"net/http"
 	"reflect"
+	"strings"
 	"testing"
 )
 
@@ -90,9 +91,7 @@ func TestCreateSslCheckV2(t *testing.T) {
 		if !reflect.DeepEqual(requestSslCheckV2Data.Test.Port, 443) {
 			t.Errorf("request body port \n\n%#v want \n\n%#v", requestSslCheckV2Data.Test.Port, 443)
 		}
-		if !reflect.DeepEqual(requestSslCheckV2Data.Test.ServerName, "www.splunk.com") {
-			t.Errorf("request body server name \n\n%#v want \n\n%#v", requestSslCheckV2Data.Test.ServerName, "www.splunk.com")
-		}
+		assertStringPtr(t, requestSslCheckV2Data.Test.ServerName, "www.splunk.com")
 		if !reflect.DeepEqual(requestSslCheckV2Data.Test.AllowSelfSigned, true) {
 			t.Errorf("request body allow self signed \n\n%#v want \n\n%#v", requestSslCheckV2Data.Test.AllowSelfSigned, true)
 		}
@@ -160,6 +159,17 @@ func TestCreateSslCheckV2(t *testing.T) {
 	}
 }
 
+func assertStringPtr(t *testing.T, got *string, want string) {
+	t.Helper()
+
+	if got == nil {
+		t.Fatalf("got nil string pointer want \n\n%#v", want)
+	}
+	if !reflect.DeepEqual(*got, want) {
+		t.Errorf("got string pointer value \n\n%#v want \n\n%#v", *got, want)
+	}
+}
+
 func TestCreateSslCheckV2DefaultsNilValidations(t *testing.T) {
 	setup()
 	defer teardown()
@@ -208,6 +218,59 @@ func TestCreateSslCheckV2DefaultsNilValidations(t *testing.T) {
 		}
 		if len(validations) != 0 {
 			t.Errorf("request body validations length \n\n%#v want \n\n%#v", len(validations), 0)
+		}
+
+		_, err = w.Write([]byte(createSslCheckV2Body))
+		if err != nil {
+			t.Fatal(err)
+		}
+	})
+
+	_, _, err = testClient.CreateSslCheckV2(&inputSslCheckV2Data)
+	if err != nil {
+		t.Fatal(err)
+	}
+}
+
+func TestCreateSslCheckV2PreservesNilServerName(t *testing.T) {
+	setup()
+	defer teardown()
+
+	inputBody := strings.Replace(createSslCheckV2Body, `"serverName":"www.splunk.com"`, `"serverName":null`, 1)
+	inputSslCheckV2Data := SslCheckV2Input{}
+	err := json.Unmarshal([]byte(inputBody), &inputSslCheckV2Data)
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	testMux.HandleFunc("/tests/ssl", func(w http.ResponseWriter, r *http.Request) {
+		testMethod(t, r, "POST")
+		requestBody, err := io.ReadAll(r.Body)
+		if err != nil {
+			t.Fatal(err)
+		}
+
+		var requestEnvelope map[string]json.RawMessage
+		err = json.Unmarshal(requestBody, &requestEnvelope)
+		if err != nil {
+			t.Fatal(err)
+		}
+		rawTest, ok := requestEnvelope["test"]
+		if !ok {
+			t.Fatal("request body missing test envelope")
+		}
+
+		var requestTestFields map[string]json.RawMessage
+		err = json.Unmarshal(rawTest, &requestTestFields)
+		if err != nil {
+			t.Fatal(err)
+		}
+		rawServerName, ok := requestTestFields["serverName"]
+		if !ok {
+			t.Fatal("request body missing test.serverName")
+		}
+		if string(rawServerName) != "null" {
+			t.Fatalf("request body server name \n\n%#v want JSON null", string(rawServerName))
 		}
 
 		_, err = w.Write([]byte(createSslCheckV2Body))

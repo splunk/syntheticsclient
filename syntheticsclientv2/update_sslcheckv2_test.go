@@ -22,6 +22,7 @@ import (
 	"io"
 	"net/http"
 	"reflect"
+	"strings"
 	"testing"
 )
 
@@ -90,9 +91,7 @@ func TestUpdateSslCheckV2(t *testing.T) {
 		if !reflect.DeepEqual(requestSslCheckV2Data.Test.Port, 8443) {
 			t.Errorf("request body port \n\n%#v want \n\n%#v", requestSslCheckV2Data.Test.Port, 8443)
 		}
-		if !reflect.DeepEqual(requestSslCheckV2Data.Test.ServerName, "example.com") {
-			t.Errorf("request body server name \n\n%#v want \n\n%#v", requestSslCheckV2Data.Test.ServerName, "example.com")
-		}
+		assertStringPtr(t, requestSslCheckV2Data.Test.ServerName, "example.com")
 		if !reflect.DeepEqual(requestSslCheckV2Data.Test.AllowSelfSigned, false) {
 			t.Errorf("request body allow self signed \n\n%#v want \n\n%#v", requestSslCheckV2Data.Test.AllowSelfSigned, false)
 		}
@@ -199,6 +198,59 @@ func TestUpdateSslCheckV2DefaultsNilValidations(t *testing.T) {
 	})
 
 	_, _, err = testClient.UpdateSslCheckV2(1651, &inputSslCheckV2Data)
+	if err != nil {
+		t.Fatal(err)
+	}
+}
+
+func TestUpdateSslCheckV2PreservesNilServerName(t *testing.T) {
+	setup()
+	defer teardown()
+
+	inputBody := strings.Replace(updateSslCheckV2Body, `"serverName":"example.com"`, `"serverName":null`, 1)
+	inputSslCheckV2Data := SslCheckV2Input{}
+	err := json.Unmarshal([]byte(inputBody), &inputSslCheckV2Data)
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	testMux.HandleFunc("/tests/ssl/1653", func(w http.ResponseWriter, r *http.Request) {
+		testMethod(t, r, "PUT")
+		requestBody, err := io.ReadAll(r.Body)
+		if err != nil {
+			t.Fatal(err)
+		}
+
+		var requestEnvelope map[string]json.RawMessage
+		err = json.Unmarshal(requestBody, &requestEnvelope)
+		if err != nil {
+			t.Fatal(err)
+		}
+		rawTest, ok := requestEnvelope["test"]
+		if !ok {
+			t.Fatal("request body missing test envelope")
+		}
+
+		var requestTestFields map[string]json.RawMessage
+		err = json.Unmarshal(rawTest, &requestTestFields)
+		if err != nil {
+			t.Fatal(err)
+		}
+		rawServerName, ok := requestTestFields["serverName"]
+		if !ok {
+			t.Fatal("request body missing test.serverName")
+		}
+		if string(rawServerName) != "null" {
+			t.Fatalf("request body server name \n\n%#v want JSON null", string(rawServerName))
+		}
+
+		_, err = w.Write([]byte(updateSslCheckV2Body))
+		if err != nil {
+			t.Fatal(err)
+		}
+	})
+
+	_, _, err = testClient.UpdateSslCheckV2(1653, &inputSslCheckV2Data)
 	if err != nil {
 		t.Fatal(err)
 	}
