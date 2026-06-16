@@ -406,7 +406,6 @@ type CaCertificateInput struct {
 }
 
 type CaCertificateUpdateInput struct {
-	Name          *string `json:"name,omitempty"`
 	Description   *string `json:"description,omitempty"`
 	Content       *string `json:"content,omitempty"`
 	FileExtension *string `json:"fileExtension,omitempty"`

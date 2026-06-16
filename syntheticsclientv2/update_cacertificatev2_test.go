@@ -76,17 +76,17 @@ func TestUpdateCaCertificateV2AllowsEmptyDescription(t *testing.T) {
 	}
 }
 
-func TestUpdateCaCertificateV2AllowsNameUpdate(t *testing.T) {
+func TestUpdateCaCertificateV2DoesNotIncludeName(t *testing.T) {
 	setup()
 	defer teardown()
 
-	name := "updated-ca-cert-name"
+	description := "Updated CA certificate"
 	inputCaCertificateV2Update := CaCertificateV2UpdateInput{}
-	inputCaCertificateV2Update.CaCert.Name = &name
+	inputCaCertificateV2Update.CaCert.Description = &description
 
 	testMux.HandleFunc("/cacerts/3", func(w http.ResponseWriter, r *http.Request) {
 		testMethod(t, r, "PUT")
-		assertSingleCaCertificateUpdateField(t, r, "name", `"updated-ca-cert-name"`)
+		assertSingleCaCertificateUpdateField(t, r, "description", `"Updated CA certificate"`)
 		w.WriteHeader(http.StatusOK)
 	})
 
@@ -134,6 +134,9 @@ func assertSingleCaCertificateUpdateField(t *testing.T, r *http.Request, field s
 	t.Helper()
 
 	requestBody, requestCaCertFields := readCaCertificateUpdateRequestFields(t, r)
+	if _, ok := requestCaCertFields["name"]; ok {
+		t.Fatalf("request body should not include cacert.name: %s", requestBody)
+	}
 	if len(requestCaCertFields) != 1 {
 		t.Fatalf("request body cacert field count %d want 1: %s", len(requestCaCertFields), requestBody)
 	}
