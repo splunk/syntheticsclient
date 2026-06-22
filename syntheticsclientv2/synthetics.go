@@ -58,6 +58,12 @@ func (c Client) String() string {
 	return fmt.Sprintf("Splunk Synthetics Client: URL: %s ", c.publicBaseURL)
 }
 
+var sensitiveJSONFieldNames = map[string]struct{}{
+	"content":  {},
+	"password": {},
+	"value":    {},
+}
+
 func (c Client) makePublicAPICall(method string, endpoint string, requestBody io.Reader, queryParams map[string]string) (*RequestDetails, error) {
 	details := RequestDetails{}
 	// Create the request
@@ -126,18 +132,14 @@ func redactSensitiveValue(value string, sensitiveValue string) string {
 	return strings.ReplaceAll(value, sensitiveValue, "[REDACTED]")
 }
 
-func sanitizeRequestDump(requestDump string, apiKey string, endpoint string) string {
+func sanitizeRequestDump(requestDump string, apiKey string, _ string) string {
 	sanitizedRequestDump := redactSensitiveValue(requestDump, apiKey)
-	if !strings.Contains(endpoint, "/cacerts") {
-		return sanitizedRequestDump
-	}
-
-	return redactCaCertificateContent(sanitizedRequestDump)
+	return redactSensitiveRequestBody(sanitizedRequestDump)
 }
 
-func redactCaCertificateContent(requestDump string) string {
+func redactSensitiveRequestBody(requestDump string) string {
 	headers, body, separator, ok := splitRequestDump(requestDump)
-	if !ok || body == "" {
+	if !ok || strings.TrimSpace(body) == "" {
 		return requestDump
 	}
 
@@ -146,7 +148,7 @@ func redactCaCertificateContent(requestDump string) string {
 		return replaceRequestDumpBody(headers, separator)
 	}
 
-	redactContentFields(requestBody)
+	redactSensitiveJSONFields(requestBody)
 
 	redactedRequestBody, err := json.Marshal(requestBody)
 	if err != nil {
@@ -171,19 +173,19 @@ func replaceRequestDumpBody(headers string, separator string) string {
 	return headers + separator + "[REDACTED]"
 }
 
-func redactContentFields(value interface{}) {
+func redactSensitiveJSONFields(value interface{}) {
 	switch typedValue := value.(type) {
 	case map[string]interface{}:
 		for key, nestedValue := range typedValue {
-			if strings.EqualFold(key, "content") {
+			if _, ok := sensitiveJSONFieldNames[strings.ToLower(key)]; ok {
 				typedValue[key] = "[REDACTED]"
 				continue
 			}
-			redactContentFields(nestedValue)
+			redactSensitiveJSONFields(nestedValue)
 		}
 	case []interface{}:
 		for _, nestedValue := range typedValue {
-			redactContentFields(nestedValue)
+			redactSensitiveJSONFields(nestedValue)
 		}
 	}
 }
