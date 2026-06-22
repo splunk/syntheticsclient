@@ -106,6 +106,7 @@ type Advancedsettings struct {
 	Verifycertificates        bool             `json:"verifyCertificates"`
 	ChromeFlags               []ChromeFlag     `json:"chromeFlags"`
 	ExcludedFiles             []ExcludedFile   `json:"excludedFiles"`
+	CertificateIDs            []int            `json:"certificateIds,omitempty"`
 }
 
 type ChromeFlag struct {
@@ -207,9 +208,10 @@ type Requests struct {
 type Configuration struct {
 	Body          string `json:"body"`
 	Headers       `json:"headers"`
-	Name          string `json:"name"`
-	RequestMethod string `json:"requestMethod,omitempty"`
-	URL           string `json:"url,omitempty"`
+	Name          string       `json:"name"`
+	RequestMethod string       `json:"requestMethod,omitempty"`
+	URL           string       `json:"url,omitempty"`
+	CertificateID *NullableInt `json:"certificateId,omitempty"`
 }
 
 type Headers map[string]interface{}
@@ -685,6 +687,7 @@ type HttpCheckV2Response struct {
 		Authentication     *Authentication    `json:"authentication"`
 		UserAgent          *string            `json:"userAgent"`
 		Verifycertificates bool               `json:"verifyCertificates"`
+		CertificateID      *NullableInt       `json:"certificateId,omitempty"`
 		HttpHeaders        []HttpHeaders      `json:"headers,omitempty"`
 		Validations        []Validations      `json:"validations"`
 		Customproperties   []CustomProperties `json:"customProperties"`
@@ -711,6 +714,7 @@ type HttpCheckV2Input struct {
 		Authentication     *Authentication    `json:"authentication"`
 		UserAgent          *string            `json:"userAgent"`
 		Verifycertificates bool               `json:"verifyCertificates"`
+		CertificateID      *NullableInt       `json:"certificateId,omitempty"`
 		HttpHeaders        []HttpHeaders      `json:"headers,omitempty"`
 		Validations        []Validations      `json:"validations"`
 		Customproperties   []CustomProperties `json:"customProperties"`
