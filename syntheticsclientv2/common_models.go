@@ -587,6 +587,57 @@ type HttpCheckV2Input struct {
 	} `json:"test"`
 }
 
+type HttpCheckV2ResponseWithNullablePort struct {
+	Test struct {
+		ID                 int                `json:"id"`
+		Name               string             `json:"name"`
+		Active             bool               `json:"active"`
+		Frequency          int                `json:"frequency"`
+		SchedulingStrategy string             `json:"schedulingStrategy"`
+		CreatedAt          time.Time          `json:"createdAt,omitempty"`
+		UpdatedAt          time.Time          `json:"updatedAt,omitempty"`
+		LocationIds        []string           `json:"locationIds"`
+		Type               string             `json:"type"`
+		URL                string             `json:"url"`
+		RequestMethod      string             `json:"requestMethod"`
+		Body               string             `json:"body,omitempty"`
+		Authentication     *Authentication    `json:"authentication"`
+		UserAgent          *string            `json:"userAgent"`
+		Verifycertificates bool               `json:"verifyCertificates"`
+		HttpHeaders        []HttpHeaders      `json:"headers,omitempty"`
+		Validations        []Validations      `json:"validations"`
+		Customproperties   []CustomProperties `json:"customProperties"`
+		Lastrunstatus      string             `json:"lastRunStatus"`
+		Lastrunat          time.Time          `json:"lastRunAt"`
+		Automaticretries   int                `json:"automaticRetries"`
+		Port               NullableInt        `json:"port"`
+		Createdby          string             `json:"createdBy"`
+		Updatedby          string             `json:"updatedBy"`
+	} `json:"test"`
+}
+
+type HttpCheckV2InputWithNullablePort struct {
+	Test struct {
+		Name               string             `json:"name"`
+		Type               string             `json:"type"`
+		URL                string             `json:"url"`
+		LocationIds        []string           `json:"locationIds"`
+		Frequency          int                `json:"frequency"`
+		SchedulingStrategy string             `json:"schedulingStrategy"`
+		Active             bool               `json:"active"`
+		RequestMethod      string             `json:"requestMethod"`
+		Body               string             `json:"body,omitempty"`
+		Authentication     *Authentication    `json:"authentication"`
+		UserAgent          *string            `json:"userAgent"`
+		Verifycertificates bool               `json:"verifyCertificates"`
+		HttpHeaders        []HttpHeaders      `json:"headers,omitempty"`
+		Validations        []Validations      `json:"validations"`
+		Customproperties   []CustomProperties `json:"customProperties"`
+		Automaticretries   int                `json:"automaticRetries"`
+		Port               NullableInt        `json:"port"`
+	} `json:"test"`
+}
+
 type ApiCheckV2Input struct {
 	Test struct {
 		Active             bool               `json:"active"`
