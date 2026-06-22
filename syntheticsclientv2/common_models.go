@@ -479,6 +479,87 @@ type CaCertificatesV2Response struct {
 	CaCerts []CaCertificate `json:"cacerts"`
 }
 
+type ClientCertificateKey struct {
+	ID            int       `json:"id,omitempty"`
+	Content       string    `json:"content,omitempty"`
+	Filename      string    `json:"filename,omitempty"`
+	FileExtension string    `json:"fileExtension,omitempty"`
+	CreatedAt     time.Time `json:"createdAt,omitempty"`
+	CreatedBy     string    `json:"createdBy,omitempty"`
+	UpdatedAt     time.Time `json:"updatedAt,omitempty"`
+	UpdatedBy     string    `json:"updatedBy,omitempty"`
+}
+
+type ClientCertificatePrivateKey struct {
+	ID            int       `json:"id,omitempty"`
+	Content       string    `json:"content,omitempty"`
+	Filename      string    `json:"filename,omitempty"`
+	FileExtension string    `json:"fileExtension,omitempty"`
+	Password      string    `json:"password,omitempty"`
+	CreatedAt     time.Time `json:"createdAt,omitempty"`
+	CreatedBy     string    `json:"createdBy,omitempty"`
+	UpdatedAt     time.Time `json:"updatedAt,omitempty"`
+	UpdatedBy     string    `json:"updatedBy,omitempty"`
+}
+
+type ClientCertificateKeyInput struct {
+	Content       string `json:"content"`
+	Filename      string `json:"filename"`
+	FileExtension string `json:"fileExtension"`
+}
+
+type ClientCertificatePrivateKeyInput struct {
+	Content       string `json:"content"`
+	Filename      string `json:"filename"`
+	FileExtension string `json:"fileExtension"`
+	Password      string `json:"password,omitempty"`
+}
+
+type ClientCertificate struct {
+	ID          int                         `json:"id,omitempty"`
+	Name        string                      `json:"name,omitempty"`
+	Description string                      `json:"description,omitempty"`
+	Domain      string                      `json:"domain,omitempty"`
+	ExpiresAt   time.Time                   `json:"expiresAt,omitempty"`
+	CreatedAt   time.Time                   `json:"createdAt,omitempty"`
+	CreatedBy   string                      `json:"createdBy,omitempty"`
+	UpdatedAt   time.Time                   `json:"updatedAt,omitempty"`
+	UpdatedBy   string                      `json:"updatedBy,omitempty"`
+	PublicKey   ClientCertificateKey        `json:"publicKey,omitempty"`
+	PrivateKey  ClientCertificatePrivateKey `json:"privateKey,omitempty"`
+}
+
+type ClientCertificateInput struct {
+	Name        string                           `json:"name"`
+	Description string                           `json:"description,omitempty"`
+	Domain      string                           `json:"domain"`
+	PublicKey   ClientCertificateKeyInput        `json:"publicKey"`
+	PrivateKey  ClientCertificatePrivateKeyInput `json:"privateKey"`
+}
+
+type ClientCertificateUpdateInput struct {
+	Description *string                           `json:"description,omitempty"`
+	Domain      *string                           `json:"domain,omitempty"`
+	PublicKey   *ClientCertificateKeyInput        `json:"publicKey,omitempty"`
+	PrivateKey  *ClientCertificatePrivateKeyInput `json:"privateKey,omitempty"`
+}
+
+type ClientCertificateV2Input struct {
+	Certificate ClientCertificateInput `json:"certificate"`
+}
+
+type ClientCertificateV2UpdateInput struct {
+	Certificate ClientCertificateUpdateInput `json:"certificate"`
+}
+
+type ClientCertificateV2Response struct {
+	Certificate ClientCertificate `json:"certificate"`
+}
+
+type ClientCertificatesV2Response struct {
+	Certificates []ClientCertificate `json:"certificates"`
+}
+
 type SslCheckV2Response struct {
 	Test struct {
 		ID                            int                `json:"id,omitempty"`
