@@ -299,6 +299,37 @@ type Variable struct {
 	Value       string    `json:"value"`
 }
 
+type TotpVariable struct {
+	CreatedAt   time.Time `json:"createdAt"`
+	CreatedBy   string    `json:"createdBy"`
+	Description string    `json:"description"`
+	Digits      int       `json:"digits"`
+	HmacDigest  string    `json:"hmacDigest"`
+	ID          int       `json:"id"`
+	Interval    int       `json:"interval"`
+	Name        string    `json:"name"`
+	Secret      string    `json:"secret"`
+	UpdatedAt   time.Time `json:"updatedAt"`
+	UpdatedBy   string    `json:"updatedBy"`
+}
+
+type TotpVariableInput struct {
+	Description string `json:"description"`
+	Digits      int    `json:"digits"`
+	HmacDigest  string `json:"hmacDigest"`
+	Interval    int    `json:"interval"`
+	Name        string `json:"name"`
+	Secret      string `json:"secret"`
+}
+
+type TotpVariableUpdateInput struct {
+	Description *string `json:"description,omitempty"`
+	Digits      *int    `json:"digits,omitempty"`
+	HmacDigest  *string `json:"hmacDigest,omitempty"`
+	Interval    *int    `json:"interval,omitempty"`
+	Secret      *string `json:"secret,omitempty"`
+}
+
 type DowntimeConfiguration struct {
 	Createdat      time.Time   `json:"createdAt,omitempty"`
 	Description    string      `json:"description,omitempty"`
@@ -364,6 +395,22 @@ type VariableV2Input struct {
 
 type VariablesV2Response struct {
 	Variable []Variable `json:"variables"`
+}
+
+type TotpVariableV2Input struct {
+	Totp TotpVariableInput `json:"totp"`
+}
+
+type TotpVariableV2UpdateInput struct {
+	Totp TotpVariableUpdateInput `json:"totp"`
+}
+
+type TotpVariableV2Response struct {
+	Totp TotpVariable `json:"totp"`
+}
+
+type TotpVariablesV2Response struct {
+	Totps []TotpVariable `json:"totps"`
 }
 
 type LocationsV2Response struct {
