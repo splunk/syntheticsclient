@@ -21,6 +21,7 @@ import (
 	"io"
 	"net/http"
 	"net/http/httputil"
+	"strings"
 	"time"
 )
 
@@ -84,10 +85,7 @@ func (c Client) makePublicAPICall(method string, endpoint string, requestBody io
 	if err != nil {
 		return &details, err
 	}
-	details.RequestBody = string(requestDump)
-	fmt.Println("************")
-	fmt.Println(details.RequestBody)
-	fmt.Println("************")
+	details.RequestBody = redactSensitiveValue(string(requestDump), c.apiKey)
 
 	// Make the request
 	resp, err := c.httpClient.Do(req)
@@ -118,6 +116,14 @@ func (c Client) makePublicAPICall(method string, endpoint string, requestBody io
 	details.ResponseBody = string(responseBody)
 
 	return &details, nil
+}
+
+func redactSensitiveValue(value string, sensitiveValue string) string {
+	if sensitiveValue == "" {
+		return value
+	}
+
+	return strings.ReplaceAll(value, sensitiveValue, "[REDACTED]")
 }
 
 func NewClientArgs(timeout int, baseUrl string) ClientArgs {

@@ -18,6 +18,7 @@
 package syntheticsclientv2
 
 import (
+	"bytes"
 	"log"
 	"net/http"
 	"net/http/httptest"
@@ -119,5 +120,42 @@ func TestConfigurableClientErrorStatusCode(t *testing.T) {
 
 	if details.StatusCode != http.StatusNotFound {
 		t.Errorf("expected to see 404 status code, but saw: %d", details.StatusCode)
+	}
+}
+
+func TestMakePublicAPICallRedactsAPIKeyFromRequestDetails(t *testing.T) {
+	testMux = http.NewServeMux()
+	testServer = httptest.NewServer(testMux)
+	defer testServer.Close()
+
+	testMux.HandleFunc("/tests", func(w http.ResponseWriter, r *http.Request) {
+		w.WriteHeader(http.StatusOK)
+		w.Write([]byte(`{}`))
+	})
+
+	apiKey := "secret-api-key"
+	testConfigurableClient := NewConfigurableClient(apiKey, "realm", ClientArgs{
+		publicBaseUrl: testServer.URL,
+	})
+
+	details, err := testConfigurableClient.makePublicAPICall("POST", "/tests", bytes.NewBufferString(`{"name":"test"}`), nil)
+	if err != nil {
+		t.Fatalf("expected no error, but saw: %s", err.Error())
+	}
+
+	if strings.Contains(details.RequestBody, apiKey) {
+		t.Fatalf("expected request details to redact API key, but found it in: %s", details.RequestBody)
+	}
+
+	if !strings.Contains(details.RequestBody, "[REDACTED]") {
+		t.Fatalf("expected request details to contain redaction marker, but saw: %s", details.RequestBody)
+	}
+}
+
+func TestRedactSensitiveValueIgnoresEmptyValue(t *testing.T) {
+	requestDump := "GET /tests HTTP/1.1\r\nX-Sf-Token: \r\n\r\n{}"
+
+	if got := redactSensitiveValue(requestDump, ""); got != requestDump {
+		t.Fatalf("expected empty sensitive value to leave request dump unchanged, but saw: %s", got)
 	}
 }

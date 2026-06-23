@@ -117,6 +117,10 @@ type ChromeFlagsResponse struct {
 	ChromeFlags []ChromeFlag `json:"chromeFlags"`
 }
 
+type ExcludedFileTypesResponse struct {
+	ExcludedFileTypes []string `json:"excludedFileTypes"`
+}
+
 type Authentication struct {
 	Password string `json:"password,omitempty"`
 	Username string `json:"username,omitempty"`
