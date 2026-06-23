@@ -85,7 +85,7 @@ func (c Client) makePublicAPICall(method string, endpoint string, requestBody io
 	if err != nil {
 		return &details, err
 	}
-	details.RequestBody = redactSensitiveValue(string(requestDump), c.apiKey)
+	details.RequestBody = sanitizeRequestDump(string(requestDump), c.apiKey, endpoint)
 
 	// Make the request
 	resp, err := c.httpClient.Do(req)
@@ -124,6 +124,68 @@ func redactSensitiveValue(value string, sensitiveValue string) string {
 	}
 
 	return strings.ReplaceAll(value, sensitiveValue, "[REDACTED]")
+}
+
+func sanitizeRequestDump(requestDump string, apiKey string, endpoint string) string {
+	sanitizedRequestDump := redactSensitiveValue(requestDump, apiKey)
+	if !strings.Contains(endpoint, "/cacerts") {
+		return sanitizedRequestDump
+	}
+
+	return redactCaCertificateContent(sanitizedRequestDump)
+}
+
+func redactCaCertificateContent(requestDump string) string {
+	headers, body, separator, ok := splitRequestDump(requestDump)
+	if !ok || body == "" {
+		return requestDump
+	}
+
+	var requestBody interface{}
+	if err := json.Unmarshal([]byte(body), &requestBody); err != nil {
+		return replaceRequestDumpBody(headers, separator)
+	}
+
+	redactContentFields(requestBody)
+
+	redactedRequestBody, err := json.Marshal(requestBody)
+	if err != nil {
+		return replaceRequestDumpBody(headers, separator)
+	}
+
+	return headers + separator + string(redactedRequestBody)
+}
+
+func splitRequestDump(requestDump string) (string, string, string, bool) {
+	for _, separator := range []string{"\r\n\r\n", "\n\n"} {
+		requestParts := strings.SplitN(requestDump, separator, 2)
+		if len(requestParts) == 2 {
+			return requestParts[0], requestParts[1], separator, true
+		}
+	}
+
+	return "", "", "", false
+}
+
+func replaceRequestDumpBody(headers string, separator string) string {
+	return headers + separator + "[REDACTED]"
+}
+
+func redactContentFields(value interface{}) {
+	switch typedValue := value.(type) {
+	case map[string]interface{}:
+		for key, nestedValue := range typedValue {
+			if strings.EqualFold(key, "content") {
+				typedValue[key] = "[REDACTED]"
+				continue
+			}
+			redactContentFields(nestedValue)
+		}
+	case []interface{}:
+		for _, nestedValue := range typedValue {
+			redactContentFields(nestedValue)
+		}
+	}
 }
 
 func NewClientArgs(timeout int, baseUrl string) ClientArgs {
