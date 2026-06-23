@@ -145,17 +145,21 @@ func redactCaCertificateContent(requestDump string) string {
 
 	var requestBody interface{}
 	if err := json.Unmarshal([]byte(requestParts[1]), &requestBody); err != nil {
-		return requestDump
+		return replaceRequestDumpBody(requestParts[0])
 	}
 
 	redactContentFields(requestBody)
 
 	redactedRequestBody, err := json.Marshal(requestBody)
 	if err != nil {
-		return requestDump
+		return replaceRequestDumpBody(requestParts[0])
 	}
 
 	return requestParts[0] + headerBodySeparator + string(redactedRequestBody)
+}
+
+func replaceRequestDumpBody(headers string) string {
+	return headers + "\r\n\r\n[REDACTED]"
 }
 
 func redactContentFields(value interface{}) {
