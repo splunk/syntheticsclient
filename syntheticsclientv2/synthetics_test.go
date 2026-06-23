@@ -207,6 +207,25 @@ func TestMakePublicAPICallRedactsMalformedCaCertificateRequestBody(t *testing.T)
 	}
 }
 
+func TestMakePublicAPICallRedactsMalformedCaCertificateRequestBodyWithLFSeparator(t *testing.T) {
+	requestDump := "POST /cacerts HTTP/1.1\nHost: example.com\nX-Sf-Token: secret-api-key\n\n{\"cacert\":{\"content\":\"private-ca-material\""
+
+	got := sanitizeRequestDump(requestDump, "secret-api-key", "/cacerts")
+
+	if strings.Contains(got, "secret-api-key") {
+		t.Fatalf("expected request details to redact API key, but found it in: %s", got)
+	}
+	if strings.Contains(got, "private-ca-material") {
+		t.Fatalf("expected request details to redact malformed CA certificate body, but found it in: %s", got)
+	}
+	if !strings.Contains(got, "Host: example.com") {
+		t.Fatalf("expected request details to preserve headers, but saw: %s", got)
+	}
+	if !strings.HasSuffix(got, "\n\n[REDACTED]") {
+		t.Fatalf("expected request details to preserve LF separator before redaction marker, but saw: %s", got)
+	}
+}
+
 func TestCreateCaCertificateV2RedactsRequestDetails(t *testing.T) {
 	testMux = http.NewServeMux()
 	testServer = httptest.NewServer(testMux)
