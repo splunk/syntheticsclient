@@ -152,6 +152,42 @@ func TestMakePublicAPICallRedactsAPIKeyFromRequestDetails(t *testing.T) {
 	}
 }
 
+func TestMakePublicAPICallRedactsCaCertificateContentFromRequestDetails(t *testing.T) {
+	testMux = http.NewServeMux()
+	testServer = httptest.NewServer(testMux)
+	defer testServer.Close()
+
+	testMux.HandleFunc("/cacerts", func(w http.ResponseWriter, r *http.Request) {
+		w.WriteHeader(http.StatusOK)
+		w.Write([]byte(`{}`))
+	})
+
+	apiKey := "secret-api-key"
+	caCertificateContent := "private-ca-material"
+	testConfigurableClient := NewConfigurableClient(apiKey, "realm", ClientArgs{
+		publicBaseUrl: testServer.URL,
+	})
+
+	requestBody := `{"cacert":{"name":"test-ca","content":"` + caCertificateContent + `","metadata":{"Content":"` + caCertificateContent + `"}}}`
+	details, err := testConfigurableClient.makePublicAPICall("POST", "/cacerts", bytes.NewBufferString(requestBody), nil)
+	if err != nil {
+		t.Fatalf("expected no error, but saw: %s", err.Error())
+	}
+
+	if strings.Contains(details.RequestBody, apiKey) {
+		t.Fatalf("expected request details to redact API key, but found it in: %s", details.RequestBody)
+	}
+	if strings.Contains(details.RequestBody, caCertificateContent) {
+		t.Fatalf("expected request details to redact CA certificate content, but found it in: %s", details.RequestBody)
+	}
+	if !strings.Contains(details.RequestBody, `"content":"[REDACTED]"`) {
+		t.Fatalf("expected request details to preserve redacted content field, but saw: %s", details.RequestBody)
+	}
+	if !strings.Contains(details.RequestBody, `"Content":"[REDACTED]"`) {
+		t.Fatalf("expected request details to redact content fields case-insensitively, but saw: %s", details.RequestBody)
+	}
+}
+
 func TestRedactSensitiveValueIgnoresEmptyValue(t *testing.T) {
 	requestDump := "GET /tests HTTP/1.1\r\nX-Sf-Token: \r\n\r\n{}"
 

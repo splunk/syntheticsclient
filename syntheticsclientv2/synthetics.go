@@ -85,7 +85,7 @@ func (c Client) makePublicAPICall(method string, endpoint string, requestBody io
 	if err != nil {
 		return &details, err
 	}
-	details.RequestBody = redactSensitiveValue(string(requestDump), c.apiKey)
+	details.RequestBody = sanitizeRequestDump(string(requestDump), c.apiKey, endpoint)
 
 	// Make the request
 	resp, err := c.httpClient.Do(req)
@@ -124,6 +124,55 @@ func redactSensitiveValue(value string, sensitiveValue string) string {
 	}
 
 	return strings.ReplaceAll(value, sensitiveValue, "[REDACTED]")
+}
+
+func sanitizeRequestDump(requestDump string, apiKey string, endpoint string) string {
+	sanitizedRequestDump := redactSensitiveValue(requestDump, apiKey)
+	if !strings.Contains(endpoint, "/cacerts") {
+		return sanitizedRequestDump
+	}
+
+	return redactCaCertificateContent(sanitizedRequestDump)
+}
+
+func redactCaCertificateContent(requestDump string) string {
+	const headerBodySeparator = "\r\n\r\n"
+
+	requestParts := strings.SplitN(requestDump, headerBodySeparator, 2)
+	if len(requestParts) != 2 || requestParts[1] == "" {
+		return requestDump
+	}
+
+	var requestBody interface{}
+	if err := json.Unmarshal([]byte(requestParts[1]), &requestBody); err != nil {
+		return requestDump
+	}
+
+	redactContentFields(requestBody)
+
+	redactedRequestBody, err := json.Marshal(requestBody)
+	if err != nil {
+		return requestDump
+	}
+
+	return requestParts[0] + headerBodySeparator + string(redactedRequestBody)
+}
+
+func redactContentFields(value interface{}) {
+	switch typedValue := value.(type) {
+	case map[string]interface{}:
+		for key, nestedValue := range typedValue {
+			if strings.EqualFold(key, "content") {
+				typedValue[key] = "[REDACTED]"
+				continue
+			}
+			redactContentFields(nestedValue)
+		}
+	case []interface{}:
+		for _, nestedValue := range typedValue {
+			redactContentFields(nestedValue)
+		}
+	}
 }
 
 func NewClientArgs(timeout int, baseUrl string) ClientArgs {
