@@ -109,6 +109,38 @@ type Advancedsettings struct {
 	CertificateIDs            []int            `json:"certificateIds,omitempty"`
 }
 
+func (a Advancedsettings) MarshalJSON() ([]byte, error) {
+	type advancedsettingsJSON struct {
+		Authentication            *Authentication  `json:"authentication"`
+		Cookiesv2                 []Cookiesv2      `json:"cookies"`
+		BrowserHeaders            []BrowserHeaders `json:"headers"`
+		HostOverrides             []HostOverrides  `json:"hostOverrides"`
+		UserAgent                 *string          `json:"userAgent"`
+		CollectInteractiveMetrics bool             `json:"collectInteractiveMetrics"`
+		Verifycertificates        bool             `json:"verifyCertificates"`
+		ChromeFlags               []ChromeFlag     `json:"chromeFlags"`
+		ExcludedFiles             []ExcludedFile   `json:"excludedFiles"`
+		CertificateIDs            *[]int           `json:"certificateIds,omitempty"`
+	}
+
+	advancedsettings := advancedsettingsJSON{
+		Authentication:            a.Authentication,
+		Cookiesv2:                 a.Cookiesv2,
+		BrowserHeaders:            a.BrowserHeaders,
+		HostOverrides:             a.HostOverrides,
+		UserAgent:                 a.UserAgent,
+		CollectInteractiveMetrics: a.CollectInteractiveMetrics,
+		Verifycertificates:        a.Verifycertificates,
+		ChromeFlags:               a.ChromeFlags,
+		ExcludedFiles:             a.ExcludedFiles,
+	}
+	if a.CertificateIDs != nil {
+		advancedsettings.CertificateIDs = &a.CertificateIDs
+	}
+
+	return json.Marshal(advancedsettings)
+}
+
 type ChromeFlag struct {
 	Name  string `json:"name"`
 	Value string `json:"value"`
