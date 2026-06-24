@@ -315,6 +315,24 @@ func TestSanitizeRequestDumpRedactsHeaderCookieAndAuthenticationValues(t *testin
 	}
 }
 
+func TestSanitizeRequestDumpRedactsAllAPIHeaderMapValues(t *testing.T) {
+	requestDump := "POST /v2/tests/api HTTP/1.1\r\nHost: example.com\r\nX-SF-TOKEN: client-api-key\r\n\r\n" +
+		`{"test":{"requests":[{"configuration":{"headers":{"X-SF-TOKEN":"request-token","Accept":"accept-json-secret","beep":"plain-header-secret"},"body":null}}]}}`
+
+	sanitized := sanitizeRequestDump(requestDump, "client-api-key", "/v2/tests/api")
+
+	for _, secret := range []string{"client-api-key", "request-token", "accept-json-secret", "plain-header-secret"} {
+		if strings.Contains(sanitized, secret) {
+			t.Fatalf("sanitized request dump leaked %q: %s", secret, sanitized)
+		}
+	}
+	for _, redacted := range []string{`"X-SF-TOKEN":"[REDACTED]"`, `"Accept":"[REDACTED]"`, `"beep":"[REDACTED]"`} {
+		if !strings.Contains(sanitized, redacted) {
+			t.Fatalf("sanitized request dump missing %q: %s", redacted, sanitized)
+		}
+	}
+}
+
 func TestMakePublicAPICallDoesNotExposeRawRequest(t *testing.T) {
 	testMux = http.NewServeMux()
 	testServer = httptest.NewServer(testMux)

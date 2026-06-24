@@ -68,6 +68,16 @@ var sensitiveJSONFieldNames = map[string]struct{}{
 	"value":    {},
 }
 
+var sensitiveHeaderNames = map[string]struct{}{
+	"authorization":       {},
+	"proxy-authorization": {},
+	"cookie":              {},
+	"set-cookie":          {},
+	"x-sf-token":          {},
+	"x-api-key":           {},
+	"api-key":             {},
+}
+
 func (c Client) makePublicAPICall(method string, endpoint string, requestBody io.Reader, queryParams map[string]string) (*RequestDetails, error) {
 	details := RequestDetails{}
 	// Create the request
@@ -183,6 +193,14 @@ func redactSensitiveJSONFields(value interface{}) {
 				typedValue[key] = "[REDACTED]"
 				continue
 			}
+			if isSensitiveHeaderName(key) {
+				typedValue[key] = "[REDACTED]"
+				continue
+			}
+			if strings.EqualFold(key, "headers") {
+				redactHeaderValues(nestedValue)
+				continue
+			}
 			redactSensitiveJSONFields(nestedValue)
 		}
 	case []interface{}:
@@ -190,6 +208,28 @@ func redactSensitiveJSONFields(value interface{}) {
 			redactSensitiveJSONFields(nestedValue)
 		}
 	}
+}
+
+func redactHeaderValues(value interface{}) {
+	switch typedValue := value.(type) {
+	case map[string]interface{}:
+		for key := range typedValue {
+			typedValue[key] = "[REDACTED]"
+		}
+	default:
+		redactSensitiveJSONFields(value)
+	}
+}
+
+func isSensitiveHeaderName(key string) bool {
+	lowerKey := strings.ToLower(key)
+	if _, ok := sensitiveHeaderNames[lowerKey]; ok {
+		return true
+	}
+
+	return strings.Contains(lowerKey, "token") ||
+		strings.Contains(lowerKey, "secret") ||
+		strings.Contains(lowerKey, "password")
 }
 
 func NewClientArgs(timeout int, baseUrl string) ClientArgs {
