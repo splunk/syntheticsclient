@@ -314,3 +314,39 @@ func TestSanitizeRequestDumpRedactsHeaderCookieAndAuthenticationValues(t *testin
 		}
 	}
 }
+
+func TestMakePublicAPICallDoesNotExposeRawRequest(t *testing.T) {
+	testMux = http.NewServeMux()
+	testServer = httptest.NewServer(testMux)
+	defer testServer.Close()
+
+	testMux.HandleFunc("/certificates", func(w http.ResponseWriter, r *http.Request) {
+		w.WriteHeader(http.StatusOK)
+		w.Write([]byte(`{}`))
+	})
+
+	apiKey := "secret-api-key"
+	certificateContent := "private-certificate-material"
+	testConfigurableClient := NewConfigurableClient(apiKey, "realm", ClientArgs{
+		publicBaseUrl: testServer.URL,
+	})
+
+	requestBody := `{"certificate":{"publicKey":{"content":"` + certificateContent + `"}}}`
+	details, err := testConfigurableClient.makePublicAPICall("POST", "/certificates", bytes.NewBufferString(requestBody), nil)
+	if err != nil {
+		t.Fatalf("expected no error, but saw: %s", err.Error())
+	}
+
+	if details.RawRequest != nil {
+		t.Fatal("expected RawRequest to be nil; RequestBody is the supported sanitized debug representation")
+	}
+	if strings.Contains(details.RequestBody, apiKey) {
+		t.Fatalf("expected request details to redact API key, but found it in: %s", details.RequestBody)
+	}
+	if strings.Contains(details.RequestBody, certificateContent) {
+		t.Fatalf("expected request details to redact certificate content, but found it in: %s", details.RequestBody)
+	}
+	if !strings.Contains(details.RequestBody, `"content":"[REDACTED]"`) {
+		t.Fatalf("expected sanitized RequestBody to include redacted content field, but saw: %s", details.RequestBody)
+	}
+}

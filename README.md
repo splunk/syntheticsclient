@@ -51,6 +51,17 @@ func main() {
 ## API Documentation
 API Docs are [available here](https://dev.splunk.com/observability/reference)
 
+## Request Details
+
+V2 methods return `RequestDetails` for debugging failed or unexpected API calls.
+Use `RequestDetails.RequestBody` when you need to inspect the outgoing request.
+This field is sanitized before it is returned and redacts API tokens, certificate
+content, passwords, and generic secret values.
+
+`RequestDetails.RawRequest` is intentionally not populated by V2 public API calls
+because a raw `http.Request` can retain authorization headers or request body
+secrets.
+
 ## Additional Information
 This client is largely a copypasta mutation of the [go-victor](https://github.com/victorops/go-victorops) client for Splunk On-Call (formerly known as VictorOps).
 

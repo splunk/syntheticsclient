@@ -40,9 +40,13 @@ type ClientArgs struct {
 type RequestDetails struct {
 	StatusCode   int
 	ResponseBody string
-	RequestBody  string
-	RawResponse  *http.Response
-	RawRequest   *http.Request
+	// RequestBody is the supported debug representation of the outgoing request.
+	// It redacts API tokens and sensitive JSON values before being returned.
+	RequestBody string
+	RawResponse *http.Response
+	// RawRequest is intentionally not returned by v2 public API calls because it
+	// can retain authorization headers or request body secrets.
+	RawRequest *http.Request
 }
 
 type errorResponse struct {
@@ -85,8 +89,6 @@ func (c Client) makePublicAPICall(method string, endpoint string, requestBody io
 	}
 	req.URL.RawQuery = q.Encode()
 
-	// Add the request to the details
-	details.RawRequest = req
 	requestDump, err := httputil.DumpRequestOut(req, true)
 	if err != nil {
 		return &details, err
