@@ -278,3 +278,75 @@ func TestRedactSensitiveValueIgnoresEmptyValue(t *testing.T) {
 		t.Fatalf("expected empty sensitive value to leave request dump unchanged, but saw: %s", got)
 	}
 }
+
+func TestSanitizeRequestDumpRedactsHeadersAndSecretJSONFields(t *testing.T) {
+	requestDump := "POST /certificates HTTP/1.1\r\nX-SF-TOKEN: token-123\r\nContent-Type: application/json\r\n\r\n" +
+		`{"certificate":{"publicKey":{"content":"public-secret"},"privateKey":{"content":"private-secret","password":"password-secret"}}}`
+
+	sanitized := sanitizeRequestDump(requestDump, "token-123", "/certificates")
+
+	for _, secret := range []string{"token-123", "public-secret", "private-secret", "password-secret"} {
+		if strings.Contains(sanitized, secret) {
+			t.Fatalf("sanitized request dump leaked %q: %s", secret, sanitized)
+		}
+	}
+	for _, redacted := range []string{`"content":"[REDACTED]"`, `"password":"[REDACTED]"`, "X-SF-TOKEN: [REDACTED]"} {
+		if !strings.Contains(sanitized, redacted) {
+			t.Fatalf("sanitized request dump missing %q: %s", redacted, sanitized)
+		}
+	}
+}
+
+func TestSanitizeRequestDumpRedactsHeaderCookieAndAuthenticationValues(t *testing.T) {
+	requestDump := "PUT /tests/browser/123 HTTP/1.1\r\nX-Sf-Token: token-abc\r\n\r\n" +
+		`{"test":{"advancedSettings":{"headers":[{"name":"Authorization","value":"Bearer secret"}],"cookies":[{"name":"session","value":"cookie-secret"}],"authentication":{"password":"auth-secret"}}}}`
+
+	sanitized := sanitizeRequestDump(requestDump, "token-abc", "/tests/browser/123")
+
+	for _, secret := range []string{"token-abc", "Bearer secret", "cookie-secret", "auth-secret"} {
+		if strings.Contains(sanitized, secret) {
+			t.Fatalf("sanitized request dump leaked %q: %s", secret, sanitized)
+		}
+	}
+	for _, redacted := range []string{`"value":"[REDACTED]"`, `"password":"[REDACTED]"`, "X-Sf-Token: [REDACTED]"} {
+		if !strings.Contains(sanitized, redacted) {
+			t.Fatalf("sanitized request dump missing %q: %s", redacted, sanitized)
+		}
+	}
+}
+
+func TestMakePublicAPICallDoesNotExposeRawRequest(t *testing.T) {
+	testMux = http.NewServeMux()
+	testServer = httptest.NewServer(testMux)
+	defer testServer.Close()
+
+	testMux.HandleFunc("/certificates", func(w http.ResponseWriter, r *http.Request) {
+		w.WriteHeader(http.StatusOK)
+		w.Write([]byte(`{}`))
+	})
+
+	apiKey := "secret-api-key"
+	certificateContent := "private-certificate-material"
+	testConfigurableClient := NewConfigurableClient(apiKey, "realm", ClientArgs{
+		publicBaseUrl: testServer.URL,
+	})
+
+	requestBody := `{"certificate":{"publicKey":{"content":"` + certificateContent + `"}}}`
+	details, err := testConfigurableClient.makePublicAPICall("POST", "/certificates", bytes.NewBufferString(requestBody), nil)
+	if err != nil {
+		t.Fatalf("expected no error, but saw: %s", err.Error())
+	}
+
+	if details.RawRequest != nil {
+		t.Fatal("expected RawRequest to be nil; RequestBody is the supported sanitized debug representation")
+	}
+	if strings.Contains(details.RequestBody, apiKey) {
+		t.Fatalf("expected request details to redact API key, but found it in: %s", details.RequestBody)
+	}
+	if strings.Contains(details.RequestBody, certificateContent) {
+		t.Fatalf("expected request details to redact certificate content, but found it in: %s", details.RequestBody)
+	}
+	if !strings.Contains(details.RequestBody, `"content":"[REDACTED]"`) {
+		t.Fatalf("expected sanitized RequestBody to include redacted content field, but saw: %s", details.RequestBody)
+	}
+}

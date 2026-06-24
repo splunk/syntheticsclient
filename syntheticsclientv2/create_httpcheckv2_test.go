@@ -19,9 +19,10 @@ package syntheticsclientv2
 
 import (
 	"encoding/json"
-	"fmt"
+	"io"
 	"net/http"
 	"reflect"
+	"strings"
 	"testing"
 )
 
@@ -36,7 +37,17 @@ func TestCreateHttpCheckV2(t *testing.T) {
 
 	testMux.HandleFunc("/tests/http", func(w http.ResponseWriter, r *http.Request) {
 		testMethod(t, r, "POST")
-		_, err := w.Write([]byte(createHttpCheckV2Body))
+		requestBody, err := io.ReadAll(r.Body)
+		if err != nil {
+			t.Fatal(err)
+		}
+		if !strings.Contains(string(requestBody), `"certificateId":123`) {
+			t.Fatalf("request body missing certificateId: %s", requestBody)
+		}
+		if strings.Contains(string(requestBody), "certificate_id") {
+			t.Fatalf("request body contains internal certificate_id field: %s", requestBody)
+		}
+		_, err = w.Write([]byte(createHttpCheckV2Body))
 		if err != nil {
 			t.Fatal(err)
 		}
@@ -46,14 +57,13 @@ func TestCreateHttpCheckV2(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
+	inputHttpCheckV2Data.Test.CertificateID = NewNullableInt(123)
 
 	resp, _, err := testClient.CreateHttpCheckV2(&inputHttpCheckV2Data)
 
 	if err != nil {
 		t.Fatal(err)
 	}
-
-	fmt.Println(resp)
 
 	if !reflect.DeepEqual(resp.Test.Name, inputHttpCheckV2Data.Test.Name) {
 		t.Errorf("returned \n\n%#v want \n\n%#v", resp.Test.Name, inputHttpCheckV2Data.Test.Name)
