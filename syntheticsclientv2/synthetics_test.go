@@ -351,17 +351,19 @@ func TestSanitizeRequestDumpRedactsAPIAndHTTPCheckBodyFields(t *testing.T) {
 
 func TestSanitizeRequestDumpRedactsURLQueryValues(t *testing.T) {
 	requestDump := "POST /tests/http?trace=client-query-secret&limit=25 HTTP/1.1\r\nHost: example.com\r\nX-SF-TOKEN: client-api-key\r\n\r\n" +
-		`{"test":{"url":"https://target.example/login?token=url-token-secret&tenant=tenant-secret","requests":[{"configuration":{"url":"https://api.example/search?api_key=api-url-secret&q=customer-secret"}}]}}`
+		`{"test":{"startUrl":"https://browser.example/start?login_token=browser-start-token&continue=browser-start-continue","url":"https://target.example/login?token=url-token-secret&tenant=tenant-secret","requests":[{"configuration":{"url":"https://api.example/search?api_key=api-url-secret&q=customer-secret"}}]}}`
 
 	sanitized := sanitizeRequestDump(requestDump, "client-api-key", "/tests/http")
 
-	for _, secret := range []string{"client-api-key", "client-query-secret", "25", "url-token-secret", "tenant-secret", "api-url-secret", "customer-secret"} {
+	for _, secret := range []string{"client-api-key", "client-query-secret", "25", "browser-start-token", "browser-start-continue", "url-token-secret", "tenant-secret", "api-url-secret", "customer-secret"} {
 		if strings.Contains(sanitized, secret) {
 			t.Fatalf("sanitized request dump leaked %q: %s", secret, sanitized)
 		}
 	}
 	for _, redacted := range []string{
 		"/tests/http?trace=[REDACTED]&limit=[REDACTED]",
+		"login_token=[REDACTED]",
+		"continue=[REDACTED]",
 		"token=[REDACTED]",
 		"tenant=[REDACTED]",
 		"api_key=[REDACTED]",

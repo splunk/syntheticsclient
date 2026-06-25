@@ -225,7 +225,7 @@ func redactSensitiveJSONFields(value interface{}) {
 				typedValue[key] = "[REDACTED]"
 				continue
 			}
-			if strings.EqualFold(key, "url") {
+			if isURLFieldName(key) {
 				if urlValue, ok := nestedValue.(string); ok {
 					typedValue[key] = redactURLQueryValues(urlValue)
 					continue
@@ -264,6 +264,11 @@ func isSensitiveHeaderName(key string) bool {
 	return strings.Contains(lowerKey, "token") ||
 		strings.Contains(lowerKey, "secret") ||
 		strings.Contains(lowerKey, "password")
+}
+
+func isURLFieldName(key string) bool {
+	lowerKey := strings.ToLower(key)
+	return lowerKey == "url" || strings.HasSuffix(lowerKey, "url")
 }
 
 func redactURLQueryValues(rawURL string) string {
