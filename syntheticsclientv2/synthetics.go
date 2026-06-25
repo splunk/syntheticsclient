@@ -272,20 +272,21 @@ func isURLFieldName(key string) bool {
 }
 
 func redactURLQueryValues(rawURL string) string {
-	queryStart := strings.Index(rawURL, "?")
-	if queryStart == -1 || queryStart == len(rawURL)-1 {
-		return rawURL
+	redactedURL := redactURLUserinfo(rawURL)
+	queryStart := strings.Index(redactedURL, "?")
+	if queryStart == -1 || queryStart == len(redactedURL)-1 {
+		return redactedURL
 	}
 
-	prefix := rawURL[:queryStart+1]
-	query := rawURL[queryStart+1:]
+	prefix := redactedURL[:queryStart+1]
+	query := redactedURL[queryStart+1:]
 	fragment := ""
 	if fragmentStart := strings.Index(query, "#"); fragmentStart != -1 {
 		fragment = query[fragmentStart:]
 		query = query[:fragmentStart]
 	}
 	if query == "" {
-		return rawURL
+		return redactedURL
 	}
 
 	queryParts := strings.Split(query, "&")
@@ -305,6 +306,31 @@ func redactURLQueryValues(rawURL string) string {
 	}
 
 	return prefix + strings.Join(queryParts, "&") + fragment
+}
+
+func redactURLUserinfo(rawURL string) string {
+	authorityStart := strings.Index(rawURL, "://")
+	if authorityStart == -1 {
+		if !strings.HasPrefix(rawURL, "//") {
+			return rawURL
+		}
+		authorityStart = 2
+	} else {
+		authorityStart += len("://")
+	}
+
+	authorityEnd := len(rawURL)
+	for _, separator := range []string{"/", "?", "#"} {
+		if index := strings.Index(rawURL[authorityStart:], separator); index != -1 && authorityStart+index < authorityEnd {
+			authorityEnd = authorityStart + index
+		}
+	}
+
+	if atSign := strings.LastIndex(rawURL[authorityStart:authorityEnd], "@"); atSign != -1 {
+		return rawURL[:authorityStart] + "[REDACTED]@" + rawURL[authorityStart+atSign+1:]
+	}
+
+	return rawURL
 }
 
 func NewClientArgs(timeout int, baseUrl string) ClientArgs {
