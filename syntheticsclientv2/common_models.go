@@ -109,38 +109,6 @@ type Advancedsettings struct {
 	CertificateIDs            []int            `json:"certificateIds,omitempty"`
 }
 
-func (a Advancedsettings) MarshalJSON() ([]byte, error) {
-	type advancedsettingsJSON struct {
-		Authentication            *Authentication  `json:"authentication"`
-		Cookiesv2                 []Cookiesv2      `json:"cookies"`
-		BrowserHeaders            []BrowserHeaders `json:"headers"`
-		HostOverrides             []HostOverrides  `json:"hostOverrides"`
-		UserAgent                 *string          `json:"userAgent"`
-		CollectInteractiveMetrics bool             `json:"collectInteractiveMetrics"`
-		Verifycertificates        bool             `json:"verifyCertificates"`
-		ChromeFlags               []ChromeFlag     `json:"chromeFlags"`
-		ExcludedFiles             []ExcludedFile   `json:"excludedFiles"`
-		CertificateIDs            *[]int           `json:"certificateIds,omitempty"`
-	}
-
-	advancedsettings := advancedsettingsJSON{
-		Authentication:            a.Authentication,
-		Cookiesv2:                 a.Cookiesv2,
-		BrowserHeaders:            a.BrowserHeaders,
-		HostOverrides:             a.HostOverrides,
-		UserAgent:                 a.UserAgent,
-		CollectInteractiveMetrics: a.CollectInteractiveMetrics,
-		Verifycertificates:        a.Verifycertificates,
-		ChromeFlags:               a.ChromeFlags,
-		ExcludedFiles:             a.ExcludedFiles,
-	}
-	if a.CertificateIDs != nil {
-		advancedsettings.CertificateIDs = &a.CertificateIDs
-	}
-
-	return json.Marshal(advancedsettings)
-}
-
 type ChromeFlag struct {
 	Name  string `json:"name"`
 	Value string `json:"value"`
@@ -857,6 +825,70 @@ type BrowserCheckV2Input struct {
 		Customproperties   []CustomProperties `json:"customProperties"`
 		Automaticretries   int                `json:"automaticRetries"`
 	} `json:"test"`
+}
+
+func (b BrowserCheckV2Input) MarshalJSON() ([]byte, error) {
+	type advancedSettingsJSON struct {
+		Authentication            *Authentication  `json:"authentication"`
+		Cookiesv2                 []Cookiesv2      `json:"cookies"`
+		BrowserHeaders            []BrowserHeaders `json:"headers"`
+		HostOverrides             []HostOverrides  `json:"hostOverrides"`
+		UserAgent                 *string          `json:"userAgent"`
+		CollectInteractiveMetrics bool             `json:"collectInteractiveMetrics"`
+		Verifycertificates        bool             `json:"verifyCertificates"`
+		ChromeFlags               []ChromeFlag     `json:"chromeFlags"`
+		ExcludedFiles             []ExcludedFile   `json:"excludedFiles"`
+		CertificateIDs            *[]int           `json:"certificateIds,omitempty"`
+	}
+
+	type browserCheckV2InputTestJSON struct {
+		Name               string               `json:"name"`
+		Transactions       []Transactions       `json:"transactions"`
+		Urlprotocol        string               `json:"urlProtocol"`
+		Starturl           string               `json:"startUrl"`
+		LocationIds        []string             `json:"locationIds"`
+		DeviceID           int                  `json:"deviceId"`
+		Frequency          int                  `json:"frequency"`
+		Schedulingstrategy string               `json:"schedulingStrategy"`
+		Active             bool                 `json:"active"`
+		Advancedsettings   advancedSettingsJSON `json:"advancedSettings,omitempty"`
+		Customproperties   []CustomProperties   `json:"customProperties"`
+		Automaticretries   int                  `json:"automaticRetries"`
+	}
+
+	advancedSettings := advancedSettingsJSON{
+		Authentication:            b.Test.Authentication,
+		Cookiesv2:                 b.Test.Cookiesv2,
+		BrowserHeaders:            b.Test.BrowserHeaders,
+		HostOverrides:             b.Test.HostOverrides,
+		UserAgent:                 b.Test.UserAgent,
+		CollectInteractiveMetrics: b.Test.CollectInteractiveMetrics,
+		Verifycertificates:        b.Test.Verifycertificates,
+		ChromeFlags:               b.Test.ChromeFlags,
+		ExcludedFiles:             b.Test.ExcludedFiles,
+	}
+	if b.Test.CertificateIDs != nil {
+		advancedSettings.CertificateIDs = &b.Test.CertificateIDs
+	}
+
+	return json.Marshal(struct {
+		Test browserCheckV2InputTestJSON `json:"test"`
+	}{
+		Test: browserCheckV2InputTestJSON{
+			Name:               b.Test.Name,
+			Transactions:       b.Test.Transactions,
+			Urlprotocol:        b.Test.Urlprotocol,
+			Starturl:           b.Test.Starturl,
+			LocationIds:        b.Test.LocationIds,
+			DeviceID:           b.Test.DeviceID,
+			Frequency:          b.Test.Frequency,
+			Schedulingstrategy: b.Test.Schedulingstrategy,
+			Active:             b.Test.Active,
+			Advancedsettings:   advancedSettings,
+			Customproperties:   b.Test.Customproperties,
+			Automaticretries:   b.Test.Automaticretries,
+		},
+	})
 }
 
 type BrowserCheckV2Response struct {

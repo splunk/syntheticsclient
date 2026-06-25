@@ -23,7 +23,6 @@ import (
 	"io"
 	"net/http"
 	"reflect"
-	"strings"
 	"testing"
 )
 
@@ -61,14 +60,73 @@ func captureUpdateBrowserCheckV2RequestBody(t *testing.T, input BrowserCheckV2In
 	return requestBody
 }
 
+func browserCheckV2RequestTestPayload(t *testing.T, requestBody string) map[string]interface{} {
+	t.Helper()
+
+	var payload map[string]interface{}
+	if err := json.Unmarshal([]byte(requestBody), &payload); err != nil {
+		t.Fatalf("expected request body to be valid JSON, but saw error %s for body: %s", err, requestBody)
+	}
+
+	testPayload, ok := payload["test"].(map[string]interface{})
+	if !ok {
+		t.Fatalf("expected request body to contain test object, but saw: %s", requestBody)
+	}
+
+	return testPayload
+}
+
+func browserCheckV2RequestAdvancedSettingsPayload(t *testing.T, requestBody string) map[string]interface{} {
+	t.Helper()
+
+	testPayload := browserCheckV2RequestTestPayload(t, requestBody)
+	if _, ok := testPayload["certificateIds"]; ok {
+		t.Fatalf("expected certificateIds under advancedSettings, not directly under test: %s", requestBody)
+	}
+
+	advancedSettings, ok := testPayload["advancedSettings"].(map[string]interface{})
+	if !ok {
+		t.Fatalf("expected request body to contain advancedSettings object, but saw: %s", requestBody)
+	}
+
+	return advancedSettings
+}
+
+func assertBrowserCheckV2RequestCertificateIDs(t *testing.T, advancedSettings map[string]interface{}, expected []int) {
+	t.Helper()
+
+	certificateIDs, ok := advancedSettings["certificateIds"].([]interface{})
+	if !ok {
+		t.Fatalf("expected advancedSettings.certificateIds array, but saw: %#v", advancedSettings["certificateIds"])
+	}
+	if len(certificateIDs) != len(expected) {
+		t.Fatalf("expected %d certificateIds, but saw %d: %#v", len(expected), len(certificateIDs), certificateIDs)
+	}
+	for i, expectedID := range expected {
+		actualID, ok := certificateIDs[i].(float64)
+		if !ok || int(actualID) != expectedID {
+			t.Fatalf("expected certificateIds[%d] to be %d, but saw %#v", i, expectedID, certificateIDs[i])
+		}
+	}
+}
+
 func TestUpdateBrowserCheckV2OmitsUnsetCertificateIDs(t *testing.T) {
 	input := BrowserCheckV2Input{}
 	input.Test.Name = "browser-without-certs"
 
 	requestBody := captureUpdateBrowserCheckV2RequestBody(t, input)
 
-	if strings.Contains(requestBody, "certificateIds") {
-		t.Fatalf("expected request body to omit unset certificateIds, but saw: %s", requestBody)
+	testPayload := browserCheckV2RequestTestPayload(t, requestBody)
+	if got := testPayload["name"]; got != "browser-without-certs" {
+		t.Fatalf("expected request body to preserve browser test name, but saw %#v in body: %s", got, requestBody)
+	}
+	if _, ok := testPayload["certificateIds"]; ok {
+		t.Fatalf("expected request body to omit certificateIds directly under test, but saw: %s", requestBody)
+	}
+	if advancedSettings, ok := testPayload["advancedSettings"].(map[string]interface{}); ok {
+		if _, ok := advancedSettings["certificateIds"]; ok {
+			t.Fatalf("expected request body to omit unset advancedSettings.certificateIds, but saw: %s", requestBody)
+		}
 	}
 }
 
@@ -80,12 +138,12 @@ func TestUpdateBrowserCheckV2SerializesEmptyCertificateIDs(t *testing.T) {
 
 	requestBody := captureUpdateBrowserCheckV2RequestBody(t, input)
 
-	if !strings.Contains(requestBody, `"certificateIds":[]`) {
-		t.Fatalf("expected request body to include empty certificateIds array, but saw: %s", requestBody)
+	testPayload := browserCheckV2RequestTestPayload(t, requestBody)
+	if got := testPayload["name"]; got != "browser-clear-certs" {
+		t.Fatalf("expected request body to preserve browser test name, but saw %#v in body: %s", got, requestBody)
 	}
-	if strings.Contains(requestBody, `"certificateIds":null`) {
-		t.Fatalf("expected empty certificateIds array, not null, but saw: %s", requestBody)
-	}
+	advancedSettings := browserCheckV2RequestAdvancedSettingsPayload(t, requestBody)
+	assertBrowserCheckV2RequestCertificateIDs(t, advancedSettings, []int{})
 }
 
 func TestUpdateBrowserCheckV2SerializesCertificateIDs(t *testing.T) {
@@ -96,9 +154,12 @@ func TestUpdateBrowserCheckV2SerializesCertificateIDs(t *testing.T) {
 
 	requestBody := captureUpdateBrowserCheckV2RequestBody(t, input)
 
-	if !strings.Contains(requestBody, `"certificateIds":[123]`) {
-		t.Fatalf("expected request body to include populated certificateIds array, but saw: %s", requestBody)
+	testPayload := browserCheckV2RequestTestPayload(t, requestBody)
+	if got := testPayload["name"]; got != "browser-attach-certs" {
+		t.Fatalf("expected request body to preserve browser test name, but saw %#v in body: %s", got, requestBody)
 	}
+	advancedSettings := browserCheckV2RequestAdvancedSettingsPayload(t, requestBody)
+	assertBrowserCheckV2RequestCertificateIDs(t, advancedSettings, []int{123})
 }
 
 func TestUpdateBrowserCheckV2(t *testing.T) {
