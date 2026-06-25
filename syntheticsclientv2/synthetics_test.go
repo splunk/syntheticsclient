@@ -333,6 +333,46 @@ func TestSanitizeRequestDumpRedactsAllAPIHeaderMapValues(t *testing.T) {
 	}
 }
 
+func TestSanitizeRequestDumpRedactsAPIAndHTTPCheckBodyFields(t *testing.T) {
+	requestDump := "POST /tests/api HTTP/1.1\r\nHost: example.com\r\nX-SF-TOKEN: client-api-key\r\n\r\n" +
+		`{"test":{"requests":[{"configuration":{"name":"login","body":"client_secret=api-body-secret&password=api-password-secret"}}],"body":"password=http-body-secret"}}`
+
+	sanitized := sanitizeRequestDump(requestDump, "client-api-key", "/tests/api")
+
+	for _, secret := range []string{"client-api-key", "api-body-secret", "api-password-secret", "http-body-secret"} {
+		if strings.Contains(sanitized, secret) {
+			t.Fatalf("sanitized request dump leaked %q: %s", secret, sanitized)
+		}
+	}
+	if got := strings.Count(sanitized, `"body":"[REDACTED]"`); got != 2 {
+		t.Fatalf("expected both API and HTTP check body fields to be redacted, saw %d redactions in: %s", got, sanitized)
+	}
+}
+
+func TestSanitizeRequestDumpRedactsURLQueryValues(t *testing.T) {
+	requestDump := "POST /tests/http?trace=client-query-secret&limit=25 HTTP/1.1\r\nHost: example.com\r\nX-SF-TOKEN: client-api-key\r\n\r\n" +
+		`{"test":{"url":"https://target.example/login?token=url-token-secret&tenant=tenant-secret","requests":[{"configuration":{"url":"https://api.example/search?api_key=api-url-secret&q=customer-secret"}}]}}`
+
+	sanitized := sanitizeRequestDump(requestDump, "client-api-key", "/tests/http")
+
+	for _, secret := range []string{"client-api-key", "client-query-secret", "25", "url-token-secret", "tenant-secret", "api-url-secret", "customer-secret"} {
+		if strings.Contains(sanitized, secret) {
+			t.Fatalf("sanitized request dump leaked %q: %s", secret, sanitized)
+		}
+	}
+	for _, redacted := range []string{
+		"/tests/http?trace=[REDACTED]&limit=[REDACTED]",
+		"token=[REDACTED]",
+		"tenant=[REDACTED]",
+		"api_key=[REDACTED]",
+		"q=[REDACTED]",
+	} {
+		if !strings.Contains(sanitized, redacted) {
+			t.Fatalf("sanitized request dump missing %q: %s", redacted, sanitized)
+		}
+	}
+}
+
 func TestMakePublicAPICallDoesNotExposeRawRequest(t *testing.T) {
 	testMux = http.NewServeMux()
 	testServer = httptest.NewServer(testMux)

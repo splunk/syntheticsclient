@@ -63,6 +63,7 @@ func (c Client) String() string {
 }
 
 var sensitiveJSONFieldNames = map[string]struct{}{
+	"body":     {},
 	"content":  {},
 	"password": {},
 	"value":    {},
@@ -146,7 +147,33 @@ func redactSensitiveValue(value string, sensitiveValue string) string {
 
 func sanitizeRequestDump(requestDump string, apiKey string, _ string) string {
 	sanitizedRequestDump := redactSensitiveValue(requestDump, apiKey)
+	sanitizedRequestDump = redactRequestDumpURLQuery(sanitizedRequestDump)
 	return redactSensitiveRequestBody(sanitizedRequestDump)
+}
+
+func redactRequestDumpURLQuery(requestDump string) string {
+	lineEnd := strings.Index(requestDump, "\n")
+	if lineEnd == -1 {
+		return redactRequestLineURLQuery(requestDump)
+	}
+
+	return redactRequestLineURLQuery(requestDump[:lineEnd]) + requestDump[lineEnd:]
+}
+
+func redactRequestLineURLQuery(requestLine string) string {
+	lineSuffix := ""
+	if strings.HasSuffix(requestLine, "\r") {
+		requestLine = strings.TrimSuffix(requestLine, "\r")
+		lineSuffix = "\r"
+	}
+
+	requestLineParts := strings.SplitN(requestLine, " ", 3)
+	if len(requestLineParts) != 3 {
+		return requestLine + lineSuffix
+	}
+
+	requestLineParts[1] = redactURLQueryValues(requestLineParts[1])
+	return strings.Join(requestLineParts, " ") + lineSuffix
 }
 
 func redactSensitiveRequestBody(requestDump string) string {
@@ -197,6 +224,12 @@ func redactSensitiveJSONFields(value interface{}) {
 				typedValue[key] = "[REDACTED]"
 				continue
 			}
+			if strings.EqualFold(key, "url") {
+				if urlValue, ok := nestedValue.(string); ok {
+					typedValue[key] = redactURLQueryValues(urlValue)
+					continue
+				}
+			}
 			if strings.EqualFold(key, "headers") {
 				redactHeaderValues(nestedValue)
 				continue
@@ -230,6 +263,42 @@ func isSensitiveHeaderName(key string) bool {
 	return strings.Contains(lowerKey, "token") ||
 		strings.Contains(lowerKey, "secret") ||
 		strings.Contains(lowerKey, "password")
+}
+
+func redactURLQueryValues(rawURL string) string {
+	queryStart := strings.Index(rawURL, "?")
+	if queryStart == -1 || queryStart == len(rawURL)-1 {
+		return rawURL
+	}
+
+	prefix := rawURL[:queryStart+1]
+	query := rawURL[queryStart+1:]
+	fragment := ""
+	if fragmentStart := strings.Index(query, "#"); fragmentStart != -1 {
+		fragment = query[fragmentStart:]
+		query = query[:fragmentStart]
+	}
+	if query == "" {
+		return rawURL
+	}
+
+	queryParts := strings.Split(query, "&")
+	for i, queryPart := range queryParts {
+		if queryPart == "" {
+			continue
+		}
+		key := queryPart
+		if equalSign := strings.Index(queryPart, "="); equalSign != -1 {
+			key = queryPart[:equalSign]
+		}
+		if key == "" {
+			queryParts[i] = "[REDACTED]"
+			continue
+		}
+		queryParts[i] = key + "=[REDACTED]"
+	}
+
+	return prefix + strings.Join(queryParts, "&") + fragment
 }
 
 func NewClientArgs(timeout int, baseUrl string) ClientArgs {
