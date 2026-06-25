@@ -66,6 +66,7 @@ var sensitiveJSONFieldNames = map[string]struct{}{
 	"body":     {},
 	"content":  {},
 	"password": {},
+	"username": {},
 	"value":    {},
 }
 
