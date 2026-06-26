@@ -162,6 +162,75 @@ func TestUpdateBrowserCheckV2SerializesCertificateIDs(t *testing.T) {
 	assertBrowserCheckV2RequestCertificateIDs(t, advancedSettings, []int{123})
 }
 
+func TestUpdateBrowserCheckV2PreservesAdvancedSettingsFields(t *testing.T) {
+	userAgent := "syntheticsclient-test-agent"
+	input := BrowserCheckV2Input{}
+	input.Test.Name = "browser-advanced-settings"
+	input.Test.Authentication = &Authentication{
+		Username: "browser-user",
+		Password: "browser-password",
+	}
+	input.Test.Cookiesv2 = []Cookiesv2{
+		{
+			Key:    "session",
+			Value:  "cookie-value",
+			Domain: "example.com",
+			Path:   "/",
+		},
+	}
+	input.Test.BrowserHeaders = []BrowserHeaders{
+		{
+			Name:   "X-Test-Header",
+			Value:  "header-value",
+			Domain: "example.com",
+		},
+	}
+	input.Test.HostOverrides = []HostOverrides{
+		{
+			Source:         "source.example.com",
+			Target:         "target.example.com",
+			KeepHostHeader: true,
+		},
+	}
+	input.Test.UserAgent = &userAgent
+	input.Test.CollectInteractiveMetrics = true
+	input.Test.Verifycertificates = true
+	input.Test.ChromeFlags = []ChromeFlag{
+		{
+			Name:  "--proxy-bypass-list",
+			Value: "127.0.0.1:8080",
+		},
+	}
+	input.Test.ExcludedFiles = []ExcludedFile{
+		{
+			Type:  "custom",
+			Regex: "example.com",
+		},
+	}
+
+	requestBody := captureUpdateBrowserCheckV2RequestBody(t, input)
+
+	advancedSettings := browserCheckV2RequestAdvancedSettingsPayload(t, requestBody)
+	expectedAdvancedSettingsJSON, err := json.Marshal(input.Test.Advancedsettings)
+	if err != nil {
+		t.Fatal(err)
+	}
+	var expectedAdvancedSettings map[string]interface{}
+	if err := json.Unmarshal(expectedAdvancedSettingsJSON, &expectedAdvancedSettings); err != nil {
+		t.Fatal(err)
+	}
+
+	for key, expected := range expectedAdvancedSettings {
+		actual, ok := advancedSettings[key]
+		if !ok {
+			t.Fatalf("expected advancedSettings.%s to be preserved in request body: %s", key, requestBody)
+		}
+		if !reflect.DeepEqual(actual, expected) {
+			t.Fatalf("expected advancedSettings.%s to be %#v, but saw %#v in body: %s", key, expected, actual, requestBody)
+		}
+	}
+}
+
 func TestUpdateBrowserCheckV2(t *testing.T) {
 	setup()
 	defer teardown()

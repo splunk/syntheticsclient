@@ -829,16 +829,8 @@ type BrowserCheckV2Input struct {
 
 func (b BrowserCheckV2Input) MarshalJSON() ([]byte, error) {
 	type advancedSettingsJSON struct {
-		Authentication            *Authentication  `json:"authentication"`
-		Cookiesv2                 []Cookiesv2      `json:"cookies"`
-		BrowserHeaders            []BrowserHeaders `json:"headers"`
-		HostOverrides             []HostOverrides  `json:"hostOverrides"`
-		UserAgent                 *string          `json:"userAgent"`
-		CollectInteractiveMetrics bool             `json:"collectInteractiveMetrics"`
-		Verifycertificates        bool             `json:"verifyCertificates"`
-		ChromeFlags               []ChromeFlag     `json:"chromeFlags"`
-		ExcludedFiles             []ExcludedFile   `json:"excludedFiles"`
-		CertificateIDs            *[]int           `json:"certificateIds,omitempty"`
+		Advancedsettings
+		CertificateIDs *[]int `json:"certificateIds,omitempty"`
 	}
 
 	type browserCheckV2InputTestJSON struct {
@@ -856,17 +848,7 @@ func (b BrowserCheckV2Input) MarshalJSON() ([]byte, error) {
 		Automaticretries   int                  `json:"automaticRetries"`
 	}
 
-	advancedSettings := advancedSettingsJSON{
-		Authentication:            b.Test.Authentication,
-		Cookiesv2:                 b.Test.Cookiesv2,
-		BrowserHeaders:            b.Test.BrowserHeaders,
-		HostOverrides:             b.Test.HostOverrides,
-		UserAgent:                 b.Test.UserAgent,
-		CollectInteractiveMetrics: b.Test.CollectInteractiveMetrics,
-		Verifycertificates:        b.Test.Verifycertificates,
-		ChromeFlags:               b.Test.ChromeFlags,
-		ExcludedFiles:             b.Test.ExcludedFiles,
-	}
+	advancedSettings := advancedSettingsJSON{Advancedsettings: b.Test.Advancedsettings}
 	if b.Test.CertificateIDs != nil {
 		advancedSettings.CertificateIDs = &b.Test.CertificateIDs
 	}
