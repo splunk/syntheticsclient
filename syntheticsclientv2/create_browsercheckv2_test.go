@@ -41,11 +41,15 @@ func TestCreateBrowserCheckV2(t *testing.T) {
 		if err != nil {
 			t.Fatal(err)
 		}
-		if !strings.Contains(string(requestBody), `"certificateIds":[123]`) {
-			t.Fatalf("request body missing certificateIds: %s", requestBody)
+		requestBodyString := string(requestBody)
+		testPayload := browserCheckV2RequestTestPayload(t, requestBodyString)
+		if got := testPayload["name"]; got != "browser-beep-test" {
+			t.Fatalf("expected request body to preserve browser test name, but saw %#v in body: %s", got, requestBodyString)
 		}
-		if strings.Contains(string(requestBody), "certificate_ids") {
-			t.Fatalf("request body contains internal certificate_ids field: %s", requestBody)
+		advancedSettings := browserCheckV2RequestAdvancedSettingsPayload(t, requestBodyString)
+		assertBrowserCheckV2RequestCertificateIDs(t, advancedSettings, []int{123})
+		if strings.Contains(requestBodyString, "certificate_ids") {
+			t.Fatalf("request body contains internal certificate_ids field: %s", requestBodyString)
 		}
 		_, err = w.Write([]byte(createBrowserCheckV2Body))
 		if err != nil {

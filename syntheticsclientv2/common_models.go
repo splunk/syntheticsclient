@@ -827,6 +827,52 @@ type BrowserCheckV2Input struct {
 	} `json:"test"`
 }
 
+func (b BrowserCheckV2Input) MarshalJSON() ([]byte, error) {
+	type advancedSettingsJSON struct {
+		Advancedsettings
+		CertificateIDs *[]int `json:"certificateIds,omitempty"`
+	}
+
+	type browserCheckV2InputTestJSON struct {
+		Name               string               `json:"name"`
+		Transactions       []Transactions       `json:"transactions"`
+		Urlprotocol        string               `json:"urlProtocol"`
+		Starturl           string               `json:"startUrl"`
+		LocationIds        []string             `json:"locationIds"`
+		DeviceID           int                  `json:"deviceId"`
+		Frequency          int                  `json:"frequency"`
+		Schedulingstrategy string               `json:"schedulingStrategy"`
+		Active             bool                 `json:"active"`
+		Advancedsettings   advancedSettingsJSON `json:"advancedSettings,omitempty"`
+		Customproperties   []CustomProperties   `json:"customProperties"`
+		Automaticretries   int                  `json:"automaticRetries"`
+	}
+
+	advancedSettings := advancedSettingsJSON{Advancedsettings: b.Test.Advancedsettings}
+	if b.Test.CertificateIDs != nil {
+		advancedSettings.CertificateIDs = &b.Test.CertificateIDs
+	}
+
+	return json.Marshal(struct {
+		Test browserCheckV2InputTestJSON `json:"test"`
+	}{
+		Test: browserCheckV2InputTestJSON{
+			Name:               b.Test.Name,
+			Transactions:       b.Test.Transactions,
+			Urlprotocol:        b.Test.Urlprotocol,
+			Starturl:           b.Test.Starturl,
+			LocationIds:        b.Test.LocationIds,
+			DeviceID:           b.Test.DeviceID,
+			Frequency:          b.Test.Frequency,
+			Schedulingstrategy: b.Test.Schedulingstrategy,
+			Active:             b.Test.Active,
+			Advancedsettings:   advancedSettings,
+			Customproperties:   b.Test.Customproperties,
+			Automaticretries:   b.Test.Automaticretries,
+		},
+	})
+}
+
 type BrowserCheckV2Response struct {
 	Test BrowserCheckV2ResponseTest `json:"test"`
 }
