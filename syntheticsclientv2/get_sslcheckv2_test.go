@@ -25,8 +25,10 @@ import (
 	"testing"
 )
 
+const getSslCheckV2LastRunID = "77ff08f0-3865-42d8-9fff-3efb7c25e176"
+
 var (
-	getSslCheckV2Body  = `{"test":{"id":1647,"type":"ssl","name":"ssl-check","frequency":5,"schedulingStrategy":"round_robin","active":true,"locationIds":["aws-us-east-1"],"createdAt":"2022-09-14T14:35:37.801Z","updatedAt":"2022-09-14T14:35:38.099Z","createdBy":"abc1234","updatedBy":"abc1234","customProperties":[{"key":"env","value":"prod"}],"automaticRetries":1,"lastRunStatus":"success","lastRunAt":"2024-03-07T00:47:43.741Z","lastRunCoreMetricsPublishedAt":"2024-03-07T00:47:43.741Z","lastRunLocationId":"aws-us-east-1","lastRunId":999,"host":"www.splunk.com","port":443,"serverName":"www.splunk.com","allowSelfSigned":true,"allowUntrustedRoot":false,"caCertificateId":42,"validations":[{"name":"Certificate expires later","type":"assert_numeric","actual":"{{certificate.days_until_expiration}}","expected":"30","comparator":"is_greater_than"}]}}`
+	getSslCheckV2Body  = `{"test":{"id":1647,"type":"ssl","name":"ssl-check","frequency":5,"schedulingStrategy":"round_robin","active":true,"locationIds":["aws-us-east-1"],"createdAt":"2022-09-14T14:35:37.801Z","updatedAt":"2022-09-14T14:35:38.099Z","createdBy":"abc1234","updatedBy":"abc1234","customProperties":[{"key":"env","value":"prod"}],"automaticRetries":1,"lastRunStatus":"success","lastRunAt":"2024-03-07T00:47:43.741Z","lastRunCoreMetricsPublishedAt":"2024-03-07T00:47:43.741Z","lastRunLocationId":"aws-us-east-1","lastRunId":"` + getSslCheckV2LastRunID + `","host":"www.splunk.com","port":443,"serverName":"www.splunk.com","allowSelfSigned":true,"allowUntrustedRoot":false,"caCertificateId":42,"validations":[{"name":"Certificate expires later","type":"assert_numeric","actual":"{{certificate.days_until_expiration}}","expected":"30","comparator":"is_greater_than"}]}}`
 	inputGetSslCheckV2 = verifySslCheckV2Input(string(getSslCheckV2Body))
 )
 
@@ -49,6 +51,9 @@ func TestGetSslCheckV2(t *testing.T) {
 
 	if !reflect.DeepEqual(resp.Test.ID, inputGetSslCheckV2.Test.ID) {
 		t.Errorf("returned \n\n%#v want \n\n%#v", resp.Test.ID, inputGetSslCheckV2.Test.ID)
+	}
+	if resp.Test.LastRunId != getSslCheckV2LastRunID {
+		t.Errorf("returned last run ID %q, want %q", resp.Test.LastRunId, getSslCheckV2LastRunID)
 	}
 	if !reflect.DeepEqual(resp.Test.Name, inputGetSslCheckV2.Test.Name) {
 		t.Errorf("returned \n\n%#v want \n\n%#v", resp.Test.Name, inputGetSslCheckV2.Test.Name)
