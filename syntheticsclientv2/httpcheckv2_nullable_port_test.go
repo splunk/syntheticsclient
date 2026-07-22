@@ -38,7 +38,14 @@ func TestCreateHttpCheckV2WithNullablePortSendsNullPort(t *testing.T) {
 		if string(rawPort) != "null" {
 			t.Fatalf("request body test.port = %s, want null", rawPort)
 		}
-		_, err := w.Write([]byte(`{"test":{"id":11,"name":"nullable-port","type":"http","url":"https://example.com","requestMethod":"GET","port":null}}`))
+		rawCertificateID, ok := fields["certificateId"]
+		if !ok {
+			t.Fatal("request body missing test.certificateId")
+		}
+		if string(rawCertificateID) != "123" {
+			t.Fatalf("request body test.certificateId = %s, want 123", rawCertificateID)
+		}
+		_, err := w.Write([]byte(`{"test":{"id":11,"name":"nullable-port","type":"http","url":"https://example.com","requestMethod":"GET","port":null,"certificateId":123}}`))
 		if err != nil {
 			t.Fatal(err)
 		}
@@ -46,6 +53,7 @@ func TestCreateHttpCheckV2WithNullablePortSendsNullPort(t *testing.T) {
 
 	input := minimalHttpCheckV2InputWithNullablePort()
 	input.Test.Port = *NewNullInt()
+	input.Test.CertificateID = NewNullableInt(123)
 
 	resp, _, err := testClient.CreateHttpCheckV2WithNullablePort(&input)
 	if err != nil {
@@ -53,6 +61,9 @@ func TestCreateHttpCheckV2WithNullablePortSendsNullPort(t *testing.T) {
 	}
 	if resp.Test.Port.Value != nil {
 		t.Fatalf("response port = %#v, want nil", resp.Test.Port.Value)
+	}
+	if resp.Test.CertificateID == nil || resp.Test.CertificateID.Value == nil || *resp.Test.CertificateID.Value != 123 {
+		t.Fatalf("response certificate ID = %#v, want 123", resp.Test.CertificateID)
 	}
 }
 
@@ -70,6 +81,13 @@ func TestUpdateHttpCheckV2WithNullablePortSendsZeroPort(t *testing.T) {
 		if string(rawPort) != "0" {
 			t.Fatalf("request body test.port = %s, want 0", rawPort)
 		}
+		rawCertificateID, ok := fields["certificateId"]
+		if !ok {
+			t.Fatal("request body missing test.certificateId")
+		}
+		if string(rawCertificateID) != "null" {
+			t.Fatalf("request body test.certificateId = %s, want null", rawCertificateID)
+		}
 		_, err := w.Write([]byte(`{"test":{"id":12,"name":"nullable-port","type":"http","url":"https://example.com","requestMethod":"GET","port":0}}`))
 		if err != nil {
 			t.Fatal(err)
@@ -78,6 +96,7 @@ func TestUpdateHttpCheckV2WithNullablePortSendsZeroPort(t *testing.T) {
 
 	input := minimalHttpCheckV2InputWithNullablePort()
 	input.Test.Port = *NewNullableInt(0)
+	input.Test.CertificateID = NewNullInt()
 
 	resp, _, err := testClient.UpdateHttpCheckV2WithNullablePort(12, &input)
 	if err != nil {
@@ -102,7 +121,7 @@ func TestGetHttpCheckV2WithNullablePortPreservesNullAndValue(t *testing.T) {
 		},
 		{
 			name:      "value",
-			body:      `{"test":{"id":13,"name":"nullable-port","type":"http","url":"https://example.com","requestMethod":"GET","port":443}}`,
+			body:      `{"test":{"id":13,"name":"nullable-port","type":"http","url":"https://example.com","requestMethod":"GET","port":443,"certificateId":123}}`,
 			wantValue: 443,
 		},
 	}
@@ -132,6 +151,9 @@ func TestGetHttpCheckV2WithNullablePortPreservesNullAndValue(t *testing.T) {
 			}
 			if resp.Test.Port.Value == nil || *resp.Test.Port.Value != tt.wantValue {
 				t.Fatalf("response port = %#v, want %d", resp.Test.Port.Value, tt.wantValue)
+			}
+			if resp.Test.CertificateID == nil || resp.Test.CertificateID.Value == nil || *resp.Test.CertificateID.Value != 123 {
+				t.Fatalf("response certificate ID = %#v, want 123", resp.Test.CertificateID)
 			}
 		})
 	}
