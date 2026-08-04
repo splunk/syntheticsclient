@@ -159,6 +159,36 @@ func TestGetHttpCheckV2WithNullablePortPreservesNullAndValue(t *testing.T) {
 	}
 }
 
+// SYN-6879 / GitHub #73: clearing all headers must send an explicit empty
+// list so the API removes existing headers, rather than omitting the field.
+func TestUpdateHttpCheckV2WithNullablePortSendsExplicitEmptyHeaders(t *testing.T) {
+	setup()
+	defer teardown()
+
+	testMux.HandleFunc("/tests/http/14", func(w http.ResponseWriter, r *http.Request) {
+		testMethod(t, r, "PUT")
+		fields := readHttpV2NullablePortRequestFields(t, r)
+		rawHeaders, ok := fields["headers"]
+		if !ok {
+			t.Fatal("request body missing test.headers, want explicit empty array")
+		}
+		if string(rawHeaders) != "[]" {
+			t.Fatalf("request body test.headers = %s, want []", rawHeaders)
+		}
+		_, err := w.Write([]byte(`{"test":{"id":14,"name":"nullable-port","type":"http","url":"https://example.com","requestMethod":"GET","port":null}}`))
+		if err != nil {
+			t.Fatal(err)
+		}
+	})
+
+	input := minimalHttpCheckV2InputWithNullablePort()
+	input.Test.HttpHeaders = []HttpHeaders{}
+
+	if _, _, err := testClient.UpdateHttpCheckV2WithNullablePort(14, &input); err != nil {
+		t.Fatal(err)
+	}
+}
+
 func minimalHttpCheckV2InputWithNullablePort() HttpCheckV2InputWithNullablePort {
 	input := HttpCheckV2InputWithNullablePort{}
 	input.Test.Name = "nullable-port"

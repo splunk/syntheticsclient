@@ -164,6 +164,7 @@ func TestUpdateBrowserCheckV2SerializesCertificateIDs(t *testing.T) {
 
 func TestUpdateBrowserCheckV2PreservesAdvancedSettingsFields(t *testing.T) {
 	userAgent := "syntheticsclient-test-agent"
+	chromeFlagValue := "127.0.0.1:8080"
 	input := BrowserCheckV2Input{}
 	input.Test.Name = "browser-advanced-settings"
 	input.Test.Authentication = &Authentication{
@@ -198,7 +199,7 @@ func TestUpdateBrowserCheckV2PreservesAdvancedSettingsFields(t *testing.T) {
 	input.Test.ChromeFlags = []ChromeFlag{
 		{
 			Name:  "--proxy-bypass-list",
-			Value: "127.0.0.1:8080",
+			Value: &chromeFlagValue,
 		},
 	}
 	input.Test.ExcludedFiles = []ExcludedFile{
@@ -228,6 +229,40 @@ func TestUpdateBrowserCheckV2PreservesAdvancedSettingsFields(t *testing.T) {
 		if !reflect.DeepEqual(actual, expected) {
 			t.Fatalf("expected advancedSettings.%s to be %#v, but saw %#v in body: %s", key, expected, actual, requestBody)
 		}
+	}
+}
+
+// SYN-6879 / GitHub #82: a Chrome flag that is valid without a value (e.g.
+// --disable-web-security) must omit "value" entirely, distinct from a flag
+// carrying an explicit empty-string value.
+func TestUpdateBrowserCheckV2SerializesValuelessChromeFlag(t *testing.T) {
+	input := BrowserCheckV2Input{}
+	input.Test.Name = "browser-valueless-chrome-flag"
+	proxyValue := "127.0.0.1:8080"
+	input.Test.ChromeFlags = []ChromeFlag{
+		{Name: "--disable-web-security", Value: nil},
+		{Name: "--proxy-bypass-list", Value: &proxyValue},
+	}
+
+	requestBody := captureUpdateBrowserCheckV2RequestBody(t, input)
+
+	advancedSettings := browserCheckV2RequestAdvancedSettingsPayload(t, requestBody)
+	chromeFlags, ok := advancedSettings["chromeFlags"].([]interface{})
+	if !ok || len(chromeFlags) != 2 {
+		t.Fatalf("expected advancedSettings.chromeFlags to have 2 entries, but saw %#v in body: %s", advancedSettings["chromeFlags"], requestBody)
+	}
+
+	valueless, ok := chromeFlags[0].(map[string]interface{})
+	if !ok || valueless["name"] != "--disable-web-security" {
+		t.Fatalf("expected chromeFlags[0].name = --disable-web-security, but saw %#v in body: %s", chromeFlags[0], requestBody)
+	}
+	if _, ok := valueless["value"]; ok {
+		t.Fatalf("expected chromeFlags[0] to omit value entirely, but saw %#v in body: %s", valueless, requestBody)
+	}
+
+	withValue, ok := chromeFlags[1].(map[string]interface{})
+	if !ok || withValue["name"] != "--proxy-bypass-list" || withValue["value"] != "127.0.0.1:8080" {
+		t.Fatalf("expected chromeFlags[1] to preserve name/value, but saw %#v in body: %s", chromeFlags[1], requestBody)
 	}
 }
 
