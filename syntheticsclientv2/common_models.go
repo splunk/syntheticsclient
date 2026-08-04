@@ -715,7 +715,7 @@ type HttpCheckV2Input struct {
 		UserAgent          *string            `json:"userAgent"`
 		Verifycertificates bool               `json:"verifyCertificates"`
 		CertificateID      *NullableInt       `json:"certificateId,omitempty"`
-		HttpHeaders        []HttpHeaders      `json:"headers"`
+		HttpHeaders        *[]HttpHeaders     `json:"headers,omitempty"`
 		Validations        []Validations      `json:"validations"`
 		Customproperties   []CustomProperties `json:"customProperties"`
 		Automaticretries   int                `json:"automaticRetries"`
@@ -768,7 +768,7 @@ type HttpCheckV2InputWithNullablePort struct {
 		UserAgent          *string            `json:"userAgent"`
 		Verifycertificates bool               `json:"verifyCertificates"`
 		CertificateID      *NullableInt       `json:"certificateId,omitempty"`
-		HttpHeaders        []HttpHeaders      `json:"headers"`
+		HttpHeaders        *[]HttpHeaders     `json:"headers,omitempty"`
 		Validations        []Validations      `json:"validations"`
 		Customproperties   []CustomProperties `json:"customProperties"`
 		Automaticretries   int                `json:"automaticRetries"`

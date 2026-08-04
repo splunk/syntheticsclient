@@ -182,9 +182,35 @@ func TestUpdateHttpCheckV2WithNullablePortSendsExplicitEmptyHeaders(t *testing.T
 	})
 
 	input := minimalHttpCheckV2InputWithNullablePort()
-	input.Test.HttpHeaders = []HttpHeaders{}
+	emptyHeaders := []HttpHeaders{}
+	input.Test.HttpHeaders = &emptyHeaders
 
 	if _, _, err := testClient.UpdateHttpCheckV2WithNullablePort(14, &input); err != nil {
+		t.Fatal(err)
+	}
+}
+
+// A caller that never touches HttpHeaders must still omit the field, so an
+// update that isn't managing headers doesn't unintentionally clear them.
+func TestUpdateHttpCheckV2WithNullablePortOmitsUnsetHeaders(t *testing.T) {
+	setup()
+	defer teardown()
+
+	testMux.HandleFunc("/tests/http/15", func(w http.ResponseWriter, r *http.Request) {
+		testMethod(t, r, "PUT")
+		fields := readHttpV2NullablePortRequestFields(t, r)
+		if rawHeaders, ok := fields["headers"]; ok {
+			t.Fatalf("request body test.headers = %s, want field omitted for an unset HttpHeaders", rawHeaders)
+		}
+		_, err := w.Write([]byte(`{"test":{"id":15,"name":"nullable-port","type":"http","url":"https://example.com","requestMethod":"GET","port":null}}`))
+		if err != nil {
+			t.Fatal(err)
+		}
+	})
+
+	input := minimalHttpCheckV2InputWithNullablePort()
+
+	if _, _, err := testClient.UpdateHttpCheckV2WithNullablePort(15, &input); err != nil {
 		t.Fatal(err)
 	}
 }
