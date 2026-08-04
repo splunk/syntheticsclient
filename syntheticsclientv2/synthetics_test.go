@@ -19,6 +19,7 @@ package syntheticsclientv2
 
 import (
 	"bytes"
+	"encoding/json"
 	"log"
 	"net/http"
 	"net/http/httptest"
@@ -411,5 +412,112 @@ func TestMakePublicAPICallDoesNotExposeRawRequest(t *testing.T) {
 	}
 	if !strings.Contains(details.RequestBody, `"content":"[REDACTED]"`) {
 		t.Fatalf("expected sanitized RequestBody to include redacted content field, but saw: %s", details.RequestBody)
+	}
+}
+
+func TestMakePublicAPICallRedactsSensitiveFieldsInSanitizedResponseBody(t *testing.T) {
+	testMux = http.NewServeMux()
+	testServer = httptest.NewServer(testMux)
+	defer testServer.Close()
+
+	totpSecret := "totp-secret-material"
+	certContent := "private-certificate-material"
+	certPassword := "private-key-password"
+
+	testMux.HandleFunc("/totps/1", func(w http.ResponseWriter, r *http.Request) {
+		w.WriteHeader(http.StatusOK)
+		w.Write([]byte(`{"totp":{"id":1,"name":"login-totp","secret":"` + totpSecret + `","digits":6,"privateKey":{"content":"` + certContent + `","password":"` + certPassword + `"}}}`))
+	})
+
+	testConfigurableClient := NewConfigurableClient("apiKey", "realm", ClientArgs{
+		publicBaseUrl: testServer.URL,
+	})
+
+	details, err := testConfigurableClient.makePublicAPICall("GET", "/totps/1", bytes.NewBufferString("{}"), nil)
+	if err != nil {
+		t.Fatalf("expected no error, but saw: %s", err.Error())
+	}
+
+	for _, secret := range []string{totpSecret, certContent, certPassword} {
+		if strings.Contains(details.SanitizedResponseBody, secret) {
+			t.Fatalf("sanitized response body leaked %q: %s", secret, details.SanitizedResponseBody)
+		}
+	}
+	for _, redacted := range []string{`"secret":"[REDACTED]"`, `"content":"[REDACTED]"`, `"password":"[REDACTED]"`} {
+		if !strings.Contains(details.SanitizedResponseBody, redacted) {
+			t.Fatalf("sanitized response body missing %q: %s", redacted, details.SanitizedResponseBody)
+		}
+	}
+	if !strings.Contains(details.SanitizedResponseBody, `"digits":6`) {
+		t.Fatalf("sanitized response body should preserve unrelated fields, but saw: %s", details.SanitizedResponseBody)
+	}
+	if !strings.Contains(details.SanitizedResponseBody, `"name":"login-totp"`) {
+		t.Fatalf("sanitized response body should preserve unrelated fields, but saw: %s", details.SanitizedResponseBody)
+	}
+
+	if strings.Contains(details.ResponseBody, "[REDACTED]") {
+		t.Fatalf("expected raw ResponseBody used for parsing to remain unredacted, but saw: %s", details.ResponseBody)
+	}
+	if !strings.Contains(details.ResponseBody, totpSecret) {
+		t.Fatalf("expected raw ResponseBody to retain real secret for parse*Response call sites, but saw: %s", details.ResponseBody)
+	}
+
+	var parsed TotpVariableV2Response
+	if err := json.Unmarshal([]byte(details.ResponseBody), &parsed); err != nil {
+		t.Fatalf("expected raw ResponseBody to remain valid JSON for parsing, but saw error: %s", err.Error())
+	}
+	if parsed.Totp.Secret != totpSecret {
+		t.Fatalf("expected parsed response to retain real secret, but saw: %s", parsed.Totp.Secret)
+	}
+}
+
+func TestMakePublicAPICallSanitizedResponseBodyHandlesEmptyAndMalformedBodies(t *testing.T) {
+	if got := sanitizeResponseBody(""); got != "" {
+		t.Fatalf("expected empty response body to remain unchanged, but saw: %q", got)
+	}
+	if got := sanitizeResponseBody("   "); got != "   " {
+		t.Fatalf("expected blank response body to remain unchanged, but saw: %q", got)
+	}
+
+	malformed := `{"totp":{"secret":"unterminated`
+	if got := sanitizeResponseBody(malformed); got != "[REDACTED]" {
+		t.Fatalf("expected malformed response body to be fully redacted, but saw: %q", got)
+	}
+}
+
+func TestMakePublicAPICallRedactsErrorResponseDetails(t *testing.T) {
+	testMux = http.NewServeMux()
+	testServer = httptest.NewServer(testMux)
+	defer testServer.Close()
+
+	echoedPassword := "echoed-password-secret"
+	echoedContent := "echoed-content-secret"
+
+	testMux.HandleFunc("/tests", func(w http.ResponseWriter, r *http.Request) {
+		w.WriteHeader(http.StatusBadRequest)
+		w.Write([]byte(`{"status":"400","message":"validation failed","details":{"password":"` + echoedPassword + `","content":"` + echoedContent + `","field":"name"}}`))
+	})
+
+	testConfigurableClient := NewConfigurableClient("apiKey", "realm", ClientArgs{
+		publicBaseUrl: testServer.URL,
+	})
+
+	_, err := testConfigurableClient.makePublicAPICall("POST", "/tests", bytes.NewBufferString(`{}`), nil)
+	if err == nil {
+		t.Fatal("expected an error for a 400 status code")
+	}
+
+	for _, secret := range []string{echoedPassword, echoedContent} {
+		if strings.Contains(err.Error(), secret) {
+			t.Fatalf("error response leaked %q: %s", secret, err.Error())
+		}
+	}
+	for _, redacted := range []string{`"password":"[REDACTED]"`, `"content":"[REDACTED]"`} {
+		if !strings.Contains(err.Error(), redacted) {
+			t.Fatalf("error response missing %q: %s", redacted, err.Error())
+		}
+	}
+	if !strings.Contains(err.Error(), `"field":"name"`) {
+		t.Fatalf("error response should preserve unrelated fields, but saw: %s", err.Error())
 	}
 }

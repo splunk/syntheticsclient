@@ -38,8 +38,15 @@ type ClientArgs struct {
 }
 
 type RequestDetails struct {
-	StatusCode   int
+	StatusCode int
+	// ResponseBody is the raw, unredacted API response body and must be used
+	// for parsing responses into typed structs.
 	ResponseBody string
+	// SanitizedResponseBody is the supported debug representation of the
+	// response body. It redacts sensitive JSON values before being returned
+	// and must be used instead of ResponseBody for logging or persisting
+	// debug details.
+	SanitizedResponseBody string
 	// RequestBody is the supported debug representation of the outgoing request.
 	// It redacts API tokens and sensitive JSON values before being returned.
 	RequestBody string
@@ -119,6 +126,7 @@ func (c Client) makePublicAPICall(method string, endpoint string, requestBody io
 	if resp.StatusCode < http.StatusOK || resp.StatusCode >= http.StatusBadRequest {
 		var errRes errorResponse
 		if err = json.NewDecoder(resp.Body).Decode(&errRes); err == nil {
+			redactErrorResponseFields(&errRes)
 			errorField, err2 := json.Marshal(errRes)
 			if err2 != nil {
 				return &details, fmt.Errorf("unknown issue while parsing API error response, status code: %d", resp.StatusCode)
@@ -134,6 +142,7 @@ func (c Client) makePublicAPICall(method string, endpoint string, requestBody io
 	}
 
 	details.ResponseBody = string(responseBody)
+	details.SanitizedResponseBody = sanitizeResponseBody(details.ResponseBody)
 
 	return &details, nil
 }
@@ -175,6 +184,41 @@ func redactRequestLineURLQuery(requestLine string) string {
 
 	requestLineParts[1] = redactURLQueryValues(requestLineParts[1])
 	return strings.Join(requestLineParts, " ") + lineSuffix
+}
+
+// sanitizeResponseBody returns a redacted copy of a raw JSON API response
+// body, suitable for debug logging. It leaves the original response body
+// returned by makePublicAPICall untouched so that parse*Response call sites
+// continue to unmarshal real values.
+func sanitizeResponseBody(responseBody string) string {
+	if strings.TrimSpace(responseBody) == "" {
+		return responseBody
+	}
+
+	var response interface{}
+	if err := json.Unmarshal([]byte(responseBody), &response); err != nil {
+		return "[REDACTED]"
+	}
+
+	redactSensitiveJSONFields(response)
+
+	redactedResponseBody, err := json.Marshal(response)
+	if err != nil {
+		return "[REDACTED]"
+	}
+
+	return string(redactedResponseBody)
+}
+
+// redactErrorResponseFields redacts sensitive JSON fields and headers echoed
+// back in an API error response, including its free-form Details map,
+// before the error response is marshaled into the returned error string.
+func redactErrorResponseFields(errRes *errorResponse) {
+	if errRes == nil || len(errRes.Details) == 0 {
+		return
+	}
+
+	redactSensitiveJSONFields(errRes.Details)
 }
 
 func redactSensitiveRequestBody(requestDump string) string {
