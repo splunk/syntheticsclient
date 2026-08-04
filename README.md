@@ -48,6 +48,34 @@ func main() {
 }
 ```
 
+## Validate Support
+
+V2 supports validating a test payload against the Synthetics API without saving the test
+or triggering a run. Validate calls always respond `HTTP 200` and return a `ValidateResponse`
+with `Valid`, `Message`, and `Details` (field-level errors, empty when `Valid` is `true`).
+Use `ValidateResponse.FieldErrors()` to get a `map[string][]string` of field-level errors
+regardless of whether the API returned an empty array or an object for `Details`.
+
+Two flows are supported per test type:
+- **Create-style** (`ValidateNew*`): validates a payload as if creating a new test.
+- **Update-style** (`Validate*(id, ...)`): validates a payload as if updating the existing
+  test identified by `id`.
+
+| Test type | Create-style | Update-style |
+| --- | --- | --- |
+| API | `ValidateNewApiCheckV2` | `ValidateApiCheckV2` |
+| Browser | `ValidateNewBrowserCheckV2` | `ValidateBrowserCheckV2` |
+| HTTP | `ValidateNewHttpCheckV2` / `ValidateNewHttpCheckV2WithNullablePort` | `ValidateHttpCheckV2` / `ValidateHttpCheckV2WithNullablePort` |
+| Port | `ValidateNewPortCheckV2` | `ValidatePortCheckV2` |
+| SSL | `ValidateNewSslCheckV2` | `ValidateSslCheckV2` |
+
+SSL update-style validation takes a `SslCheckV2UpdateInput`, matching `UpdateSslCheckV2`'s
+partial-update semantics, while SSL create-style validation takes a `SslCheckV2Input`.
+
+Validate support is not available for the deprecated V1 client, and there is no Synthetics
+API validate endpoint for Location, Variable, TOTP variable, downtime configuration, CA
+certificate, or client certificate resources.
+
 ## API Documentation
 API Docs are [available here](https://dev.splunk.com/observability/reference)
 
