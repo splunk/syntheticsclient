@@ -8,10 +8,14 @@ on:
   push:
 
 # Testing needs to read repository contents and write check runs (test-reporter)
-# and step summaries (coverage report).
+# and step summaries (coverage report). actions:read lets PR runs download the
+# base branch's coverage breakdown artifact; pull-requests:write lets the
+# coverage-diff report be posted as a PR comment.
 permissions:
   contents: read
   checks: write
+  actions: read
+  pull-requests: write
 
 jobs:
   # Ensure project builds before running testing matrix
@@ -39,11 +43,47 @@ jobs:
           name: Go Tests
           path: test-results.json
           reporter: golang-json
+      # Fetch v2's (the base branch's) last coverage breakdown so PR runs can
+      # report how this change moves coverage, not just its absolute value.
+      - name: Download base branch coverage breakdown
+        id: download-main-breakdown
+        uses: dawidd6/action-download-artifact@b6e2e70617bc3265edd6dab6c906732b2f1ae151 # v21
+        with:
+          branch: v2
+          workflow_conclusion: success
+          name: v2.breakdown
+          if_no_artifact_found: warn
       - name: Check test coverage
         id: coverage
         uses: vladopajic/go-test-coverage@f94bcf0d6b9fa5fb8b783830b22648f6c17475e2 # v2
+        continue-on-error: true # fail after the coverage comment is posted below
         with:
           config: ./.testcoverage.yml
+          breakdown-file-name: ${{ github.ref_name == 'v2' && 'v2.breakdown' || '' }}
+          diff-base-breakdown-file-name: ${{ steps.download-main-breakdown.outputs.found_artifact == 'true' && 'v2.breakdown' || '' }}
+      - name: Upload coverage breakdown
+        if: ${{ github.ref_name == 'v2' }}
+        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
+        with:
+          name: v2.breakdown
+          path: v2.breakdown
+          if-no-files-found: error
+      # No status function here: leaving the implicit success() check in
+      # place means this (and the coverage step it reads outputs from) is
+      # skipped if make test-cover failed, instead of erroring on a missing
+      # report from a skipped step.
+      - name: Post coverage report to PR
+        if: ${{ github.event_name == 'pull_request' }}
+        uses: thollander/actions-comment-pull-request@24bffb9b452ba05a4f3f77933840a6a841d1b32b # v3.0.1
+        with:
+          comment-tag: coverage-report
+          message: |
+            go-test-coverage report:
+            ```
+            ${{ fromJSON(steps.coverage.outputs.report) }}```
+      - name: Fail if coverage threshold not met
+        if: ${{ steps.coverage.outcome == 'failure' }}
+        run: echo "coverage check failed" && exit 1
       - name: Publish coverage summary
         if: ${{ !cancelled() }}
         run: |

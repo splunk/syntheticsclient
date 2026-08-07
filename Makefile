@@ -14,7 +14,7 @@ build: fmtcheck
 clean:
 	@echo "==> Cleaning out old builds "
 	go clean
-	rm -rf coverage.txt test-results.json
+	rm -rf coverage.txt test-results.json v2.breakdown
 
 
 fmt:

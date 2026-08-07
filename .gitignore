@@ -12,6 +12,7 @@
 *.out
 coverage.txt
 test-results.json
+*.breakdown
 
 # Dependency directories (remove the comment below to include it)
 # vendor/
