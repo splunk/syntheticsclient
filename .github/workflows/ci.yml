@@ -5,15 +5,13 @@ name: CI Checks
 # Optionally, you can turn it on using a schedule for regular testing.
 on:
   pull_request:
-    paths-ignore:
-      - 'README.md'
   push:
-    paths-ignore:
-      - 'README.md'
 
-# Testing only needs permissions to read the repository contents.
+# Testing needs to read repository contents and write check runs (test-reporter)
+# and step summaries (coverage report).
 permissions:
   contents: read
+  checks: write
 
 jobs:
   # Ensure project builds before running testing matrix
@@ -33,5 +31,22 @@ jobs:
         with:
           version: latest
       - run: make lint
-      - run: make testacc
-      - run: go build -v ./syntheticsclientv2
+      - run: make test-cover
+      - name: Report test results
+        uses: dorny/test-reporter@a43b3a5f7366b97d083190328d2c652e1a8b6aa2 # v3
+        if: ${{ !cancelled() }}
+        with:
+          name: Go Tests
+          path: test-results.json
+          reporter: golang-json
+      - name: Check test coverage
+        id: coverage
+        uses: vladopajic/go-test-coverage@f94bcf0d6b9fa5fb8b783830b22648f6c17475e2 # v2
+        with:
+          config: ./.testcoverage.yml
+      - name: Publish coverage summary
+        if: ${{ !cancelled() }}
+        run: |
+          echo "### Coverage" >> "$GITHUB_STEP_SUMMARY"
+          go tool cover -func=coverage.txt | tail -1 >> "$GITHUB_STEP_SUMMARY"
+      - run: go build -v ./...

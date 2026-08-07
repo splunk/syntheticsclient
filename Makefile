@@ -1,19 +1,18 @@
-.PHONY: default all build clean test fmtcheck testacc sonarqube
+.PHONY: default all build clean test fmtcheck test-cover
 
-PKG_NAME=syntheticsclientv2
-FILES=./syntheticsclientv2/...
+FILES=./...
 
-default: test 
+default: test
 
-all: clean build test 
+all: clean build test
 
 build: fmtcheck
-	go build -tags=unit_tests
+	go build -tags=unit_tests ./...
 
 clean:
 	@echo "==> Cleaning out old builds "
 	go clean
-	rm -rf coverage.txt .sonar .scannerwork
+	rm -rf coverage.txt test-results.json
 
 
 fmt:
@@ -30,9 +29,6 @@ test: fmtcheck
 	@echo "==> Running all tests"
 	go test $(FILES) -v -tags=unit_tests -timeout=30s -parallel=4 -cover
 
-testacc: clean fmtcheck
-	@echo "==> Running all tests"
-	go test $(FILES) -v -tags=unit_tests -timeout=30s -parallel=8 -cover -coverprofile coverage.txt
-
-sonarqube: testacc
-	docker run -it -v "${PWD}:/usr/src" sonarsource/sonar-scanner-cli
+test-cover: clean fmtcheck
+	@echo "==> Running all tests with coverage and JSON output"
+	go test $(FILES) -tags=unit_tests -timeout=30s -parallel=8 -json -cover -covermode=atomic -coverprofile coverage.txt > test-results.json

@@ -1,4 +1,10 @@
 # syntheticsclient
+
+[![Release](https://img.shields.io/github/v/release/splunk/syntheticsclient)](https://github.com/splunk/syntheticsclient/releases)
+[![CI Checks](https://img.shields.io/github/actions/workflow/status/splunk/syntheticsclient/ci.yml?branch=v2&label=CI)](https://github.com/splunk/syntheticsclient/actions/workflows/ci.yml?query=branch%3Av2)
+[![Build](https://img.shields.io/github/actions/workflow/status/splunk/syntheticsclient/ci.yml?branch=v2&label=build)](https://github.com/splunk/syntheticsclient/actions/workflows/ci.yml?query=branch%3Av2)
+[![License](https://img.shields.io/github/license/splunk/syntheticsclient)](https://github.com/splunk/syntheticsclient/blob/v2/LICENSE)
+
 A Splunk Synthetics for Splunk Observability (Formerly Rigor) client for golang.
 
 ## Installation

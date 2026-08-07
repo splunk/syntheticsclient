@@ -1,0 +1,7 @@
+profile: coverage.txt
+
+threshold:
+  # Ratchet floor at today's combined baseline (syntheticsclient + syntheticsclientv2).
+  # Raise to 90 once SYN-6889's test coverage work lands; until then this only
+  # guards against regressions.
+  total: 71
