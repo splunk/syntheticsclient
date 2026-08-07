@@ -1,13 +1,15 @@
 .PHONY: default all build clean test fmtcheck test-cover
 
-FILES=./...
+# syntheticsclient (v1) is deprecated and excluded from tests, builds, and
+# coverage; only syntheticsclientv2 is exercised here.
+FILES=./syntheticsclientv2/...
 
 default: test
 
 all: clean build test
 
 build: fmtcheck
-	go build -tags=unit_tests ./...
+	go build -tags=unit_tests $(FILES)
 
 clean:
 	@echo "==> Cleaning out old builds "

@@ -1,7 +1,8 @@
 profile: coverage.txt
 
 threshold:
-  # Ratchet floor at today's combined baseline (syntheticsclient + syntheticsclientv2).
+  # Ratchet floor at today's syntheticsclientv2 baseline. syntheticsclient (v1)
+  # is deprecated and excluded from tests/coverage entirely (see Makefile).
   # Raise to 90 once SYN-6889's test coverage work lands; until then this only
   # guards against regressions.
-  total: 71
+  total: 73
