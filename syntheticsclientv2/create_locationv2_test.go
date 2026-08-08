@@ -68,7 +68,10 @@ func TestCreateLocationV2ReturnsErrorOnMalformedResponse(t *testing.T) {
 
 	testMux.HandleFunc("/locations", func(w http.ResponseWriter, r *http.Request) {
 		testMethod(t, r, "POST")
-		w.Write([]byte("{not valid json"))
+		_, err := w.Write([]byte("{not valid json"))
+		if err != nil {
+			t.Fatal(err)
+		}
 	})
 
 	resp, details, err := testClient.CreateLocationV2(&LocationV2Input{})

@@ -144,7 +144,10 @@ func TestGetLocationsV2ReturnsErrorOnMalformedResponse(t *testing.T) {
 
 	testMux.HandleFunc("/locations/", func(w http.ResponseWriter, r *http.Request) {
 		testMethod(t, r, "GET")
-		w.Write([]byte("{not valid json"))
+		_, err := w.Write([]byte("{not valid json"))
+		if err != nil {
+			t.Fatal(err)
+		}
 	})
 
 	resp, details, err := testClient.GetLocationsV2()
@@ -173,7 +176,10 @@ func TestGetLocationV2ReturnsErrorOnMalformedResponse(t *testing.T) {
 
 	testMux.HandleFunc("/locations/aws-us-east-1", func(w http.ResponseWriter, r *http.Request) {
 		testMethod(t, r, "GET")
-		w.Write([]byte("{not valid json"))
+		_, err := w.Write([]byte("{not valid json"))
+		if err != nil {
+			t.Fatal(err)
+		}
 	})
 
 	resp, details, err := testClient.GetLocationV2("aws-us-east-1")

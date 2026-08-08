@@ -92,7 +92,10 @@ func TestCreateDowntimeConfigurationV2ReturnsErrorOnMalformedResponse(t *testing
 
 	testMux.HandleFunc("/downtime_configurations", func(w http.ResponseWriter, r *http.Request) {
 		testMethod(t, r, "POST")
-		w.Write([]byte("{not valid json"))
+		_, err := w.Write([]byte("{not valid json"))
+		if err != nil {
+			t.Fatal(err)
+		}
 	})
 
 	resp, details, err := testClient.CreateDowntimeConfigurationV2(&DowntimeConfigurationV2Input{})

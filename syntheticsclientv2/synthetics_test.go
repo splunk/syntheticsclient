@@ -104,7 +104,10 @@ func TestConfigurableClientErrorStatusCode(t *testing.T) {
 
 	testMux.HandleFunc("/tests", func(w http.ResponseWriter, r *http.Request) {
 		w.WriteHeader(http.StatusNotFound)
-		w.Write([]byte(`{"status":"404"}`))
+		_, err := w.Write([]byte(`{"status":"404"}`))
+		if err != nil {
+			t.Fatal(err)
+		}
 	})
 
 	testConfigurableClient := NewConfigurableClient("apiKey", "realm", ClientArgs{
@@ -128,7 +131,10 @@ func TestMakePublicAPICallRedactsAPIKeyFromRequestDetails(t *testing.T) {
 
 	testMux.HandleFunc("/tests", func(w http.ResponseWriter, r *http.Request) {
 		w.WriteHeader(http.StatusOK)
-		w.Write([]byte(`{}`))
+		_, err := w.Write([]byte(`{}`))
+		if err != nil {
+			t.Fatal(err)
+		}
 	})
 
 	apiKey := "secret-api-key"
@@ -157,7 +163,10 @@ func TestMakePublicAPICallRedactsCaCertificateContentFromRequestDetails(t *testi
 
 	testMux.HandleFunc("/cacerts", func(w http.ResponseWriter, r *http.Request) {
 		w.WriteHeader(http.StatusOK)
-		w.Write([]byte(`{}`))
+		_, err := w.Write([]byte(`{}`))
+		if err != nil {
+			t.Fatal(err)
+		}
 	})
 
 	apiKey := "secret-api-key"
@@ -232,7 +241,10 @@ func TestCreateCaCertificateV2RedactsRequestDetails(t *testing.T) {
 	testMux.HandleFunc("/cacerts", func(w http.ResponseWriter, r *http.Request) {
 		testMethod(t, r, "POST")
 		w.WriteHeader(http.StatusOK)
-		w.Write([]byte(`{"cacert":{"id":1,"name":"test-ca","description":"private test CA","content":"<REDACTED>","fileExtension":"pem","filename":"ca.pem"}}`))
+		_, err := w.Write([]byte(`{"cacert":{"id":1,"name":"test-ca","description":"private test CA","content":"<REDACTED>","fileExtension":"pem","filename":"ca.pem"}}`))
+		if err != nil {
+			t.Fatal(err)
+		}
 	})
 
 	apiKey := "secret-api-key"
@@ -455,7 +467,10 @@ func TestMakePublicAPICallSetsQueryParams(t *testing.T) {
 			t.Errorf("returned query param \n\n%#v want \n\n%#v", got, "2")
 		}
 		w.WriteHeader(http.StatusOK)
-		w.Write([]byte(`{}`))
+		_, err := w.Write([]byte(`{}`))
+		if err != nil {
+			t.Fatal(err)
+		}
 	})
 
 	testConfigurableClient := NewConfigurableClient("apiKey", "realm", ClientArgs{
@@ -554,7 +569,10 @@ func TestMakePublicAPICallDoesNotExposeRawRequest(t *testing.T) {
 
 	testMux.HandleFunc("/certificates", func(w http.ResponseWriter, r *http.Request) {
 		w.WriteHeader(http.StatusOK)
-		w.Write([]byte(`{}`))
+		_, err := w.Write([]byte(`{}`))
+		if err != nil {
+			t.Fatal(err)
+		}
 	})
 
 	apiKey := "secret-api-key"

@@ -69,7 +69,10 @@ func TestGetExcludedFileTypesV2ReturnsErrorOnMalformedResponse(t *testing.T) {
 
 	testMux.HandleFunc("/excluded_file_types", func(w http.ResponseWriter, r *http.Request) {
 		testMethod(t, r, "GET")
-		w.Write([]byte("{not valid json"))
+		_, err := w.Write([]byte("{not valid json"))
+		if err != nil {
+			t.Fatal(err)
+		}
 	})
 
 	resp, details, err := testClient.GetExcludedFileTypesV2()
