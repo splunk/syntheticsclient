@@ -65,3 +65,42 @@ func TestParseExcludedFileTypesV2Response(t *testing.T) {
 		t.Fatalf("ExcludedFileTypes = %#v, want %#v", resp.ExcludedFileTypes, expected)
 	}
 }
+
+func TestGetExcludedFileTypesV2ReturnsErrorOnMalformedResponse(t *testing.T) {
+	setup()
+	defer teardown()
+
+	testMux.HandleFunc("/excluded_file_types", func(w http.ResponseWriter, r *http.Request) {
+		testMethod(t, r, "GET")
+		w.Write([]byte("{not valid json"))
+	})
+
+	resp, details, err := testClient.GetExcludedFileTypesV2()
+	if err == nil {
+		t.Fatal("expected a parse error, but got none")
+	}
+	if details == nil {
+		t.Fatal("expected request details")
+	}
+	if resp != nil {
+		t.Errorf("expected nil response, got %#v", resp)
+	}
+}
+
+func TestGetExcludedFileTypesV2ReturnsErrorOnNetworkFailure(t *testing.T) {
+	unreachableClient := NewConfigurableClient("apiKey", "realm", ClientArgs{publicBaseUrl: "http://127.0.0.1:1"})
+	_, _, err := unreachableClient.GetExcludedFileTypesV2()
+	if err == nil {
+		t.Fatal("expected a connection error")
+	}
+}
+
+func TestParseExcludedFileTypesV2ResponseReturnsErrorOnMalformedJSON(t *testing.T) {
+	resp, err := parseExcludedFileTypesV2Response("{not valid json")
+	if err == nil {
+		t.Fatal("expected a parse error, but got none")
+	}
+	if resp != nil {
+		t.Errorf("expected nil response, got %#v", resp)
+	}
+}

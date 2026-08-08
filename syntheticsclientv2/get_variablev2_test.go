@@ -142,3 +142,63 @@ func verifyVariablesV2Input(stringInput string) *VariablesV2Response {
 	}
 	return check
 }
+
+func TestGetVariableV2ReturnsErrorOnMalformedResponse(t *testing.T) {
+	setup()
+	defer teardown()
+
+	testMux.HandleFunc("/variables/1", func(w http.ResponseWriter, r *http.Request) {
+		testMethod(t, r, "GET")
+		_, err := w.Write([]byte("{invalid json}"))
+		if err != nil {
+			t.Fatal(err)
+		}
+	})
+
+	resp, _, err := testClient.GetVariableV2(1)
+	if err == nil {
+		t.Fatal("expected error on malformed response, got nil")
+	}
+	if resp != nil {
+		t.Errorf("expected nil response on parse error, got %#v", resp)
+	}
+}
+
+func TestGetVariableV2ReturnsErrorOnNetworkFailure(t *testing.T) {
+	unreachableClient := NewConfigurableClient("apiKey", "realm", ClientArgs{publicBaseUrl: "http://127.0.0.1:1"})
+
+	_, _, err := unreachableClient.GetVariableV2(1)
+	if err == nil {
+		t.Fatal("expected connection error, got nil")
+	}
+}
+
+func TestGetVariablesV2ReturnsErrorOnMalformedResponse(t *testing.T) {
+	setup()
+	defer teardown()
+
+	testMux.HandleFunc("/variables", func(w http.ResponseWriter, r *http.Request) {
+		testMethod(t, r, "GET")
+		_, err := w.Write([]byte("{invalid json array}"))
+		if err != nil {
+			t.Fatal(err)
+		}
+	})
+
+	resp, _, err := testClient.GetVariablesV2()
+	if err == nil {
+		t.Fatal("expected error on malformed response, got nil")
+	}
+	if resp != nil {
+		t.Errorf("expected nil response on parse error, got %#v", resp)
+	}
+}
+
+func TestGetVariablesV2ReturnsErrorOnNetworkFailure(t *testing.T) {
+	unreachableClient := NewConfigurableClient("apiKey", "realm", ClientArgs{publicBaseUrl: "http://127.0.0.1:1"})
+
+	_, _, err := unreachableClient.GetVariablesV2()
+	if err == nil {
+		t.Fatal("expected connection error, got nil")
+	}
+}

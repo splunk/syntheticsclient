@@ -171,3 +171,44 @@ func verifyBrowserCheckV2Input(stringInput string) *BrowserCheckV2Response {
 	}
 	return check
 }
+
+func TestGetBrowserCheckV2ReturnsErrorOnMalformedResponse(t *testing.T) {
+	setup()
+	defer teardown()
+
+	testMux.HandleFunc("/v2/tests/browser/2", func(w http.ResponseWriter, r *http.Request) {
+		testMethod(t, r, "GET")
+		_, err := w.Write([]byte("{not valid json"))
+		if err != nil {
+			t.Fatal(err)
+		}
+	})
+
+	resp, details, err := testClient.GetBrowserCheckV2(2)
+
+	if err == nil {
+		t.Fatal("expected an error on malformed JSON response, but got none")
+	}
+	if resp != nil && resp.Test.Name != "" {
+		t.Error("expected empty response struct on parse error")
+	}
+	if details == nil {
+		t.Fatal("expected request details even on parse error")
+	}
+}
+
+func TestGetBrowserCheckV2ReturnsErrorWhenRequestFails(t *testing.T) {
+	unreachableClient := NewConfigurableClient("apiKey", "realm", ClientArgs{publicBaseUrl: "http://127.0.0.1:1"})
+
+	resp, details, err := unreachableClient.GetBrowserCheckV2(3)
+
+	if err == nil {
+		t.Fatal("expected a connection error, but got none")
+	}
+	if resp != nil {
+		t.Errorf("expected nil response on network error, but got %#v", resp)
+	}
+	if details == nil {
+		t.Fatal("expected request details to be populated")
+	}
+}

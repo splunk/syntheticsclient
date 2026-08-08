@@ -20,6 +20,7 @@ package syntheticsclientv2
 import (
 	"fmt"
 	"net/http"
+	"strings"
 	"testing"
 )
 
@@ -45,4 +46,34 @@ func TestDeleteVariableV2(t *testing.T) {
 		t.Fatal(err)
 	}
 	fmt.Println(resp)
+}
+
+func TestDeleteVariableV2ReturnsErrorOnNetworkFailure(t *testing.T) {
+	unreachableClient := NewConfigurableClient("apiKey", "realm", ClientArgs{publicBaseUrl: "http://127.0.0.1:1"})
+
+	_, err := unreachableClient.DeleteVariableV2(19)
+	if err == nil {
+		t.Fatal("expected connection error, got nil")
+	}
+}
+
+func TestDeleteVariableV2ReturnsErrorOnNon2xxStatus(t *testing.T) {
+	setup()
+	defer teardown()
+
+	testMux.HandleFunc("/variables/20", func(w http.ResponseWriter, r *http.Request) {
+		testMethod(t, r, "DELETE")
+		w.WriteHeader(http.StatusMultipleChoices)
+	})
+
+	resp, err := testClient.DeleteVariableV2(20)
+	if err == nil {
+		t.Fatal("expected error on non-2xx status code, got nil")
+	}
+	if resp != http.StatusMultipleChoices {
+		t.Errorf("returned status \n\n%#v want \n\n%#v", resp, http.StatusMultipleChoices)
+	}
+	if !strings.Contains(err.Error(), "Response code") {
+		t.Errorf("expected error to contain 'Response code', got %s", err.Error())
+	}
 }

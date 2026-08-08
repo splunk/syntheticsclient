@@ -170,6 +170,54 @@ func assertStringPtr(t *testing.T, got *string, want string) {
 	}
 }
 
+func TestCreateSslCheckV2ReturnsErrorOnMalformedResponse(t *testing.T) {
+	setup()
+	defer teardown()
+
+	testMux.HandleFunc("/tests/ssl", func(w http.ResponseWriter, r *http.Request) {
+		testMethod(t, r, "POST")
+		_, err := w.Write([]byte("{not valid json"))
+		if err != nil {
+			t.Fatal(err)
+		}
+	})
+
+	inputSslCheckV2Data := SslCheckV2Input{}
+	err := json.Unmarshal([]byte(createSslCheckV2Body), &inputSslCheckV2Data)
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	resp, _, err := testClient.CreateSslCheckV2(&inputSslCheckV2Data)
+
+	if err == nil {
+		t.Fatal("expected error on malformed JSON response, got nil")
+	}
+	if resp != nil {
+		t.Errorf("expected nil response on error, got %#v", resp)
+	}
+	if !strings.Contains(err.Error(), "invalid character") {
+		t.Errorf("expected JSON unmarshal error, got: %v", err)
+	}
+}
+
+func TestCreateSslCheckV2ReturnsErrorWhenRequestFails(t *testing.T) {
+	// Use an unreachable address to trigger a connection error
+	unreachableClient := NewConfigurableClient("apiKey", "realm", ClientArgs{publicBaseUrl: "http://127.0.0.1:1"})
+
+	inputSslCheckV2Data := SslCheckV2Input{}
+	err := json.Unmarshal([]byte(createSslCheckV2Body), &inputSslCheckV2Data)
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	_, _, err = unreachableClient.CreateSslCheckV2(&inputSslCheckV2Data)
+
+	if err == nil {
+		t.Fatal("expected connection error, got nil")
+	}
+}
+
 func TestCreateSslCheckV2DefaultsNilValidations(t *testing.T) {
 	setup()
 	defer teardown()

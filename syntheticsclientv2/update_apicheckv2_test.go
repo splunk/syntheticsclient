@@ -82,3 +82,81 @@ func TestUpdateApiCheckV2(t *testing.T) {
 		t.Errorf("returned \n\n%#v want \n\n%#v", resp.Test.Customproperties, inputApiCheckV2Update.Test.Customproperties)
 	}
 }
+
+func TestUpdateApiCheckV2HandlesEmptyResponseBody(t *testing.T) {
+	setup()
+	defer teardown()
+
+	testMux.HandleFunc("/v2/tests/api/10", func(w http.ResponseWriter, r *http.Request) {
+		testMethod(t, r, "PUT")
+		w.WriteHeader(http.StatusNoContent)
+	})
+
+	err := json.Unmarshal([]byte(updateApiCheckV2Body), &inputApiCheckV2Update)
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	resp, details, err := testClient.UpdateApiCheckV2(10, &inputApiCheckV2Update)
+
+	if err != nil {
+		t.Fatal(err)
+	}
+	if resp == nil {
+		t.Fatal("expected non-nil response on empty body")
+	}
+	if details == nil {
+		t.Fatal("expected request details")
+	}
+}
+
+func TestUpdateApiCheckV2ReturnsErrorOnMalformedResponse(t *testing.T) {
+	setup()
+	defer teardown()
+
+	testMux.HandleFunc("/v2/tests/api/10", func(w http.ResponseWriter, r *http.Request) {
+		testMethod(t, r, "PUT")
+		_, err := w.Write([]byte("{not valid json"))
+		if err != nil {
+			t.Fatal(err)
+		}
+	})
+
+	err := json.Unmarshal([]byte(updateApiCheckV2Body), &inputApiCheckV2Update)
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	resp, details, err := testClient.UpdateApiCheckV2(10, &inputApiCheckV2Update)
+
+	if err == nil {
+		t.Fatal("expected an error on malformed JSON response, but got none")
+	}
+	if resp != nil && resp.Test.Name != "" {
+		t.Error("expected empty response struct on parse error")
+	}
+	if details == nil {
+		t.Fatal("expected request details even on parse error")
+	}
+}
+
+func TestUpdateApiCheckV2ReturnsErrorWhenRequestFails(t *testing.T) {
+	unreachableClient := NewConfigurableClient("apiKey", "realm", ClientArgs{publicBaseUrl: "http://127.0.0.1:1"})
+
+	err := json.Unmarshal([]byte(updateApiCheckV2Body), &inputApiCheckV2Update)
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	resp, details, err := unreachableClient.UpdateApiCheckV2(10, &inputApiCheckV2Update)
+
+	if err == nil {
+		t.Fatal("expected a connection error, but got none")
+	}
+	if resp != nil {
+		t.Errorf("expected nil response on network error, but got %#v", resp)
+	}
+	if details == nil {
+		t.Fatal("expected request details to be populated")
+	}
+}

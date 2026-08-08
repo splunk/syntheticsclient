@@ -88,3 +88,32 @@ func TestCreateDowntimeConfigurationV2(t *testing.T) {
 	}
 
 }
+
+func TestCreateDowntimeConfigurationV2ReturnsErrorOnMalformedResponse(t *testing.T) {
+	setup()
+	defer teardown()
+
+	testMux.HandleFunc("/downtime_configurations", func(w http.ResponseWriter, r *http.Request) {
+		testMethod(t, r, "POST")
+		w.Write([]byte("{not valid json"))
+	})
+
+	resp, details, err := testClient.CreateDowntimeConfigurationV2(&DowntimeConfigurationV2Input{})
+	if err == nil {
+		t.Fatal("expected a parse error, but got none")
+	}
+	if details == nil {
+		t.Fatal("expected request details")
+	}
+	if resp != nil {
+		t.Errorf("expected nil response, got %#v", resp)
+	}
+}
+
+func TestCreateDowntimeConfigurationV2ReturnsErrorOnNetworkFailure(t *testing.T) {
+	unreachableClient := NewConfigurableClient("apiKey", "realm", ClientArgs{publicBaseUrl: "http://127.0.0.1:1"})
+	_, _, err := unreachableClient.CreateDowntimeConfigurationV2(&DowntimeConfigurationV2Input{})
+	if err == nil {
+		t.Fatal("expected a connection error")
+	}
+}

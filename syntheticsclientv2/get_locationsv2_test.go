@@ -140,3 +140,61 @@ func verifyLocationV2Input(stringInput string) *LocationV2Response {
 	}
 	return check
 }
+
+func TestGetLocationsV2ReturnsErrorOnMalformedResponse(t *testing.T) {
+	setup()
+	defer teardown()
+
+	testMux.HandleFunc("/locations/", func(w http.ResponseWriter, r *http.Request) {
+		testMethod(t, r, "GET")
+		w.Write([]byte("{not valid json"))
+	})
+
+	resp, details, err := testClient.GetLocationsV2()
+	if err == nil {
+		t.Fatal("expected a parse error, but got none")
+	}
+	if details == nil {
+		t.Fatal("expected request details")
+	}
+	if resp != nil {
+		t.Errorf("expected nil response, got %#v", resp)
+	}
+}
+
+func TestGetLocationsV2ReturnsErrorOnNetworkFailure(t *testing.T) {
+	unreachableClient := NewConfigurableClient("apiKey", "realm", ClientArgs{publicBaseUrl: "http://127.0.0.1:1"})
+	_, _, err := unreachableClient.GetLocationsV2()
+	if err == nil {
+		t.Fatal("expected a connection error")
+	}
+}
+
+func TestGetLocationV2ReturnsErrorOnMalformedResponse(t *testing.T) {
+	setup()
+	defer teardown()
+
+	testMux.HandleFunc("/locations/aws-us-east-1", func(w http.ResponseWriter, r *http.Request) {
+		testMethod(t, r, "GET")
+		w.Write([]byte("{not valid json"))
+	})
+
+	resp, details, err := testClient.GetLocationV2("aws-us-east-1")
+	if err == nil {
+		t.Fatal("expected a parse error, but got none")
+	}
+	if details == nil {
+		t.Fatal("expected request details")
+	}
+	if resp != nil {
+		t.Errorf("expected nil response, got %#v", resp)
+	}
+}
+
+func TestGetLocationV2ReturnsErrorOnNetworkFailure(t *testing.T) {
+	unreachableClient := NewConfigurableClient("apiKey", "realm", ClientArgs{publicBaseUrl: "http://127.0.0.1:1"})
+	_, _, err := unreachableClient.GetLocationV2("aws-us-east-1")
+	if err == nil {
+		t.Fatal("expected a connection error")
+	}
+}

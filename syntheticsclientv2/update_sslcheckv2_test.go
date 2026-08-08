@@ -22,6 +22,7 @@ import (
 	"io"
 	"net/http"
 	"reflect"
+	"strings"
 	"testing"
 )
 
@@ -330,5 +331,51 @@ func TestUpdateSslCheckV2BlankResponse(t *testing.T) {
 	}
 	if resp == nil {
 		t.Fatal("expected non-nil response for blank successful update body")
+	}
+}
+
+func TestUpdateSslCheckV2ReturnsErrorOnMalformedResponse(t *testing.T) {
+	setup()
+	defer teardown()
+
+	testMux.HandleFunc("/tests/ssl/1650", func(w http.ResponseWriter, r *http.Request) {
+		testMethod(t, r, "PUT")
+		_, err := w.Write([]byte("{not valid json"))
+		if err != nil {
+			t.Fatal(err)
+		}
+	})
+
+	err := json.Unmarshal([]byte(updateSslCheckV2Body), &inputSslCheckV2Update)
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	resp, _, err := testClient.UpdateSslCheckV2(1650, &inputSslCheckV2Update)
+
+	if err == nil {
+		t.Fatal("expected error on malformed JSON response, got nil")
+	}
+	if resp != nil {
+		t.Errorf("expected nil response on error, got %#v", resp)
+	}
+	if !strings.Contains(err.Error(), "invalid character") {
+		t.Errorf("expected JSON unmarshal error, got: %v", err)
+	}
+}
+
+func TestUpdateSslCheckV2ReturnsErrorWhenRequestFails(t *testing.T) {
+	// Use an unreachable address to trigger a connection error
+	unreachableClient := NewConfigurableClient("apiKey", "realm", ClientArgs{publicBaseUrl: "http://127.0.0.1:1"})
+
+	err := json.Unmarshal([]byte(updateSslCheckV2Body), &inputSslCheckV2Update)
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	_, _, err = unreachableClient.UpdateSslCheckV2(1650, &inputSslCheckV2Update)
+
+	if err == nil {
+		t.Fatal("expected connection error, got nil")
 	}
 }

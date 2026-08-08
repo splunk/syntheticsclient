@@ -21,6 +21,7 @@ import (
 	"encoding/json"
 	"net/http"
 	"reflect"
+	"strings"
 	"testing"
 )
 
@@ -58,4 +59,40 @@ func verifyCaCertificatesV2Input(stringInput string) *CaCertificatesV2Response {
 		panic(err)
 	}
 	return check
+}
+
+func TestGetCaCertificatesV2ReturnsErrorOnMalformedResponse(t *testing.T) {
+	setup()
+	defer teardown()
+
+	testMux.HandleFunc("/cacerts", func(w http.ResponseWriter, r *http.Request) {
+		testMethod(t, r, "GET")
+		_, err := w.Write([]byte("{not valid json"))
+		if err != nil {
+			t.Fatal(err)
+		}
+	})
+
+	resp, _, err := testClient.GetCaCertificatesV2()
+
+	if err == nil {
+		t.Fatal("expected error on malformed JSON response, got nil")
+	}
+	if resp != nil {
+		t.Errorf("expected nil response on error, got %#v", resp)
+	}
+	if !strings.Contains(err.Error(), "invalid character") {
+		t.Errorf("expected JSON unmarshal error, got: %v", err)
+	}
+}
+
+func TestGetCaCertificatesV2ReturnsErrorWhenRequestFails(t *testing.T) {
+	// Use an unreachable address to trigger a connection error
+	unreachableClient := NewConfigurableClient("apiKey", "realm", ClientArgs{publicBaseUrl: "http://127.0.0.1:1"})
+
+	_, _, err := unreachableClient.GetCaCertificatesV2()
+
+	if err == nil {
+		t.Fatal("expected connection error, got nil")
+	}
 }

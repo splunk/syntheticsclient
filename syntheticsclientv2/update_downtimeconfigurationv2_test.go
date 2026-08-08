@@ -78,3 +78,53 @@ func TestUpdateDowntimeConfigurationV2(t *testing.T) {
 		t.Errorf("returned \n\n%#v want \n\n%#v", resp.DowntimeConfiguration.Endtime, inputDowntimeConfigurationV2Update.DowntimeConfiguration.Endtime)
 	}
 }
+
+func TestUpdateDowntimeConfigurationV2ReturnsErrorOnMalformedResponse(t *testing.T) {
+	setup()
+	defer teardown()
+
+	testMux.HandleFunc("/downtime_configurations/10", func(w http.ResponseWriter, r *http.Request) {
+		testMethod(t, r, "PUT")
+		w.Write([]byte("{not valid json"))
+	})
+
+	resp, details, err := testClient.UpdateDowntimeConfigurationV2(10, &DowntimeConfigurationV2Input{})
+	if err == nil {
+		t.Fatal("expected a parse error, but got none")
+	}
+	if details == nil {
+		t.Fatal("expected request details")
+	}
+	if resp != nil {
+		t.Errorf("expected nil response, got %#v", resp)
+	}
+}
+
+func TestUpdateDowntimeConfigurationV2ReturnsErrorOnNetworkFailure(t *testing.T) {
+	unreachableClient := NewConfigurableClient("apiKey", "realm", ClientArgs{publicBaseUrl: "http://127.0.0.1:1"})
+	_, _, err := unreachableClient.UpdateDowntimeConfigurationV2(10, &DowntimeConfigurationV2Input{})
+	if err == nil {
+		t.Fatal("expected a connection error")
+	}
+}
+
+func TestUpdateDowntimeConfigurationV2ReturnsResponseOnEmptyBody(t *testing.T) {
+	setup()
+	defer teardown()
+
+	testMux.HandleFunc("/downtime_configurations/10", func(w http.ResponseWriter, r *http.Request) {
+		testMethod(t, r, "PUT")
+		w.WriteHeader(http.StatusOK)
+	})
+
+	resp, details, err := testClient.UpdateDowntimeConfigurationV2(10, &DowntimeConfigurationV2Input{})
+	if err != nil {
+		t.Fatalf("expected no error for empty response, but got: %v", err)
+	}
+	if details == nil {
+		t.Fatal("expected request details")
+	}
+	if resp == nil {
+		t.Fatal("expected non-nil response for empty body")
+	}
+}

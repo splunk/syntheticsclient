@@ -71,3 +71,74 @@ func TestUpdateVariableV2(t *testing.T) {
 	}
 
 }
+
+func TestUpdateVariableV2ReturnsErrorOnMalformedResponse(t *testing.T) {
+	setup()
+	defer teardown()
+
+	err := json.Unmarshal([]byte(updateVariableV2Body), &inputVariableV2Update)
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	testMux.HandleFunc("/variables/10", func(w http.ResponseWriter, r *http.Request) {
+		testMethod(t, r, "PUT")
+		_, err := w.Write([]byte("{malformed response}"))
+		if err != nil {
+			t.Fatal(err)
+		}
+	})
+
+	resp, _, err := testClient.UpdateVariableV2(10, &inputVariableV2Update)
+	if err == nil {
+		t.Fatal("expected error on malformed response, got nil")
+	}
+	if resp != nil {
+		t.Errorf("expected nil response on parse error, got %#v", resp)
+	}
+}
+
+func TestUpdateVariableV2ReturnsErrorOnNetworkFailure(t *testing.T) {
+	unreachableClient := NewConfigurableClient("apiKey", "realm", ClientArgs{publicBaseUrl: "http://127.0.0.1:1"})
+
+	inputData := VariableV2Input{
+		Variable: Variable{
+			Name:        "test-var",
+			Value:       "test-value",
+			Secret:      false,
+			Description: "test description",
+		},
+	}
+
+	_, _, err := unreachableClient.UpdateVariableV2(10, &inputData)
+	if err == nil {
+		t.Fatal("expected connection error, got nil")
+	}
+}
+
+func TestUpdateVariableV2ReturnsNonNilResponseOnEmptyBody(t *testing.T) {
+	setup()
+	defer teardown()
+
+	err := json.Unmarshal([]byte(updateVariableV2Body), &inputVariableV2Update)
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	testMux.HandleFunc("/variables/20", func(w http.ResponseWriter, r *http.Request) {
+		testMethod(t, r, "PUT")
+		w.WriteHeader(http.StatusOK)
+		_, err := w.Write([]byte(""))
+		if err != nil {
+			t.Fatal(err)
+		}
+	})
+
+	resp, _, err := testClient.UpdateVariableV2(20, &inputVariableV2Update)
+	if err != nil {
+		t.Fatal(err)
+	}
+	if resp == nil {
+		t.Fatal("expected non-nil response for empty body with 2xx status")
+	}
+}

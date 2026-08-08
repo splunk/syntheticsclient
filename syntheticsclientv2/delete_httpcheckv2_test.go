@@ -20,6 +20,7 @@ package syntheticsclientv2
 import (
 	"fmt"
 	"net/http"
+	"strings"
 	"testing"
 )
 
@@ -45,4 +46,39 @@ func TestDeleteHttpCheckV2(t *testing.T) {
 		t.Fatal(err)
 	}
 	fmt.Println(resp)
+}
+
+func TestDeleteHttpCheckV2ReturnsErrorOnNon2xxStatus(t *testing.T) {
+	setup()
+	defer teardown()
+
+	testMux.HandleFunc("/tests/http/20", func(w http.ResponseWriter, r *http.Request) {
+		testMethod(t, r, "DELETE")
+		w.WriteHeader(http.StatusBadRequest)
+	})
+
+	status, err := testClient.DeleteHttpCheckV2(20)
+
+	if err == nil {
+		t.Fatal("expected an error on non-2xx status, but got none")
+	}
+	if !strings.Contains(err.Error(), "unknown error, status code") {
+		t.Fatalf("expected error message to contain 'unknown error, status code', but got: %s", err.Error())
+	}
+	if status != 1 {
+		t.Errorf("expected status 1 on API error, but got %d", status)
+	}
+}
+
+func TestDeleteHttpCheckV2ReturnsErrorWhenRequestFails(t *testing.T) {
+	unreachableClient := NewConfigurableClient("apiKey", "realm", ClientArgs{publicBaseUrl: "http://127.0.0.1:1"})
+
+	status, err := unreachableClient.DeleteHttpCheckV2(21)
+
+	if err == nil {
+		t.Fatal("expected a connection error, but got none")
+	}
+	if status != 1 {
+		t.Errorf("expected status 1 on network error, but got %d", status)
+	}
 }

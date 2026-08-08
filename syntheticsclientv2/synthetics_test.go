@@ -19,6 +19,7 @@ package syntheticsclientv2
 
 import (
 	"bytes"
+	"errors"
 	"log"
 	"net/http"
 	"net/http/httptest"
@@ -375,6 +376,177 @@ func TestSanitizeRequestDumpRedactsURLQueryValues(t *testing.T) {
 		if !strings.Contains(sanitized, redacted) {
 			t.Fatalf("sanitized request dump missing %q: %s", redacted, sanitized)
 		}
+	}
+}
+
+func TestClientString(t *testing.T) {
+	setup()
+	defer teardown()
+
+	got := testClient.String()
+	want := "Splunk Synthetics Client: URL: " + testClient.publicBaseURL + " "
+	if got != want {
+		t.Errorf("returned \n\n%#v want \n\n%#v", got, want)
+	}
+}
+
+func TestNewClientArgs(t *testing.T) {
+	args := NewClientArgs(45, "https://example.com")
+	if args.timeoutSeconds != 45 {
+		t.Errorf("returned \n\n%#v want \n\n%#v", args.timeoutSeconds, 45)
+	}
+	if args.publicBaseUrl != "https://example.com" {
+		t.Errorf("returned \n\n%#v want \n\n%#v", args.publicBaseUrl, "https://example.com")
+	}
+}
+
+func TestNewClient(t *testing.T) {
+	client := NewClient("snakedonut", "us0")
+	if client.apiKey != "snakedonut" {
+		t.Errorf("returned \n\n%#v want \n\n%#v", client.apiKey, "snakedonut")
+	}
+	if client.realm != "us0" {
+		t.Errorf("returned \n\n%#v want \n\n%#v", client.realm, "us0")
+	}
+	if client.publicBaseURL != "https://api.us0.signalfx.com/v2/synthetics" {
+		t.Errorf("returned \n\n%#v want \n\n%#v", client.publicBaseURL, "https://api.us0.signalfx.com/v2/synthetics")
+	}
+	if client.GetHTTPClient().Timeout != 30*time.Second {
+		t.Errorf("returned \n\n%#v want \n\n%#v", client.GetHTTPClient().Timeout, 30*time.Second)
+	}
+}
+
+func TestJsonPrint(t *testing.T) {
+	// JsonPrint only writes to stdout; this exercises both the success and
+	// marshal-error branches without asserting on stdout content.
+	JsonPrint(map[string]string{"key": "value"})
+	JsonPrint(make(chan int))
+}
+
+func TestMakePublicAPICallReturnsUnknownErrorForNonJSONErrorBody(t *testing.T) {
+	testMux = http.NewServeMux()
+	testServer = httptest.NewServer(testMux)
+	defer testServer.Close()
+
+	testMux.HandleFunc("/tests", func(w http.ResponseWriter, r *http.Request) {
+		w.WriteHeader(http.StatusInternalServerError)
+	})
+
+	testConfigurableClient := NewConfigurableClient("apiKey", "realm", ClientArgs{
+		publicBaseUrl: testServer.URL,
+	})
+	details, err := testConfigurableClient.makePublicAPICall("GET", "/tests", nil, nil)
+
+	if err == nil {
+		t.Fatal("expected an error for a non-2xx response with an empty body")
+	}
+	if !strings.Contains(err.Error(), "unknown error, status code: 500") {
+		t.Errorf("returned \n\n%#v want error containing \n\n%#v", err.Error(), "unknown error, status code: 500")
+	}
+	if details.StatusCode != http.StatusInternalServerError {
+		t.Errorf("returned \n\n%#v want \n\n%#v", details.StatusCode, http.StatusInternalServerError)
+	}
+}
+
+func TestMakePublicAPICallSetsQueryParams(t *testing.T) {
+	testMux = http.NewServeMux()
+	testServer = httptest.NewServer(testMux)
+	defer testServer.Close()
+
+	testMux.HandleFunc("/tests", func(w http.ResponseWriter, r *http.Request) {
+		if got := r.URL.Query().Get("page"); got != "2" {
+			t.Errorf("returned query param \n\n%#v want \n\n%#v", got, "2")
+		}
+		w.WriteHeader(http.StatusOK)
+		w.Write([]byte(`{}`))
+	})
+
+	testConfigurableClient := NewConfigurableClient("apiKey", "realm", ClientArgs{
+		publicBaseUrl: testServer.URL,
+	})
+	_, err := testConfigurableClient.makePublicAPICall("GET", "/tests", nil, map[string]string{"page": "2"})
+	if err != nil {
+		t.Fatalf("expected no error, but saw: %s", err.Error())
+	}
+}
+
+func TestMakePublicAPICallReturnsErrorForInvalidMethod(t *testing.T) {
+	setup()
+	defer teardown()
+
+	_, err := testClient.makePublicAPICall("IN VALID", "/tests", nil, nil)
+	if err == nil {
+		t.Fatal("expected an error for an invalid HTTP method")
+	}
+}
+
+type erroringReader struct{}
+
+func (erroringReader) Read([]byte) (int, error) {
+	return 0, errors.New("simulated read error")
+}
+
+func TestMakePublicAPICallReturnsErrorWhenRequestBodyFailsToRead(t *testing.T) {
+	setup()
+	defer teardown()
+
+	_, err := testClient.makePublicAPICall("POST", "/tests", erroringReader{}, nil)
+	if err == nil {
+		t.Fatal("expected an error when the request body fails to read")
+	}
+}
+
+func TestRedactRequestDumpURLQueryWithNoNewline(t *testing.T) {
+	requestLine := "GET /tests?token=secret HTTP/1.1"
+	got := redactRequestDumpURLQuery(requestLine)
+	want := "GET /tests?token=[REDACTED] HTTP/1.1"
+	if got != want {
+		t.Errorf("returned \n\n%#v want \n\n%#v", got, want)
+	}
+}
+
+func TestRedactRequestLineURLQueryWithMalformedRequestLine(t *testing.T) {
+	requestLine := "malformed-request-line"
+	got := redactRequestLineURLQuery(requestLine)
+	if got != requestLine {
+		t.Errorf("returned \n\n%#v want \n\n%#v", got, requestLine)
+	}
+}
+
+func TestSplitRequestDumpReturnsFalseWhenNoSeparatorFound(t *testing.T) {
+	headers, body, separator, ok := splitRequestDump("no separator here")
+	if ok {
+		t.Fatalf("expected ok=false, but saw headers=%q body=%q separator=%q", headers, body, separator)
+	}
+}
+
+func TestIsSensitiveHeaderNameMatchesKnownHeaderExactly(t *testing.T) {
+	if !isSensitiveHeaderName("Authorization") {
+		t.Error("expected Authorization to be treated as a sensitive header name")
+	}
+}
+
+func TestRedactURLQueryValuesWithFragmentAndEmptyParts(t *testing.T) {
+	got := redactURLQueryValues("https://example.com/path?a=1&&=orphan#fragment-only")
+	want := "https://example.com/path?a=[REDACTED]&&[REDACTED]#fragment-only"
+	if got != want {
+		t.Errorf("returned \n\n%#v want \n\n%#v", got, want)
+	}
+}
+
+func TestRedactURLQueryValuesWithFragmentOnlyQuery(t *testing.T) {
+	got := redactURLQueryValues("https://example.com/path?#fragment-only")
+	want := "https://example.com/path?#fragment-only"
+	if got != want {
+		t.Errorf("returned \n\n%#v want \n\n%#v", got, want)
+	}
+}
+
+func TestRedactURLUserinfoWithProtocolRelativeURL(t *testing.T) {
+	got := redactURLUserinfo("//user:pass@example.com/path")
+	want := "//[REDACTED]@example.com/path"
+	if got != want {
+		t.Errorf("returned \n\n%#v want \n\n%#v", got, want)
 	}
 }
 

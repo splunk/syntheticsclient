@@ -81,3 +81,32 @@ func verifyDevicesV2Input(stringInput string) *DevicesV2Response {
 	}
 	return check
 }
+
+func TestGetDevicesV2ReturnsErrorOnMalformedResponse(t *testing.T) {
+	setup()
+	defer teardown()
+
+	testMux.HandleFunc("/devices", func(w http.ResponseWriter, r *http.Request) {
+		testMethod(t, r, "GET")
+		w.Write([]byte("{not valid json"))
+	})
+
+	resp, details, err := testClient.GetDevicesV2()
+	if err == nil {
+		t.Fatal("expected a parse error, but got none")
+	}
+	if details == nil {
+		t.Fatal("expected request details")
+	}
+	if resp != nil {
+		t.Errorf("expected nil response, got %#v", resp)
+	}
+}
+
+func TestGetDevicesV2ReturnsErrorOnNetworkFailure(t *testing.T) {
+	unreachableClient := NewConfigurableClient("apiKey", "realm", ClientArgs{publicBaseUrl: "http://127.0.0.1:1"})
+	_, _, err := unreachableClient.GetDevicesV2()
+	if err == nil {
+		t.Fatal("expected a connection error")
+	}
+}

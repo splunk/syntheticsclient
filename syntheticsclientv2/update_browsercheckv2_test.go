@@ -302,3 +302,81 @@ func TestUpdateBrowserCheckV2(t *testing.T) {
 		t.Errorf("returned \n\n%#v want \n\n%#v", resp.Test.Advancedsettings, inputBrowserCheckV2Update.Test.Advancedsettings)
 	}
 }
+
+func TestUpdateBrowserCheckV2HandlesEmptyResponseBody(t *testing.T) {
+	setup()
+	defer teardown()
+
+	testMux.HandleFunc("/v2/tests/browser/15", func(w http.ResponseWriter, r *http.Request) {
+		testMethod(t, r, "PUT")
+		w.WriteHeader(http.StatusNoContent)
+	})
+
+	err := json.Unmarshal([]byte(updateBrowserCheckV2Body), &inputBrowserCheckV2Update)
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	resp, details, err := testClient.UpdateBrowserCheckV2(15, &inputBrowserCheckV2Update)
+
+	if err != nil {
+		t.Fatal(err)
+	}
+	if resp == nil {
+		t.Fatal("expected non-nil response on empty body")
+	}
+	if details == nil {
+		t.Fatal("expected request details")
+	}
+}
+
+func TestUpdateBrowserCheckV2ReturnsErrorOnMalformedResponse(t *testing.T) {
+	setup()
+	defer teardown()
+
+	testMux.HandleFunc("/v2/tests/browser/16", func(w http.ResponseWriter, r *http.Request) {
+		testMethod(t, r, "PUT")
+		_, err := w.Write([]byte("{not valid json"))
+		if err != nil {
+			t.Fatal(err)
+		}
+	})
+
+	err := json.Unmarshal([]byte(updateBrowserCheckV2Body), &inputBrowserCheckV2Update)
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	resp, details, err := testClient.UpdateBrowserCheckV2(16, &inputBrowserCheckV2Update)
+
+	if err == nil {
+		t.Fatal("expected an error on malformed JSON response, but got none")
+	}
+	if resp != nil && resp.Test.Name != "" {
+		t.Error("expected empty response struct on parse error")
+	}
+	if details == nil {
+		t.Fatal("expected request details even on parse error")
+	}
+}
+
+func TestUpdateBrowserCheckV2ReturnsErrorWhenRequestFails(t *testing.T) {
+	unreachableClient := NewConfigurableClient("apiKey", "realm", ClientArgs{publicBaseUrl: "http://127.0.0.1:1"})
+
+	err := json.Unmarshal([]byte(updateBrowserCheckV2Body), &inputBrowserCheckV2Update)
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	resp, details, err := unreachableClient.UpdateBrowserCheckV2(17, &inputBrowserCheckV2Update)
+
+	if err == nil {
+		t.Fatal("expected a connection error, but got none")
+	}
+	if resp != nil {
+		t.Errorf("expected nil response on network error, but got %#v", resp)
+	}
+	if details == nil {
+		t.Fatal("expected request details to be populated")
+	}
+}

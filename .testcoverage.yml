@@ -1,8 +1,9 @@
 profile: coverage.txt
 
 threshold:
-  # Ratchet floor at today's syntheticsclientv2 baseline. syntheticsclient (v1)
-  # is deprecated and excluded from tests/coverage entirely (see Makefile).
-  # Raise to 90 once SYN-6889's test coverage work lands; until then this only
-  # guards against regressions.
-  total: 73
+  # SYN-6889 added error-path unit tests, raising syntheticsclientv2 coverage
+  # from 73% to 94.4%. Floor set at 90 (the ticket's target) rather than the
+  # measured value, to leave headroom for minor fluctuations without
+  # relaxing the original goal. syntheticsclient (v1) is deprecated and
+  # excluded from tests/coverage entirely (see Makefile).
+  total: 90
