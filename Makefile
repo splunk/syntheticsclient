@@ -9,7 +9,7 @@ default: test
 all: clean build test
 
 build: fmtcheck
-	go build -tags=unit_tests $(FILES)
+	go build $(FILES)
 
 clean:
 	@echo "==> Cleaning out old builds "
@@ -29,8 +29,8 @@ fmtcheck: fmt lint
 
 test: fmtcheck
 	@echo "==> Running all tests"
-	go test $(FILES) -v -tags=unit_tests -timeout=30s -parallel=4 -cover
+	go test $(FILES) -v -timeout=30s -parallel=4 -cover
 
 test-cover: clean fmtcheck
 	@echo "==> Running all tests with coverage and JSON output"
-	go test $(FILES) -tags=unit_tests -timeout=30s -parallel=8 -json -cover -covermode=atomic -coverprofile coverage.txt > test-results.json
+	go test $(FILES) -timeout=30s -parallel=8 -json -cover -covermode=atomic -coverprofile coverage.txt > test-results.json

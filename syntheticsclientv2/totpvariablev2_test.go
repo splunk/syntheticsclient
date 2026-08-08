@@ -1,6 +1,3 @@
-//go:build unit_tests
-// +build unit_tests
-
 // Copyright 2026 Splunk, Inc.
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
