@@ -36,9 +36,14 @@ jobs:
           version: latest
       - run: make lint
       - run: make test-cover
+      # GitHub downgrades GITHUB_TOKEN to read-only for pull_request runs from forks,
+      # regardless of the checks:write/pull-requests:write requested above — creating a
+      # check run or posting a PR comment there fails with "Resource not accessible by
+      # integration". Skip both write-dependent reporting steps in that case; the job
+      # itself still fails (and blocks merge) on a test or coverage failure regardless.
       - name: Report test results
         uses: dorny/test-reporter@a43b3a5f7366b97d083190328d2c652e1a8b6aa2 # v3
-        if: ${{ !cancelled() }}
+        if: ${{ !cancelled() && (github.event_name != 'pull_request' || github.event.pull_request.head.repo.full_name == github.repository) }}
         with:
           name: Go Tests
           path: test-results.json
@@ -72,9 +77,10 @@ jobs:
       # No status function here: leaving the implicit success() check in
       # place means this (and the coverage step it reads outputs from) is
       # skipped if make test-cover failed, instead of erroring on a missing
-      # report from a skipped step.
+      # report from a skipped step. Also skipped for fork PRs — see the
+      # test-reporter step above for why pull-requests:write isn't usable there.
       - name: Post coverage report to PR
-        if: ${{ github.event_name == 'pull_request' }}
+        if: ${{ github.event_name == 'pull_request' && github.event.pull_request.head.repo.full_name == github.repository }}
         uses: thollander/actions-comment-pull-request@24bffb9b452ba05a4f3f77933840a6a841d1b32b # v3.0.1
         with:
           comment-tag: coverage-report

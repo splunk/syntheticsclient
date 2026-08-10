@@ -25,14 +25,6 @@ on:
 
 permissions: {}
 
-concurrency:
-  group: integration-test-${{ github.event.workflow_run.head_repository.full_name }}-${{ github.event.workflow_run.head_branch }}
-  # The live suite provisions fixed-name resources (see integration_test.go TestMain), so
-  # two concurrent runs against the same org collide. Queue instead of cancelling: a
-  # cancelled Go test binary skips t.Cleanup and TestMain's post-run deletes, so cancelling
-  # a run trades a wait for a batch of orphaned live resources.
-  cancel-in-progress: false
-
 jobs:
   # Ungated on purpose: downloads and validates the pr-metadata artifact immediately,
   # before any approval wait. An environment approval can take up to 30 days (GitHub's own
@@ -184,6 +176,19 @@ jobs:
     runs-on: ubuntu-latest
     timeout-minutes: 25
     environment: integration-test # gate: waits for reviewer approval here
+    concurrency:
+      # One fixed group for every PR/branch, not keyed by head repo/branch: every run —
+      # regardless of which fork or branch it came from — hits the same live org (sg0)
+      # and provisions the same fixed-name resources (see integration_test.go TestMain,
+      # and e.g. TestLiveCreateVariableV2ReturnsErrorOnDuplicateName, which asserts that
+      # duplicate names are rejected). A per-branch key would let two approved PRs run
+      # this job at the same time and collide on those names.
+      #
+      # Scoped to this job rather than the whole workflow so a second PR's `resolve` job
+      # (validation + opening the queued check) still runs immediately and isn't stuck
+      # behind however long the first PR's environment approval takes to arrive.
+      group: integration-test-live-suite
+      cancel-in-progress: false
     # Deliberately just contents: read — this job runs a fork PR's code with a live API
     # token in its environment. Reporting the outcome (checks:write, pull-requests:write)
     # is split into the ungated `report` job below so fork code never runs on a runner that
