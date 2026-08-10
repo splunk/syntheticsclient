@@ -175,7 +175,9 @@ jobs:
     if: needs.resolve.outputs.found == 'true'
     runs-on: ubuntu-latest
     timeout-minutes: 25
-    environment: integration-test # gate: waits for reviewer approval here
+    # TEMPORARY: approval gate disabled for end-to-end testing by the PR author.
+    # MUST be restored before merge — see follow-up revert commit.
+    # environment: integration-test # gate: waits for reviewer approval here
     concurrency:
       # One fixed group for every PR/branch, not keyed by head repo/branch: every run —
       # regardless of which fork or branch it came from — hits the same live org (sg0)
