@@ -1,8 +1,12 @@
 .PHONY: default all build clean test fmtcheck test-cover test-integration
 
-# syntheticsclient (v1) is deprecated and excluded from tests, builds, and
-# coverage; only syntheticsclientv2 is exercised here.
+# syntheticsclient (v1) is deprecated and excluded from builds and coverage;
+# only syntheticsclientv2 is built/covered. v1's tests still run via
+# TEST_FILES below so `go test` reports them as an explicit SKIP (see
+# skipDeprecated in syntheticsclient/synthetics_test.go) rather than the
+# package silently vanishing from CI output.
 FILES=./syntheticsclientv2/...
+TEST_FILES=./syntheticsclient/... ./syntheticsclientv2/...
 
 default: test
 
@@ -29,11 +33,11 @@ fmtcheck: fmt lint
 
 test: fmtcheck
 	@echo "==> Running all tests"
-	go test $(FILES) -v -timeout=30s -parallel=4 -cover
+	go test $(TEST_FILES) -v -timeout=30s -parallel=4 -cover -coverpkg=$(FILES)
 
 test-cover: clean fmtcheck
 	@echo "==> Running all tests with coverage and JSON output"
-	go test $(FILES) -timeout=30s -parallel=8 -json -cover -covermode=atomic -coverprofile coverage.txt > test-results.json
+	go test $(TEST_FILES) -timeout=30s -parallel=8 -json -cover -covermode=atomic -coverpkg=$(FILES) -coverprofile coverage.txt > test-results.json
 
 # Runs the live integration suite (syntheticsclientv2/integration_test.go) against a real
 # Synthetics org. Requires API_ACCESS_TOKEN and REALM in the environment. Not part of the

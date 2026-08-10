@@ -24,6 +24,7 @@ var (
 )
 
 func TestDeleteBrowseCheck(t *testing.T) {
+	skipDeprecated(t)
 	setup()
 	defer teardown()
 

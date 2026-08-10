@@ -24,6 +24,7 @@ var (
 )
 
 func TestDeleteHttpCheck(t *testing.T) {
+	skipDeprecated(t)
 	setup()
 	defer teardown()
 
