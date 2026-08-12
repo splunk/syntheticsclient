@@ -1,6 +1,3 @@
-//go:build unit_tests
-// +build unit_tests
-
 // Copyright 2026 Splunk, Inc.
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
@@ -22,6 +19,7 @@ import (
 	"io"
 	"net/http"
 	"reflect"
+	"strings"
 	"testing"
 )
 
@@ -120,5 +118,51 @@ func TestCreateCaCertificateV2(t *testing.T) {
 
 	if !reflect.DeepEqual(resp.CaCert, outputCaCertificateV2Data.CaCert) {
 		t.Errorf("returned \n\n%#v want \n\n%#v", resp.CaCert, outputCaCertificateV2Data.CaCert)
+	}
+}
+
+func TestCreateCaCertificateV2ReturnsErrorOnMalformedResponse(t *testing.T) {
+	setup()
+	defer teardown()
+
+	testMux.HandleFunc("/cacerts", func(w http.ResponseWriter, r *http.Request) {
+		testMethod(t, r, "POST")
+		_, err := w.Write([]byte("{not valid json"))
+		if err != nil {
+			t.Fatal(err)
+		}
+	})
+
+	err := json.Unmarshal([]byte(createCaCertificateV2Body), &inputCaCertificateV2Data)
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	resp, _, err := testClient.CreateCaCertificateV2(&inputCaCertificateV2Data)
+
+	if err == nil {
+		t.Fatal("expected error on malformed JSON response, got nil")
+	}
+	if resp != nil {
+		t.Errorf("expected nil response on error, got %#v", resp)
+	}
+	if !strings.Contains(err.Error(), "invalid character") {
+		t.Errorf("expected JSON unmarshal error, got: %v", err)
+	}
+}
+
+func TestCreateCaCertificateV2ReturnsErrorWhenRequestFails(t *testing.T) {
+	// Use an unreachable address to trigger a connection error
+	unreachableClient := NewConfigurableClient("apiKey", "realm", ClientArgs{publicBaseUrl: "http://127.0.0.1:1"})
+
+	err := json.Unmarshal([]byte(createCaCertificateV2Body), &inputCaCertificateV2Data)
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	_, _, err = unreachableClient.CreateCaCertificateV2(&inputCaCertificateV2Data)
+
+	if err == nil {
+		t.Fatal("expected connection error, got nil")
 	}
 }

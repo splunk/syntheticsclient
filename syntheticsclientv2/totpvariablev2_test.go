@@ -1,6 +1,3 @@
-//go:build unit_tests
-// +build unit_tests
-
 // Copyright 2026 Splunk, Inc.
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
@@ -238,6 +235,236 @@ func TestDeleteTotpVariableV2(t *testing.T) {
 	}
 	if resp != http.StatusNoContent {
 		t.Errorf("returned \n\n%#v want \n\n%#v", resp, http.StatusNoContent)
+	}
+}
+
+func TestCreateTotpVariableV2ReturnsErrorOnMalformedResponse(t *testing.T) {
+	setup()
+	defer teardown()
+
+	err := json.Unmarshal([]byte(createTotpVariableV2Body), &inputTotpVariableV2Data)
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	testMux.HandleFunc("/totps", func(w http.ResponseWriter, r *http.Request) {
+		testMethod(t, r, "POST")
+		_, err := w.Write([]byte("{not valid json"))
+		if err != nil {
+			t.Fatal(err)
+		}
+	})
+
+	resp, _, err := testClient.CreateTotpVariableV2(&inputTotpVariableV2Data)
+	if err == nil {
+		t.Fatal("expected error on malformed response, got nil")
+	}
+	if resp != nil {
+		t.Errorf("expected nil response on parse error, got %#v", resp)
+	}
+}
+
+func TestCreateTotpVariableV2ReturnsErrorOnNetworkFailure(t *testing.T) {
+	unreachableClient := NewConfigurableClient("apiKey", "realm", ClientArgs{publicBaseUrl: "http://127.0.0.1:1"})
+
+	inputData := TotpVariableV2Input{
+		Totp: TotpVariableInput{
+			Name:       "test-totp",
+			Secret:     "test-secret",
+			Digits:     6,
+			Interval:   30,
+			HmacDigest: "SHA1",
+		},
+	}
+
+	_, _, err := unreachableClient.CreateTotpVariableV2(&inputData)
+	if err == nil {
+		t.Fatal("expected connection error, got nil")
+	}
+}
+
+func TestGetTotpVariableV2ReturnsErrorOnMalformedResponse(t *testing.T) {
+	setup()
+	defer teardown()
+
+	testMux.HandleFunc("/totps/102", func(w http.ResponseWriter, r *http.Request) {
+		testMethod(t, r, "GET")
+		_, err := w.Write([]byte("{invalid json}"))
+		if err != nil {
+			t.Fatal(err)
+		}
+	})
+
+	resp, _, err := testClient.GetTotpVariableV2(102)
+	if err == nil {
+		t.Fatal("expected error on malformed response, got nil")
+	}
+	if resp != nil {
+		t.Errorf("expected nil response on parse error, got %#v", resp)
+	}
+}
+
+func TestGetTotpVariableV2ReturnsErrorOnNetworkFailure(t *testing.T) {
+	unreachableClient := NewConfigurableClient("apiKey", "realm", ClientArgs{publicBaseUrl: "http://127.0.0.1:1"})
+
+	_, _, err := unreachableClient.GetTotpVariableV2(102)
+	if err == nil {
+		t.Fatal("expected connection error, got nil")
+	}
+}
+
+func TestGetTotpVariablesV2ReturnsErrorOnMalformedResponse(t *testing.T) {
+	setup()
+	defer teardown()
+
+	testMux.HandleFunc("/totps", func(w http.ResponseWriter, r *http.Request) {
+		testMethod(t, r, "GET")
+		_, err := w.Write([]byte("{invalid json array}"))
+		if err != nil {
+			t.Fatal(err)
+		}
+	})
+
+	resp, _, err := testClient.GetTotpVariablesV2()
+	if err == nil {
+		t.Fatal("expected error on malformed response, got nil")
+	}
+	if resp != nil {
+		t.Errorf("expected nil response on parse error, got %#v", resp)
+	}
+}
+
+func TestGetTotpVariablesV2ReturnsErrorOnNetworkFailure(t *testing.T) {
+	unreachableClient := NewConfigurableClient("apiKey", "realm", ClientArgs{publicBaseUrl: "http://127.0.0.1:1"})
+
+	_, _, err := unreachableClient.GetTotpVariablesV2()
+	if err == nil {
+		t.Fatal("expected connection error, got nil")
+	}
+}
+
+func TestUpdateTotpVariableV2ReturnsErrorOnMalformedResponse(t *testing.T) {
+	setup()
+	defer teardown()
+
+	description := "Updated TOTP"
+	digits := 8
+	hmacDigest := "SHA512"
+	interval := 45
+	secret := "update-totp-secret"
+	updateInput := TotpVariableV2UpdateInput{
+		Totp: TotpVariableUpdateInput{
+			Description: &description,
+			Digits:      &digits,
+			HmacDigest:  &hmacDigest,
+			Interval:    &interval,
+			Secret:      &secret,
+		},
+	}
+
+	testMux.HandleFunc("/totps/103", func(w http.ResponseWriter, r *http.Request) {
+		testMethod(t, r, "PUT")
+		_, err := w.Write([]byte("{malformed response}"))
+		if err != nil {
+			t.Fatal(err)
+		}
+	})
+
+	resp, _, err := testClient.UpdateTotpVariableV2(103, &updateInput)
+	if err == nil {
+		t.Fatal("expected error on malformed response, got nil")
+	}
+	if resp != nil {
+		t.Errorf("expected nil response on parse error, got %#v", resp)
+	}
+}
+
+func TestUpdateTotpVariableV2ReturnsErrorOnNetworkFailure(t *testing.T) {
+	unreachableClient := NewConfigurableClient("apiKey", "realm", ClientArgs{publicBaseUrl: "http://127.0.0.1:1"})
+
+	description := "Updated TOTP"
+	digits := 8
+	hmacDigest := "SHA512"
+	interval := 45
+	secret := "update-totp-secret"
+	updateInput := TotpVariableV2UpdateInput{
+		Totp: TotpVariableUpdateInput{
+			Description: &description,
+			Digits:      &digits,
+			HmacDigest:  &hmacDigest,
+			Interval:    &interval,
+			Secret:      &secret,
+		},
+	}
+
+	_, _, err := unreachableClient.UpdateTotpVariableV2(103, &updateInput)
+	if err == nil {
+		t.Fatal("expected connection error, got nil")
+	}
+}
+
+func TestUpdateTotpVariableV2ReturnsNonNilResponseOnEmptyBody(t *testing.T) {
+	setup()
+	defer teardown()
+
+	description := "Updated TOTP"
+	digits := 8
+	hmacDigest := "SHA512"
+	interval := 45
+	updateInput := TotpVariableV2UpdateInput{
+		Totp: TotpVariableUpdateInput{
+			Description: &description,
+			Digits:      &digits,
+			HmacDigest:  &hmacDigest,
+			Interval:    &interval,
+		},
+	}
+
+	testMux.HandleFunc("/totps/106", func(w http.ResponseWriter, r *http.Request) {
+		testMethod(t, r, "PUT")
+		w.WriteHeader(http.StatusOK)
+		_, err := w.Write([]byte(""))
+		if err != nil {
+			t.Fatal(err)
+		}
+	})
+
+	resp, _, err := testClient.UpdateTotpVariableV2(106, &updateInput)
+	if err != nil {
+		t.Fatal(err)
+	}
+	if resp == nil {
+		t.Fatal("expected non-nil response for empty body with 2xx status")
+	}
+}
+
+func TestDeleteTotpVariableV2ReturnsErrorOnNetworkFailure(t *testing.T) {
+	unreachableClient := NewConfigurableClient("apiKey", "realm", ClientArgs{publicBaseUrl: "http://127.0.0.1:1"})
+
+	_, err := unreachableClient.DeleteTotpVariableV2(105)
+	if err == nil {
+		t.Fatal("expected connection error, got nil")
+	}
+}
+
+func TestDeleteTotpVariableV2ReturnsErrorOnNon2xxStatus(t *testing.T) {
+	setup()
+	defer teardown()
+
+	testMux.HandleFunc("/totps/107", func(w http.ResponseWriter, r *http.Request) {
+		testMethod(t, r, "DELETE")
+		w.WriteHeader(http.StatusMultipleChoices)
+	})
+
+	resp, err := testClient.DeleteTotpVariableV2(107)
+	if err == nil {
+		t.Fatal("expected error on non-2xx status code, got nil")
+	}
+	if resp != http.StatusMultipleChoices {
+		t.Errorf("returned status \n\n%#v want \n\n%#v", resp, http.StatusMultipleChoices)
+	}
+	if !strings.Contains(err.Error(), "Response code") {
+		t.Errorf("expected error to contain 'Response code', got %s", err.Error())
 	}
 }
 

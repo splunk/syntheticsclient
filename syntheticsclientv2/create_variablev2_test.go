@@ -1,6 +1,3 @@
-//go:build unit_tests
-// +build unit_tests
-
 // Copyright 2021 Splunk, Inc.
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
@@ -75,4 +72,48 @@ func TestCreateVariableV2(t *testing.T) {
 		t.Errorf("returned \n\n%#v want \n\n%#v", resp.Variable.Secret, inputVariableV2Data.Variable.Secret)
 	}
 
+}
+
+func TestCreateVariableV2ReturnsErrorOnMalformedResponse(t *testing.T) {
+	setup()
+	defer teardown()
+
+	err := json.Unmarshal([]byte(createVariableV2Body), &inputVariableV2Data)
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	testMux.HandleFunc("/variables", func(w http.ResponseWriter, r *http.Request) {
+		testMethod(t, r, "POST")
+		_, err := w.Write([]byte("{not valid json"))
+		if err != nil {
+			t.Fatal(err)
+		}
+	})
+
+	resp, _, err := testClient.CreateVariableV2(&inputVariableV2Data)
+	if err == nil {
+		t.Fatal("expected error on malformed response, got nil")
+	}
+	if resp != nil {
+		t.Errorf("expected nil response on parse error, got %#v", resp)
+	}
+}
+
+func TestCreateVariableV2ReturnsErrorOnNetworkFailure(t *testing.T) {
+	unreachableClient := NewConfigurableClient("apiKey", "realm", ClientArgs{publicBaseUrl: "http://127.0.0.1:1"})
+
+	inputData := VariableV2Input{
+		Variable: Variable{
+			Name:        "test-var",
+			Value:       "test-value",
+			Secret:      false,
+			Description: "test description",
+		},
+	}
+
+	_, _, err := unreachableClient.CreateVariableV2(&inputData)
+	if err == nil {
+		t.Fatal("expected connection error, got nil")
+	}
 }

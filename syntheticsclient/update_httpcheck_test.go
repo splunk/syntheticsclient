@@ -26,6 +26,7 @@ var (
 )
 
 func TestUpdateHttpCheck(t *testing.T) {
+	skipDeprecated(t)
 	setup()
 	defer teardown()
 

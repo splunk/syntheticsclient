@@ -1,6 +1,3 @@
-//go:build unit_tests
-// +build unit_tests
-
 // Copyright 2021 Splunk, Inc.
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
@@ -103,5 +100,56 @@ func TestCreateApiCheckV2(t *testing.T) {
 
 	if !reflect.DeepEqual(resp.Test.Customproperties, inputData.Test.Customproperties) {
 		t.Errorf("returned \n\n%#v want \n\n%#v", resp.Test.Customproperties, inputData.Test.Customproperties)
+	}
+}
+
+func TestCreateApiCheckV2ReturnsErrorOnMalformedResponse(t *testing.T) {
+	setup()
+	defer teardown()
+
+	testMux.HandleFunc("/v2/tests/api", func(w http.ResponseWriter, r *http.Request) {
+		testMethod(t, r, "POST")
+		_, err := w.Write([]byte("{not valid json"))
+		if err != nil {
+			t.Fatal(err)
+		}
+	})
+
+	err := json.Unmarshal([]byte(createApiV2Body), &inputData)
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	resp, details, err := testClient.CreateApiCheckV2(&inputData)
+
+	if err == nil {
+		t.Fatal("expected an error on malformed JSON response, but got none")
+	}
+	if resp != nil && resp.Test.Name != "" {
+		t.Error("expected empty response struct on parse error")
+	}
+	if details == nil {
+		t.Fatal("expected request details even on parse error")
+	}
+}
+
+func TestCreateApiCheckV2ReturnsErrorWhenRequestFails(t *testing.T) {
+	unreachableClient := NewConfigurableClient("apiKey", "realm", ClientArgs{publicBaseUrl: "http://127.0.0.1:1"})
+
+	err := json.Unmarshal([]byte(createApiV2Body), &inputData)
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	resp, details, err := unreachableClient.CreateApiCheckV2(&inputData)
+
+	if err == nil {
+		t.Fatal("expected a connection error, but got none")
+	}
+	if resp != nil {
+		t.Errorf("expected nil response on network error, but got %#v", resp)
+	}
+	if details == nil {
+		t.Fatal("expected request details to be populated")
 	}
 }

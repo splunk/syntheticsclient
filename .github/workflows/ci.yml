@@ -5,15 +5,17 @@ name: CI Checks
 # Optionally, you can turn it on using a schedule for regular testing.
 on:
   pull_request:
-    paths-ignore:
-      - 'README.md'
   push:
-    paths-ignore:
-      - 'README.md'
 
-# Testing only needs permissions to read the repository contents.
+# Testing needs to read repository contents and write check runs (test-reporter)
+# and step summaries (coverage report). actions:read lets PR runs download the
+# base branch's coverage breakdown artifact; pull-requests:write lets the
+# coverage-diff report be posted as a PR comment.
 permissions:
   contents: read
+  checks: write
+  actions: read
+  pull-requests: write
 
 jobs:
   # Ensure project builds before running testing matrix
@@ -33,5 +35,65 @@ jobs:
         with:
           version: latest
       - run: make lint
-      - run: make testacc
-      - run: go build -v ./syntheticsclientv2
+      - run: make test-cover
+      # GitHub downgrades GITHUB_TOKEN to read-only for pull_request runs from forks,
+      # regardless of the checks:write/pull-requests:write requested above — creating a
+      # check run or posting a PR comment there fails with "Resource not accessible by
+      # integration". Skip both write-dependent reporting steps in that case; the job
+      # itself still fails (and blocks merge) on a test or coverage failure regardless.
+      - name: Report test results
+        uses: dorny/test-reporter@a43b3a5f7366b97d083190328d2c652e1a8b6aa2 # v3
+        if: ${{ !cancelled() && (github.event_name != 'pull_request' || github.event.pull_request.head.repo.full_name == github.repository) }}
+        with:
+          name: Go Tests
+          path: test-results.json
+          reporter: golang-json
+          only-summary: true
+      # Fetch v2's (the base branch's) last coverage breakdown so PR runs can
+      # report how this change moves coverage, not just its absolute value.
+      - name: Download base branch coverage breakdown
+        id: download-main-breakdown
+        uses: dawidd6/action-download-artifact@b6e2e70617bc3265edd6dab6c906732b2f1ae151 # v21
+        with:
+          branch: v2
+          workflow_conclusion: success
+          name: v2.breakdown
+          if_no_artifact_found: warn
+      - name: Check test coverage
+        id: coverage
+        uses: vladopajic/go-test-coverage@f94bcf0d6b9fa5fb8b783830b22648f6c17475e2 # v2
+        continue-on-error: true # fail after the coverage comment is posted below
+        with:
+          config: ./.testcoverage.yml
+          breakdown-file-name: ${{ github.ref_name == 'v2' && 'v2.breakdown' || '' }}
+          diff-base-breakdown-file-name: ${{ steps.download-main-breakdown.outputs.found_artifact == 'true' && 'v2.breakdown' || '' }}
+      - name: Upload coverage breakdown
+        if: ${{ github.ref_name == 'v2' }}
+        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
+        with:
+          name: v2.breakdown
+          path: v2.breakdown
+          if-no-files-found: error
+      # No status function here: leaving the implicit success() check in
+      # place means this (and the coverage step it reads outputs from) is
+      # skipped if make test-cover failed, instead of erroring on a missing
+      # report from a skipped step. Also skipped for fork PRs — see the
+      # test-reporter step above for why pull-requests:write isn't usable there.
+      - name: Post coverage report to PR
+        if: ${{ github.event_name == 'pull_request' && github.event.pull_request.head.repo.full_name == github.repository }}
+        uses: thollander/actions-comment-pull-request@24bffb9b452ba05a4f3f77933840a6a841d1b32b # v3.0.1
+        with:
+          comment-tag: coverage-report
+          message: |
+            Code Coverage Report:
+            ```
+            ${{ fromJSON(steps.coverage.outputs.report) }}```
+      - name: Fail if coverage threshold not met
+        if: ${{ steps.coverage.outcome == 'failure' }}
+        run: echo "coverage check failed" && exit 1
+      - name: Publish coverage summary
+        if: ${{ !cancelled() }}
+        run: |
+          echo "### Coverage" >> "$GITHUB_STEP_SUMMARY"
+          go tool cover -func=coverage.txt | tail -1 >> "$GITHUB_STEP_SUMMARY"
+      - run: go build -v ./syntheticsclientv2/...

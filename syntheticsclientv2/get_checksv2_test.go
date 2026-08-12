@@ -1,6 +1,3 @@
-//go:build unit_tests
-// +build unit_tests
-
 // Copyright 2021 Splunk, Inc.
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
@@ -21,6 +18,7 @@ import (
 	"encoding/json"
 	"net/http"
 	"reflect"
+	"strings"
 	"testing"
 )
 
@@ -66,4 +64,101 @@ func verifyChecksV2Input(stringInput string) *GetChecksV2Options {
 		panic(err)
 	}
 	return check
+}
+
+func TestGetChecksV2WithAllQueryParamsPopulated(t *testing.T) {
+	setup()
+	defer teardown()
+
+	var gotQuery string
+	testMux.HandleFunc("/tests", func(w http.ResponseWriter, r *http.Request) {
+		testMethod(t, r, "GET")
+		gotQuery = r.URL.RawQuery
+		_, err := w.Write([]byte(`{"tests":[]}`))
+		if err != nil {
+			t.Fatal(err)
+		}
+	})
+
+	active := true
+	params := &GetChecksV2Options{
+		TestType:           "api",
+		Page:               2,
+		PerPage:            25,
+		OrderBy:            "id",
+		Search:             "beep",
+		Active:             &active,
+		SchedulingStrategy: "round_robin",
+		CustomProperties:   []CustomProperties{{Key: "env", Value: "prod"}},
+		LastRunStatus:      []string{"success", "pending"},
+		LocationIds:        []string{"aws-us-east-1", "aws-ap-northeast-1"},
+		TestTypes:          []string{"api", "browser"},
+		Frequencies:        []int{5, 10},
+	}
+
+	_, _, err := testClient.GetChecksV2(params)
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	for _, want := range []string{
+		"active=true",
+		"customProperties%5B%5D=env%3Aprod",
+		"lastRunStatus%5B%5D=success",
+		"lastRunStatus%5B%5D=pending",
+		"locationIds%5B%5D=aws-us-east-1",
+		"locationIds%5B%5D=aws-ap-northeast-1",
+		"testTypes%5B%5D=api",
+		"testTypes%5B%5D=browser",
+		"frequencies%5B%5D=5",
+		"frequencies%5B%5D=10",
+	} {
+		if !strings.Contains(gotQuery, want) {
+			t.Errorf("query %q missing expected substring %q", gotQuery, want)
+		}
+	}
+}
+
+func TestActiveQueryParam(t *testing.T) {
+	active := true
+	if got, want := activeQueryParam(&active), "&active=true"; got != want {
+		t.Errorf("returned \n\n%#v want \n\n%#v", got, want)
+	}
+	if got, want := activeQueryParam(nil), ""; got != want {
+		t.Errorf("returned \n\n%#v want \n\n%#v", got, want)
+	}
+}
+
+func TestCustomPropsQueryParam(t *testing.T) {
+	params := []CustomProperties{{Key: "env", Value: "prod"}, {Key: "team", Value: "synthetics"}}
+	got := customPropsQueryParam(params)
+	want := "&customProperties[]=env:prod&customProperties[]=team:synthetics"
+	if got != want {
+		t.Errorf("returned \n\n%#v want \n\n%#v", got, want)
+	}
+	if got := customPropsQueryParam(nil); got != "" {
+		t.Errorf("returned \n\n%#v want empty string", got)
+	}
+}
+
+func TestIntegersQueryParam(t *testing.T) {
+	got := integersQueryParam([]int{5, 10}, "&frequencies[]=")
+	want := "&frequencies[]=5&frequencies[]=10"
+	if got != want {
+		t.Errorf("returned \n\n%#v want \n\n%#v", got, want)
+	}
+	if got := integersQueryParam(nil, "&frequencies[]="); got != "" {
+		t.Errorf("returned \n\n%#v want empty string", got)
+	}
+}
+
+func TestStringsQueryParam(t *testing.T) {
+	got := stringsQueryParam([]string{"success", "pending"}, "&lastRunStatus[]=")
+	want := "&lastRunStatus[]=success&lastRunStatus[]=pending"
+	if got != want {
+		t.Errorf("returned \n\n%#v want \n\n%#v", got, want)
+	}
+	if got := stringsQueryParam(nil, "&lastRunStatus[]="); got != "" {
+		t.Errorf("returned \n\n%#v want empty string", got)
+	}
 }

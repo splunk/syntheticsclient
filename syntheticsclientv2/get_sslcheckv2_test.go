@@ -1,6 +1,3 @@
-//go:build unit_tests
-// +build unit_tests
-
 // Copyright 2026 Splunk, Inc.
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
@@ -115,4 +112,40 @@ func verifySslCheckV2Input(stringInput string) *SslCheckV2Response {
 		panic(err)
 	}
 	return check
+}
+
+func TestGetSslCheckV2ReturnsErrorOnMalformedResponse(t *testing.T) {
+	setup()
+	defer teardown()
+
+	testMux.HandleFunc("/tests/ssl/1", func(w http.ResponseWriter, r *http.Request) {
+		testMethod(t, r, "GET")
+		_, err := w.Write([]byte("{not valid json"))
+		if err != nil {
+			t.Fatal(err)
+		}
+	})
+
+	resp, _, err := testClient.GetSslCheckV2(1)
+
+	if err == nil {
+		t.Fatal("expected error on malformed JSON response, got nil")
+	}
+	if resp != nil {
+		t.Errorf("expected nil response on error, got %#v", resp)
+	}
+	if !strings.Contains(err.Error(), "invalid character") {
+		t.Errorf("expected JSON unmarshal error, got: %v", err)
+	}
+}
+
+func TestGetSslCheckV2ReturnsErrorWhenRequestFails(t *testing.T) {
+	// Use an unreachable address to trigger a connection error
+	unreachableClient := NewConfigurableClient("apiKey", "realm", ClientArgs{publicBaseUrl: "http://127.0.0.1:1"})
+
+	_, _, err := unreachableClient.GetSslCheckV2(1)
+
+	if err == nil {
+		t.Fatal("expected connection error, got nil")
+	}
 }

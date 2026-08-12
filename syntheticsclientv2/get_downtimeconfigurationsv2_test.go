@@ -1,6 +1,3 @@
-//go:build unit_tests
-// +build unit_tests
-
 // Copyright 2024 Splunk, Inc.
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
@@ -144,4 +141,36 @@ func verifyDowntimeConfigurationsV2Input(stringInput string) *GetDowntimeConfigu
 		panic(err)
 	}
 	return check
+}
+
+func TestGetDowntimeConfigurationsV2ReturnsErrorOnMalformedResponse(t *testing.T) {
+	setup()
+	defer teardown()
+
+	testMux.HandleFunc("/downtime_configurations", func(w http.ResponseWriter, r *http.Request) {
+		testMethod(t, r, "GET")
+		_, err := w.Write([]byte("{not valid json"))
+		if err != nil {
+			t.Fatal(err)
+		}
+	})
+
+	resp, details, err := testClient.GetDowntimeConfigurationsV2(&GetDowntimeConfigurationsV2Options{})
+	if err == nil {
+		t.Fatal("expected a parse error, but got none")
+	}
+	if details == nil {
+		t.Fatal("expected request details")
+	}
+	if resp != nil {
+		t.Errorf("expected nil response, got %#v", resp)
+	}
+}
+
+func TestGetDowntimeConfigurationsV2ReturnsErrorOnNetworkFailure(t *testing.T) {
+	unreachableClient := NewConfigurableClient("apiKey", "realm", ClientArgs{publicBaseUrl: "http://127.0.0.1:1"})
+	_, _, err := unreachableClient.GetDowntimeConfigurationsV2(&GetDowntimeConfigurationsV2Options{})
+	if err == nil {
+		t.Fatal("expected a connection error")
+	}
 }

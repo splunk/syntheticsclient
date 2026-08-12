@@ -53,7 +53,17 @@ func testMethod(t *testing.T, r *http.Request, want string) {
 	}
 }
 
+// skipDeprecated marks a test as skipped rather than removing it outright,
+// so `go test ./...` still reports every syntheticsclient (v1) test by name
+// with a SKIP status and this note, instead of the package silently
+// vanishing from CI output. See SYN-6889: v1 is slated for deprecation and
+// is excluded from the coverage gate and build (Makefile FILES var).
+func skipDeprecated(t *testing.T) {
+	t.Skip("syntheticsclient (v1) is deprecated; skipping in favor of syntheticsclientv2")
+}
+
 func TestConfigurableClient(t *testing.T) {
+	skipDeprecated(t)
 	testMux = http.NewServeMux()
 	testServer = httptest.NewServer(testMux)
 	args := ClientArgs{
@@ -72,6 +82,7 @@ func TestConfigurableClient(t *testing.T) {
 }
 
 func TestConfigurableClientTimeout(t *testing.T) {
+	skipDeprecated(t)
 	testMux = http.NewServeMux()
 	testServer = httptest.NewServer(testMux)
 

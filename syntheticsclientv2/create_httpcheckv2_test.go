@@ -1,6 +1,3 @@
-//go:build unit_tests
-// +build unit_tests
-
 // Copyright 2021 Splunk, Inc.
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
@@ -99,5 +96,101 @@ func TestCreateHttpCheckV2(t *testing.T) {
 
 	if !reflect.DeepEqual(resp.Test.Port, inputHttpCheckV2Data.Test.Port) {
 		t.Errorf("returned \n\n%#v want \n\n%#v", resp.Test.Port, inputHttpCheckV2Data.Test.Port)
+	}
+}
+
+func TestCreateHttpCheckV2ReturnsErrorOnMalformedResponse(t *testing.T) {
+	setup()
+	defer teardown()
+
+	testMux.HandleFunc("/tests/http", func(w http.ResponseWriter, r *http.Request) {
+		testMethod(t, r, "POST")
+		_, err := w.Write([]byte("{not valid json"))
+		if err != nil {
+			t.Fatal(err)
+		}
+	})
+
+	err := json.Unmarshal([]byte(createHttpCheckV2Body), &inputHttpCheckV2Data)
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	resp, details, err := testClient.CreateHttpCheckV2(&inputHttpCheckV2Data)
+
+	if err == nil {
+		t.Fatal("expected an error on malformed JSON response, but got none")
+	}
+	if resp != nil && resp.Test.Name != "" {
+		t.Error("expected empty response struct on parse error")
+	}
+	if details == nil {
+		t.Fatal("expected request details even on parse error")
+	}
+}
+
+func TestCreateHttpCheckV2ReturnsErrorWhenRequestFails(t *testing.T) {
+	unreachableClient := NewConfigurableClient("apiKey", "realm", ClientArgs{publicBaseUrl: "http://127.0.0.1:1"})
+
+	err := json.Unmarshal([]byte(createHttpCheckV2Body), &inputHttpCheckV2Data)
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	resp, details, err := unreachableClient.CreateHttpCheckV2(&inputHttpCheckV2Data)
+
+	if err == nil {
+		t.Fatal("expected a connection error, but got none")
+	}
+	if resp != nil {
+		t.Errorf("expected nil response on network error, but got %#v", resp)
+	}
+	if details == nil {
+		t.Fatal("expected request details to be populated")
+	}
+}
+
+func TestCreateHttpCheckV2WithNullablePortReturnsErrorOnMalformedResponse(t *testing.T) {
+	setup()
+	defer teardown()
+
+	testMux.HandleFunc("/tests/http", func(w http.ResponseWriter, r *http.Request) {
+		testMethod(t, r, "POST")
+		_, err := w.Write([]byte("{not valid json"))
+		if err != nil {
+			t.Fatal(err)
+		}
+	})
+
+	inputWithNullablePort := HttpCheckV2InputWithNullablePort{}
+	inputWithNullablePort.Test.Name = "test-http"
+	resp, details, err := testClient.CreateHttpCheckV2WithNullablePort(&inputWithNullablePort)
+
+	if err == nil {
+		t.Fatal("expected an error on malformed JSON response, but got none")
+	}
+	if resp != nil && resp.Test.Name != "" {
+		t.Error("expected empty response struct on parse error")
+	}
+	if details == nil {
+		t.Fatal("expected request details even on parse error")
+	}
+}
+
+func TestCreateHttpCheckV2WithNullablePortReturnsErrorWhenRequestFails(t *testing.T) {
+	unreachableClient := NewConfigurableClient("apiKey", "realm", ClientArgs{publicBaseUrl: "http://127.0.0.1:1"})
+
+	inputWithNullablePort := HttpCheckV2InputWithNullablePort{}
+	inputWithNullablePort.Test.Name = "test-http"
+	resp, details, err := unreachableClient.CreateHttpCheckV2WithNullablePort(&inputWithNullablePort)
+
+	if err == nil {
+		t.Fatal("expected a connection error, but got none")
+	}
+	if resp != nil {
+		t.Errorf("expected nil response on network error, but got %#v", resp)
+	}
+	if details == nil {
+		t.Fatal("expected request details to be populated")
 	}
 }
