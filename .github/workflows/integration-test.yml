@@ -43,6 +43,7 @@ jobs:
       found: ${{ steps.pr.outputs.found }}
       number: ${{ steps.pr.outputs.number }}
       sha: ${{ steps.pr.outputs.sha }}
+      check-run-id: ${{ steps.create-check.outputs.id }}
 
     steps:
       - name: Download PR metadata
@@ -154,13 +155,20 @@ jobs:
             core.setOutput('sha', trustedSha);
 
       - name: Create pending check run
+        id: create-check
         if: steps.pr.outputs.found == 'true'
         uses: actions/github-script@60a0d83039c74a4aee543508d2ffcb1c3799cdea # v7.0.1
         env:
           PR_SHA: ${{ steps.pr.outputs.sha }}
         with:
           script: |
-            await github.rest.checks.create({
+            // Capture the created check run's own ID as a job output rather than having
+            // `report` re-look it up by ref+name later: a rerun of this workflow (or of
+            // PR Metadata) for the same head SHA would create a second `integration-test`
+            // check run, and listForRef().check_runs[0] has no guarantee of returning
+            // *this* run's check — it could complete a different run's check and leave
+            // this one stuck at queued.
+            const { data: check } = await github.rest.checks.create({
               owner: context.repo.owner,
               repo: context.repo.repo,
               name: 'integration-test',
@@ -168,6 +176,7 @@ jobs:
               status: 'queued',
               details_url: `${context.serverUrl}/${context.repo.owner}/${context.repo.repo}/actions/runs/${context.runId}`,
             });
+            core.setOutput('id', String(check.id));
 
   integration-test:
     name: integration-test
@@ -273,7 +282,7 @@ jobs:
         uses: actions/github-script@60a0d83039c74a4aee543508d2ffcb1c3799cdea # v7.0.1
         env:
           JOB_RESULT: ${{ needs.integration-test.result }}
-          PR_SHA: ${{ needs.resolve.outputs.sha }}
+          CHECK_RUN_ID: ${{ needs.resolve.outputs.check-run-id }}
           PR_NUMBER: ${{ needs.resolve.outputs.number }}
         with:
           script: |
@@ -320,18 +329,16 @@ jobs:
               }
             }
 
-            const checks = await github.rest.checks.listForRef({
-              owner: context.repo.owner,
-              repo: context.repo.repo,
-              ref: process.env.PR_SHA,
-              check_name: 'integration-test',
-            });
-            const check = checks.data.check_runs[0];
-            if (check) {
+            // Update the exact check run `resolve` created (its ID was threaded through as
+            // a job output), not a re-lookup by ref+name: a rerun of this workflow for the
+            // same head SHA would create a second `integration-test` check run, and
+            // listForRef().check_runs[0] has no guarantee of returning *this* run's check —
+            // it could complete a different run's check and leave this one stuck at queued.
+            if (process.env.CHECK_RUN_ID) {
               await github.rest.checks.update({
                 owner: context.repo.owner,
                 repo: context.repo.repo,
-                check_run_id: check.id,
+                check_run_id: Number(process.env.CHECK_RUN_ID),
                 status: 'completed',
                 conclusion,
                 details_url: runUrl,
