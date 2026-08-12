@@ -20,7 +20,7 @@ import (
 	"testing"
 )
 
-var getChromeFlagsBody = `{"chromeFlags":[{"name":"disable-gpu"},{"name":"lang","value":"en-US"}]}`
+var getChromeFlagsBody = `{"chromeFlags":[{"name":"--disable-http2","label":"Disable h2","description":"Disables HTTP/2.0.","acceptsValue":false},{"name":"--proxy-server","label":"Proxy server","description":"Use a specified proxy server.","acceptsValue":true}]}`
 
 func TestGetChromeFlags(t *testing.T) {
 	setup()
@@ -45,10 +45,9 @@ func TestGetChromeFlags(t *testing.T) {
 		t.Fatalf("status code = %d, want %d", details.StatusCode, http.StatusOK)
 	}
 
-	langValue := "en-US"
-	expected := []ChromeFlag{
-		{Name: "disable-gpu"},
-		{Name: "lang", Value: &langValue},
+	expected := []ChromeFlagOption{
+		{Name: "--disable-http2", Label: "Disable h2", Description: "Disables HTTP/2.0.", AcceptsValue: false},
+		{Name: "--proxy-server", Label: "Proxy server", Description: "Use a specified proxy server.", AcceptsValue: true},
 	}
 	if !reflect.DeepEqual(resp.ChromeFlags, expected) {
 		t.Fatalf("ChromeFlags = %#v, want %#v", resp.ChromeFlags, expected)
@@ -61,10 +60,9 @@ func TestParseChromeFlagsResponse(t *testing.T) {
 		t.Fatal(err)
 	}
 
-	langValue := "en-US"
-	expected := []ChromeFlag{
-		{Name: "disable-gpu"},
-		{Name: "lang", Value: &langValue},
+	expected := []ChromeFlagOption{
+		{Name: "--disable-http2", Label: "Disable h2", Description: "Disables HTTP/2.0.", AcceptsValue: false},
+		{Name: "--proxy-server", Label: "Proxy server", Description: "Use a specified proxy server.", AcceptsValue: true},
 	}
 	if !reflect.DeepEqual(resp.ChromeFlags, expected) {
 		t.Fatalf("ChromeFlags = %#v, want %#v", resp.ChromeFlags, expected)
