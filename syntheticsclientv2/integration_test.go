@@ -1829,6 +1829,17 @@ func TestLiveGetExcludedFileTypesV2(t *testing.T) {
 	JsonPrint(res)
 }
 
+func TestLiveGetChromeFlags(t *testing.T) {
+	//Create your client with the token
+	c := NewClient(token, realm)
+
+	res, _, err := c.GetChromeFlags()
+	if err != nil {
+		t.Fatal(err)
+	}
+	JsonPrint(res)
+}
+
 func liveCreateHttpCheckV2WithNullablePortInput(name string) *HttpCheckV2InputWithNullablePort {
 	input := &HttpCheckV2InputWithNullablePort{}
 	input.Test.Name = name
