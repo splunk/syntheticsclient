@@ -1,6 +1,3 @@
-//go:build unit_tests
-// +build unit_tests
-
 // Copyright 2021 Splunk, Inc.
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
@@ -20,6 +17,7 @@ package syntheticsclientv2
 import (
 	"fmt"
 	"net/http"
+	"strings"
 	"testing"
 )
 
@@ -45,4 +43,33 @@ func TestDeleteLocationV2(t *testing.T) {
 		t.Fatal(err)
 	}
 	fmt.Println(resp)
+}
+
+func TestDeleteLocationV2ReturnsErrorOnNetworkFailure(t *testing.T) {
+	unreachableClient := NewConfigurableClient("apiKey", "realm", ClientArgs{publicBaseUrl: "http://127.0.0.1:1"})
+	_, err := unreachableClient.DeleteLocationV2("beep")
+	if err == nil {
+		t.Fatal("expected a connection error")
+	}
+}
+
+func TestDeleteLocationV2ReturnsErrorOnNon2xxStatus(t *testing.T) {
+	setup()
+	defer teardown()
+
+	testMux.HandleFunc("/locations/beep", func(w http.ResponseWriter, r *http.Request) {
+		testMethod(t, r, "DELETE")
+		w.WriteHeader(http.StatusMultipleChoices)
+	})
+
+	resp, err := testClient.DeleteLocationV2("beep")
+	if err == nil {
+		t.Fatalf("expected an error for non-2xx status, but got none")
+	}
+	if !strings.Contains(err.Error(), "Response code") {
+		t.Errorf("expected error message to contain 'Response code', got: %v", err)
+	}
+	if resp != http.StatusMultipleChoices {
+		t.Errorf("expected status code %d, got %d", http.StatusMultipleChoices, resp)
+	}
 }

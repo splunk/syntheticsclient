@@ -26,12 +26,16 @@ var (
 )
 
 func TestUpdateHttpCheck(t *testing.T) {
+	skipDeprecated(t)
 	setup()
 	defer teardown()
 
 	testMux.HandleFunc("/v2/checks/http/19", func(w http.ResponseWriter, r *http.Request) {
 		testMethod(t, r, "PUT")
-		w.Write([]byte(updateResponse))
+		_, err := w.Write([]byte(updateResponse))
+		if err != nil {
+			t.Errorf("returned error: %#v", err)
+		}
 	})
 
 	resp, _, err := testClient.UpdateHttpCheck(19, updateBody)

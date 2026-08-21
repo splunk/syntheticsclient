@@ -10,6 +10,13 @@
 
 # Output of the go coverage tool, specifically when used with LiteIDE
 *.out
+coverage.txt
+test-results.json
+*.breakdown
+integration.jsonl
+
+# Local credentials for running the live integration suite (make test-integration)
+.env.testacc
 
 # Dependency directories (remove the comment below to include it)
 # vendor/

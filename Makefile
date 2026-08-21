@@ -1,19 +1,24 @@
-.PHONY: default all build clean test fmtcheck testacc sonarqube
+.PHONY: default all build clean test fmtcheck test-cover test-integration
 
-PKG_NAME=syntheticsclientv2
+# syntheticsclient (v1) is deprecated and excluded from builds and coverage;
+# only syntheticsclientv2 is built/covered. v1's tests still run via
+# TEST_FILES below so `go test` reports them as an explicit SKIP (see
+# skipDeprecated in syntheticsclient/synthetics_test.go) rather than the
+# package silently vanishing from CI output.
 FILES=./syntheticsclientv2/...
+TEST_FILES=./syntheticsclient/... ./syntheticsclientv2/...
 
-default: test 
+default: test
 
-all: clean build test 
+all: clean build test
 
 build: fmtcheck
-	go build -tags=unit_tests
+	go build $(FILES)
 
 clean:
 	@echo "==> Cleaning out old builds "
 	go clean
-	rm -rf coverage.txt .sonar .scannerwork
+	rm -rf coverage.txt test-results.json v2.breakdown integration.jsonl
 
 
 fmt:
@@ -28,11 +33,21 @@ fmtcheck: fmt lint
 
 test: fmtcheck
 	@echo "==> Running all tests"
-	go test $(FILES) -v -tags=unit_tests -timeout=30s -parallel=4 -cover
+	go test $(TEST_FILES) -v -timeout=30s -parallel=4 -cover -coverpkg=$(FILES)
 
-testacc: clean fmtcheck
-	@echo "==> Running all tests"
-	go test $(FILES) -v -tags=unit_tests -timeout=30s -parallel=8 -cover -coverprofile coverage.txt
+test-cover: clean fmtcheck
+	@echo "==> Running all tests with coverage and JSON output"
+	go test $(TEST_FILES) -timeout=30s -parallel=8 -json -cover -covermode=atomic -coverpkg=$(FILES) -coverprofile coverage.txt > test-results.json
 
-sonarqube: testacc
-	docker run -it -v "${PWD}:/usr/src" sonarsource/sonar-scanner-cli
+# Runs the live integration suite (syntheticsclientv2/integration_test.go) against a real
+# Synthetics org. Requires API_ACCESS_TOKEN and REALM in the environment. Not part of the
+# default test/test-cover targets: it mutates live state and needs real credentials, so it
+# only runs where those are deliberately provided (a developer's shell, or the gated
+# integration-test CI job).
+test-integration: SHELL:=/bin/bash
+test-integration:
+	@echo "==> Running live integration tests"
+	set -o pipefail; go test -tags=integration -json ./syntheticsclientv2/... -timeout 30m \
+		| sed '/X-Sf-Token/d' \
+		| tee integration.jsonl \
+		| jq -j -r 'if .Action == "output" then .Output else empty end'

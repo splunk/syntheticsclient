@@ -51,12 +51,16 @@ var (
 )
 
 func TestUpdateBrowserCheck(t *testing.T) {
+	skipDeprecated(t)
 	setup()
 	defer teardown()
 
 	testMux.HandleFunc("/v2/checks/real_browsers/10", func(w http.ResponseWriter, r *http.Request) {
 		testMethod(t, r, "PUT")
-		w.Write([]byte(updateBrowserCheckResponse))
+		_, err := w.Write([]byte(updateBrowserCheckResponse))
+		if err != nil {
+			t.Errorf("returned error: %#v", err)
+		}
 	})
 
 	resp, _, err := testClient.UpdateBrowserCheck(10, updateBrowserCheckBody)
