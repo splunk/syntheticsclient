@@ -1,6 +1,3 @@
-//go:build unit_tests
-// +build unit_tests
-
 // Copyright 2021 Splunk, Inc.
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
@@ -25,7 +22,7 @@ import (
 )
 
 var (
-	getHttpCheckV2Body  = `{"test":{"customProperties": [{"key": "Test_Key", "value": "Test Custom Properties"}], "active":true,"advancedSettings":{"authentication":{"password":"password123","username":"myuser"},"cookies":[{"key":"qux","value":"qux","domain":"splunk.com","path":"/qux"}],"headers":[{"name":"Accept","value":"application/json","domain":"splunk.com"}],"verifyCertificates":true},"createdAt":"2022-09-14T14:35:37.801Z","device":{"id":1,"label":"iPhone","networkConnection":{"description":"Mobile LTE","downloadBandwidth":12000,"latency":70,"packetLoss":0,"uploadBandwidth":12000},"viewportHeight":844,"viewportWidth":375},"frequency":5,"id":1,"locationIds":["na-us-virginia"],"name":"My Test","schedulingStrategy":"round_robin","transactions":[{"name":"Example transaction","steps":[{"name":"element step","selector":".main","selectorType":"css","type":"click_element","waitForNav":true}]}],"type":"browser","updatedAt":"2022-09-14T14:35:38.099Z","lastRunAt":"2024-03-07T00:47:43.741Z","lastRunStatus":"success"}}`
+	getHttpCheckV2Body  = `{"test":{"automaticRetries": 1, "customProperties": [{"key": "Test_Key", "value": "Test Custom Properties"}], "active":true,"createdAt":"2022-09-14T14:35:37.801Z","frequency":5,"id":1,"locationIds":["na-us-virginia"],"name":"My Test","schedulingStrategy":"round_robin","type":"http","updatedAt":"2022-09-14T14:35:38.099Z","lastRunAt":"2024-03-07T00:47:43.741Z","lastRunStatus":"success","createdBy":"abc1234","updatedBy":"abc1234","url":"https://splunk.com","requestMethod":"GET","body":null,"headers":[{"name":"Accept","value":"application/json","domain":"splunk.com"}],"userAgent":null,"validations":[],"verifyCertificates":false,"authentication":null,"port":null}}`
 	inputGetHttpCheckV2 = verifyHttpCheckV2Input(string(getHttpCheckV2Body))
 )
 
@@ -101,6 +98,10 @@ func TestGetHttpCheckV2(t *testing.T) {
 	if !reflect.DeepEqual(resp.Test.Customproperties, inputGetHttpCheckV2.Test.Customproperties) {
 		t.Errorf("returned \n\n%#v want \n\n%#v", resp.Test.Customproperties, inputGetHttpCheckV2.Test.Customproperties)
 	}
+
+	if !reflect.DeepEqual(resp.Test.Port, inputGetHttpCheckV2.Test.Port) {
+		t.Errorf("returned \n\n%#v want \n\n%#v", resp.Test.Port, inputGetHttpCheckV2.Test.Port)
+	}
 }
 
 func verifyHttpCheckV2Input(stringInput string) *HttpCheckV2Response {
@@ -110,4 +111,86 @@ func verifyHttpCheckV2Input(stringInput string) *HttpCheckV2Response {
 		panic(err)
 	}
 	return check
+}
+
+func TestGetHttpCheckV2ReturnsErrorOnMalformedResponse(t *testing.T) {
+	setup()
+	defer teardown()
+
+	testMux.HandleFunc("/tests/http/2", func(w http.ResponseWriter, r *http.Request) {
+		testMethod(t, r, "GET")
+		_, err := w.Write([]byte("{not valid json"))
+		if err != nil {
+			t.Fatal(err)
+		}
+	})
+
+	resp, details, err := testClient.GetHttpCheckV2(2)
+
+	if err == nil {
+		t.Fatal("expected an error on malformed JSON response, but got none")
+	}
+	if resp != nil && resp.Test.Name != "" {
+		t.Error("expected empty response struct on parse error")
+	}
+	if details == nil {
+		t.Fatal("expected request details even on parse error")
+	}
+}
+
+func TestGetHttpCheckV2ReturnsErrorWhenRequestFails(t *testing.T) {
+	unreachableClient := NewConfigurableClient("apiKey", "realm", ClientArgs{publicBaseUrl: "http://127.0.0.1:1"})
+
+	resp, details, err := unreachableClient.GetHttpCheckV2(3)
+
+	if err == nil {
+		t.Fatal("expected a connection error, but got none")
+	}
+	if resp != nil {
+		t.Errorf("expected nil response on network error, but got %#v", resp)
+	}
+	if details == nil {
+		t.Fatal("expected request details to be populated")
+	}
+}
+
+func TestGetHttpCheckV2WithNullablePortReturnsErrorOnMalformedResponse(t *testing.T) {
+	setup()
+	defer teardown()
+
+	testMux.HandleFunc("/tests/http/4", func(w http.ResponseWriter, r *http.Request) {
+		testMethod(t, r, "GET")
+		_, err := w.Write([]byte("{not valid json"))
+		if err != nil {
+			t.Fatal(err)
+		}
+	})
+
+	resp, details, err := testClient.GetHttpCheckV2WithNullablePort(4)
+
+	if err == nil {
+		t.Fatal("expected an error on malformed JSON response, but got none")
+	}
+	if resp != nil && resp.Test.Name != "" {
+		t.Error("expected empty response struct on parse error")
+	}
+	if details == nil {
+		t.Fatal("expected request details even on parse error")
+	}
+}
+
+func TestGetHttpCheckV2WithNullablePortReturnsErrorWhenRequestFails(t *testing.T) {
+	unreachableClient := NewConfigurableClient("apiKey", "realm", ClientArgs{publicBaseUrl: "http://127.0.0.1:1"})
+
+	resp, details, err := unreachableClient.GetHttpCheckV2WithNullablePort(5)
+
+	if err == nil {
+		t.Fatal("expected a connection error, but got none")
+	}
+	if resp != nil {
+		t.Errorf("expected nil response on network error, but got %#v", resp)
+	}
+	if details == nil {
+		t.Fatal("expected request details to be populated")
+	}
 }

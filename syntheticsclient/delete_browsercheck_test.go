@@ -24,12 +24,16 @@ var (
 )
 
 func TestDeleteBrowseCheck(t *testing.T) {
+	skipDeprecated(t)
 	setup()
 	defer teardown()
 
 	testMux.HandleFunc("/v2/checks/real_browsers/10", func(w http.ResponseWriter, r *http.Request) {
 		testMethod(t, r, "DELETE")
-		w.Write([]byte(deleteBrowserRespBody))
+		_, err := w.Write([]byte(deleteBrowserRespBody))
+		if err != nil {
+			t.Errorf("returned error: %#v", err)
+		}
 	})
 
 	resp, err := testClient.DeleteBrowserCheck(10)

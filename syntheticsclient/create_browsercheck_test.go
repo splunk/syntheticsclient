@@ -26,12 +26,16 @@ var (
 )
 
 func TestCreateBrowseCheck(t *testing.T) {
+	skipDeprecated(t)
 	setup()
 	defer teardown()
 
 	testMux.HandleFunc("/v2/checks/real_browsers", func(w http.ResponseWriter, r *http.Request) {
 		testMethod(t, r, "POST")
-		w.Write([]byte(createBrowserRespBody))
+		_, err := w.Write([]byte(createBrowserRespBody))
+		if err != nil {
+			t.Errorf("returned error: %#v", err)
+		}
 	})
 
 	resp, _, err := testClient.CreateBrowserCheck(&BrowserCheckInput{

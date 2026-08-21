@@ -1,5 +1,11 @@
 # syntheticsclient
-A Splunk Synthetics (Formerly Rigor) client for golang.
+
+[![Release](https://img.shields.io/github/v/release/splunk/syntheticsclient)](https://github.com/splunk/syntheticsclient/releases)
+[![CI Checks](https://img.shields.io/github/actions/workflow/status/splunk/syntheticsclient/ci.yml?branch=v2&label=CI)](https://github.com/splunk/syntheticsclient/actions/workflows/ci.yml?query=branch%3Av2)
+[![Build](https://img.shields.io/github/actions/workflow/status/splunk/syntheticsclient/ci.yml?branch=v2&label=build)](https://github.com/splunk/syntheticsclient/actions/workflows/ci.yml?query=branch%3Av2)
+[![License](https://img.shields.io/github/license/splunk/syntheticsclient)](https://github.com/splunk/syntheticsclient/blob/v2/LICENSE)
+
+A Splunk Synthetics for Splunk Observability (Formerly Rigor) client for golang.
 
 ## Installation
 `go get https://github.com/splunk/syntheticsclient.git`
@@ -18,7 +24,7 @@ import (
 	"fmt"
 	"os"
 	"encoding/json"
-	sc2 "github.com/splunk/syntheticsclient/syntheticsclientv2"
+	sc2 "github.com/splunk/syntheticsclient/v2/syntheticsclientv2"
 )
 
 func main() {
@@ -50,6 +56,17 @@ func main() {
 
 ## API Documentation
 API Docs are [available here](https://dev.splunk.com/observability/reference)
+
+## Request Details
+
+V2 methods return `RequestDetails` for debugging failed or unexpected API calls.
+Use `RequestDetails.RequestBody` when you need to inspect the outgoing request.
+This field is sanitized before it is returned and redacts API tokens, certificate
+content, passwords, and generic secret values.
+
+`RequestDetails.RawRequest` is intentionally not populated by V2 public API calls
+because a raw `http.Request` can retain authorization headers or request body
+secrets.
 
 ## Additional Information
 This client is largely a copypasta mutation of the [go-victor](https://github.com/victorops/go-victorops) client for Splunk On-Call (formerly known as VictorOps).
