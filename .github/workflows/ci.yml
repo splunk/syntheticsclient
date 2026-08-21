@@ -95,12 +95,23 @@ jobs:
       # skipped if make test-cover failed, instead of erroring on a missing
       # report from a skipped step. Also skipped for fork PRs — see the
       # test-reporter step above for why pull-requests:write isn't usable there.
+      - name: Find existing coverage comment
+        id: find-coverage-comment
+        if: ${{ github.event_name == 'pull_request' && github.event.pull_request.head.repo.full_name == github.repository }}
+        uses: peter-evans/find-comment@b30e6a3c0ed37e7c023ccd3f1db5c6c0b0c23aad # v4.0.0
+        with:
+          issue-number: ${{ github.event.pull_request.number }}
+          comment-author: 'github-actions[bot]'
+          body-includes: '<!-- coverage-report -->'
       - name: Post coverage report to PR
         if: ${{ github.event_name == 'pull_request' && github.event.pull_request.head.repo.full_name == github.repository }}
-        uses: thollander/actions-comment-pull-request@24bffb9b452ba05a4f3f77933840a6a841d1b32b # v3.0.1
+        uses: peter-evans/create-or-update-comment@e8674b075228eee787fea43ef493e45ece1004c9 # v5.0.0
         with:
-          comment-tag: coverage-report
-          message: |
+          comment-id: ${{ steps.find-coverage-comment.outputs.comment-id }}
+          issue-number: ${{ github.event.pull_request.number }}
+          edit-mode: replace
+          body: |
+            <!-- coverage-report -->
             Code Coverage Report:
             ```
             ${{ fromJSON(steps.coverage.outputs.report) }}```
