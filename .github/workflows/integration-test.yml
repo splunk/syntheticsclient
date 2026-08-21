@@ -207,7 +207,7 @@ jobs:
 
     steps:
       - name: Checkout PR head
-        uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4.2.2
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:
           # Checkout by the exact commit SHA recorded by `resolve`, not refs/pull/<n>/head:
           # that ref is mutable and the environment approval above can sit for hours or
@@ -226,9 +226,9 @@ jobs:
           fi
 
       - name: Setup Go
-        uses: actions/setup-go@0a12ed9d6a96ab950c8f026ed9f722fe0da7ef32 # v5.0.2
+        uses: actions/setup-go@b7ad1dad31e06c5925ef5d2fc7ad053ef454303e # v7.0.0
         with:
-          go-version-file: 'go.mod'
+          go-version-file: '.go-version'
           # No build cache here: workflow_run executes on the base repo's default-branch
           # ref, so a cache written in this job would be saved into the shared v2 cache
           # scope and later restored by trusted CI runs — a poisoning path for fork code
