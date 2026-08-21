@@ -51,20 +51,20 @@ func TestUpdateVariableV2(t *testing.T) {
 
 	fmt.Println(resp)
 
-	if !reflect.DeepEqual(resp.Variable.Name, inputVariableV2Update.Variable.Name) {
-		t.Errorf("returned \n\n%#v want \n\n%#v", resp.Variable.Name, inputVariableV2Update.Variable.Name)
+	if !reflect.DeepEqual(resp.Name, inputVariableV2Update.Name) {
+		t.Errorf("returned \n\n%#v want \n\n%#v", resp.Name, inputVariableV2Update.Name)
 	}
 
-	if !reflect.DeepEqual(resp.Variable.Description, inputVariableV2Update.Variable.Description) {
-		t.Errorf("returned \n\n%#v want \n\n%#v", resp.Variable.Description, inputVariableV2Update.Variable.Description)
+	if !reflect.DeepEqual(resp.Description, inputVariableV2Update.Description) {
+		t.Errorf("returned \n\n%#v want \n\n%#v", resp.Description, inputVariableV2Update.Description)
 	}
 
-	if !reflect.DeepEqual(resp.Variable.Value, inputVariableV2Update.Variable.Value) {
-		t.Errorf("returned \n\n%#v want \n\n%#v", resp.Variable.Value, inputVariableV2Update.Variable.Value)
+	if !reflect.DeepEqual(resp.Value, inputVariableV2Update.Value) {
+		t.Errorf("returned \n\n%#v want \n\n%#v", resp.Value, inputVariableV2Update.Value)
 	}
 
-	if !reflect.DeepEqual(resp.Variable.Secret, inputVariableV2Update.Variable.Secret) {
-		t.Errorf("returned \n\n%#v want \n\n%#v", resp.Variable.Secret, inputVariableV2Update.Variable.Secret)
+	if !reflect.DeepEqual(resp.Secret, inputVariableV2Update.Secret) {
+		t.Errorf("returned \n\n%#v want \n\n%#v", resp.Secret, inputVariableV2Update.Secret)
 	}
 
 }

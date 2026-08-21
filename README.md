@@ -10,6 +10,36 @@ A Splunk Synthetics for Splunk Observability (Formerly Rigor) client for golang.
 ## Installation
 `go get https://github.com/splunk/syntheticsclient.git`
 
+## Development
+
+The supported Go baseline for `main` is the version pinned in [`.go-version`](./.go-version)
+(currently Go 1.26.7). Local tooling and CI both resolve their Go toolchain from that file.
+
+Before opening a pull request, run the same checks CI runs:
+
+```shell
+make fmtcheck     # gofmt -l, fails on formatting drift
+make vet          # go vet ./...
+make lint         # golangci-lint v2.12.2, requires golangci-lint on PATH
+make test-cover   # go test ./... with coverage
+make test-race    # go test ./... -race
+make govulncheck  # requires govulncheck on PATH
+make actionlint   # lints .github/workflows, requires actionlint on PATH
+```
+
+`golangci-lint`, `govulncheck`, and `actionlint` are not vendored; install the versions CI
+pins with:
+
+```shell
+go install github.com/golangci/golangci-lint/v2/cmd/golangci-lint@v2.12.2
+go install golang.org/x/vuln/cmd/govulncheck@v1.7.0
+go install github.com/rhysd/actionlint/cmd/actionlint@v1.7.12
+```
+
+> **Note:** `github.com/splunk/syntheticsclient` (V1) is deprecated and excluded from
+> build/coverage targets (see the Makefile); its tests still run and report as an explicit
+> `SKIP`. It may be removed from this module in a future change (tracked separately).
+
 ## Important Note
 
 V2 client is used to make API calls and CRUD operations to the Splunk Observability Synthetics endpoints (E.G. [API Tests](https://dev.splunk.com/observability/reference/api/synthetics_api_tests/))

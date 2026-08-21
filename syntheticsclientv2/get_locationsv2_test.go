@@ -99,32 +99,32 @@ func TestGetLocationV2(t *testing.T) {
 		t.Fatal(err)
 	}
 
-	if !reflect.DeepEqual(resp.Location.ID, inputGetLocationV2.Location.ID) {
-		t.Errorf("returned \n\n%#v want \n\n%#v", resp.Location.ID, inputGetLocationV2.Location.ID)
+	if !reflect.DeepEqual(resp.ID, inputGetLocationV2.ID) {
+		t.Errorf("returned \n\n%#v want \n\n%#v", resp.ID, inputGetLocationV2.ID)
 	}
 
-	if !reflect.DeepEqual(resp.Location.Label, inputGetLocationV2.Location.Label) {
-		t.Errorf("returned \n\n%#v want \n\n%#v", resp.Location.Label, inputGetLocationV2.Location.Label)
+	if !reflect.DeepEqual(resp.Label, inputGetLocationV2.Label) {
+		t.Errorf("returned \n\n%#v want \n\n%#v", resp.Label, inputGetLocationV2.Label)
 	}
 
-	if !reflect.DeepEqual(resp.Location.Default, inputGetLocationV2.Location.Default) {
-		t.Errorf("returned \n\n%#v want \n\n%#v", resp.Location.Default, inputGetLocationV2.Location.Default)
+	if !reflect.DeepEqual(resp.Default, inputGetLocationV2.Default) {
+		t.Errorf("returned \n\n%#v want \n\n%#v", resp.Default, inputGetLocationV2.Default)
 	}
 
-	if !reflect.DeepEqual(resp.Location.Type, inputGetLocationV2.Location.Type) {
-		t.Errorf("returned \n\n%#v want \n\n%#v", resp.Location.Type, inputGetLocationV2.Location.Type)
+	if !reflect.DeepEqual(resp.Type, inputGetLocationV2.Type) {
+		t.Errorf("returned \n\n%#v want \n\n%#v", resp.Type, inputGetLocationV2.Type)
 	}
 
-	if !reflect.DeepEqual(resp.Location.Country, inputGetLocationV2.Location.Country) {
-		t.Errorf("returned \n\n%#v want \n\n%#v", resp.Location.Country, inputGetLocationV2.Location.Country)
+	if !reflect.DeepEqual(resp.Country, inputGetLocationV2.Country) {
+		t.Errorf("returned \n\n%#v want \n\n%#v", resp.Country, inputGetLocationV2.Country)
 	}
 
-	if !reflect.DeepEqual(resp.Meta.ActiveTestIds, inputGetLocationV2.Meta.ActiveTestIds) {
-		t.Errorf("returned \n\n%#v want \n\n%#v", resp.Meta.ActiveTestIds, inputGetLocationV2.Meta.ActiveTestIds)
+	if !reflect.DeepEqual(resp.ActiveTestIds, inputGetLocationV2.ActiveTestIds) {
+		t.Errorf("returned \n\n%#v want \n\n%#v", resp.ActiveTestIds, inputGetLocationV2.ActiveTestIds)
 	}
 
-	if !reflect.DeepEqual(resp.Meta.PausedTestIds, inputGetLocationV2.Meta.PausedTestIds) {
-		t.Errorf("returned \n\n%#v want \n\n%#v", resp.Meta.PausedTestIds, inputGetLocationV2.Meta.PausedTestIds)
+	if !reflect.DeepEqual(resp.PausedTestIds, inputGetLocationV2.PausedTestIds) {
+		t.Errorf("returned \n\n%#v want \n\n%#v", resp.PausedTestIds, inputGetLocationV2.PausedTestIds)
 	}
 
 }

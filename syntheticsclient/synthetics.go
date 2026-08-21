@@ -19,7 +19,6 @@ import (
 	"errors"
 	"fmt"
 	"io"
-	"io/ioutil"
 	"net/http"
 	"net/http/httputil"
 	"time"
@@ -103,7 +102,7 @@ func (c Client) makePublicAPICall(method string, endpoint string, requestBody io
 		return &details, fmt.Errorf("unknown error, status code: %d", resp.StatusCode)
 	}
 
-	responseBody, err := ioutil.ReadAll(resp.Body)
+	responseBody, err := io.ReadAll(resp.Body)
 	if err != nil {
 		return &details, err
 	}

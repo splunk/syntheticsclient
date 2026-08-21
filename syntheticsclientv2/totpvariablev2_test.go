@@ -579,7 +579,7 @@ func assertRawRequestDoesNotExposeSensitiveDetails(t *testing.T, details *Reques
 	if err != nil {
 		t.Fatal(err)
 	}
-	defer body.Close()
+	defer func() { _ = body.Close() }()
 
 	rawBody, err := io.ReadAll(body)
 	if err != nil {
