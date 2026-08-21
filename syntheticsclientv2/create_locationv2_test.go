@@ -52,12 +52,12 @@ func TestCreateLocationV2(t *testing.T) {
 
 	fmt.Println(resp)
 
-	if !reflect.DeepEqual(resp.Location.ID, inputLocationV2Data.Location.ID) {
-		t.Errorf("returned \n\n%#v want \n\n%#v", resp.Location.ID, inputLocationV2Data.Location.ID)
+	if !reflect.DeepEqual(resp.ID, inputLocationV2Data.ID) {
+		t.Errorf("returned \n\n%#v want \n\n%#v", resp.ID, inputLocationV2Data.ID)
 	}
 
-	if !reflect.DeepEqual(resp.Location.Label, inputLocationV2Data.Location.Label) {
-		t.Errorf("returned \n\n%#v want \n\n%#v", resp.Location.Label, inputLocationV2Data.Location.Label)
+	if !reflect.DeepEqual(resp.Label, inputLocationV2Data.Label) {
+		t.Errorf("returned \n\n%#v want \n\n%#v", resp.Label, inputLocationV2Data.Label)
 	}
 
 }

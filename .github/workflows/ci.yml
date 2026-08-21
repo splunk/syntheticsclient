@@ -22,20 +22,36 @@ jobs:
   build:
     name: Build
     runs-on: ubuntu-latest
-    timeout-minutes: 5
+    timeout-minutes: 15
     steps:
-      - uses: actions/checkout@b4ffde65f46336ab88eb53be808477a3936bae11 # v4.1.1
-      - uses: actions/setup-go@93397bea11091df50f3d7e59dc26a7711a8bcfbe # v4.1.0
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+      - uses: actions/setup-go@b7ad1dad31e06c5925ef5d2fc7ad053ef454303e # v7.0.0
         with:
-          go-version-file: 'go.mod'
+          go-version-file: '.go-version'
           cache: true
       - run: go mod download
+      - name: Check formatting
+        run: make fmtcheck
+      - name: Run go vet
+        run: make vet
+      # Single source of lint truth: the action installs and runs the pinned
+      # golangci-lint release itself (against .golangci.yml at the repo root),
+      # so `make lint` is not also invoked here — running both duplicated the
+      # same check under the previous `version: latest` + `make lint` setup.
       - name: Run linters
-        uses: golangci/golangci-lint-action@3a919529898de77ec3da873e3063ca4b10e7f5cc # v3.7.0
+        uses: golangci/golangci-lint-action@ba0d7d2ec06a0ea1cb5fa41b2e4a3ab91d21278a # v9.3.0
         with:
-          version: latest
-      - run: make lint
-      - run: make test-cover
+          version: v2.12.2
+      - name: Lint GitHub Actions workflows
+        run: |
+          go install github.com/rhysd/actionlint/cmd/actionlint@v1.7.12
+          "$(go env GOPATH)/bin/actionlint"
+      - name: Run tests with coverage
+        timeout-minutes: 5
+        run: make test-cover
+      - name: Run tests with the race detector
+        timeout-minutes: 5
+        run: make test-race
       # GitHub downgrades GITHUB_TOKEN to read-only for pull_request runs from forks,
       # regardless of the checks:write/pull-requests:write requested above — creating a
       # check run or posting a PR comment there fails with "Resource not accessible by
@@ -79,12 +95,23 @@ jobs:
       # skipped if make test-cover failed, instead of erroring on a missing
       # report from a skipped step. Also skipped for fork PRs — see the
       # test-reporter step above for why pull-requests:write isn't usable there.
+      - name: Find existing coverage comment
+        id: find-coverage-comment
+        if: ${{ github.event_name == 'pull_request' && github.event.pull_request.head.repo.full_name == github.repository }}
+        uses: peter-evans/find-comment@b30e6a3c0ed37e7c023ccd3f1db5c6c0b0c23aad # v4.0.0
+        with:
+          issue-number: ${{ github.event.pull_request.number }}
+          comment-author: 'github-actions[bot]'
+          body-includes: '<!-- coverage-report -->'
       - name: Post coverage report to PR
         if: ${{ github.event_name == 'pull_request' && github.event.pull_request.head.repo.full_name == github.repository }}
-        uses: thollander/actions-comment-pull-request@24bffb9b452ba05a4f3f77933840a6a841d1b32b # v3.0.1
+        uses: peter-evans/create-or-update-comment@e8674b075228eee787fea43ef493e45ece1004c9 # v5.0.0
         with:
-          comment-tag: coverage-report
-          message: |
+          comment-id: ${{ steps.find-coverage-comment.outputs.comment-id }}
+          issue-number: ${{ github.event.pull_request.number }}
+          edit-mode: replace
+          body: |
+            <!-- coverage-report -->
             Code Coverage Report:
             ```
             ${{ fromJSON(steps.coverage.outputs.report) }}```
@@ -96,4 +123,9 @@ jobs:
         run: |
           echo "### Coverage" >> "$GITHUB_STEP_SUMMARY"
           go tool cover -func=coverage.txt | tail -1 >> "$GITHUB_STEP_SUMMARY"
-      - run: go build -v ./syntheticsclientv2/...
+      - name: Check for known vulnerabilities
+        uses: golang/govulncheck-action@032d45514ae346b1db93c04b0c90b841c370344f # v1.1.0
+        with:
+          go-version-file: '.go-version'
+          repo-checkout: false
+      - run: go build -v ./...

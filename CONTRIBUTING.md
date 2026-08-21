@@ -3,6 +3,9 @@
 Contributions are encouraged and greatly appreciated! Every
 little bit helps, and credit will always be given.
 
+See the [Development](./README.md#development) section of the README for the supported Go
+version and the commands to run locally before opening a pull request.
+
 You can contribute in many ways:
 
 ## Types of Contributions

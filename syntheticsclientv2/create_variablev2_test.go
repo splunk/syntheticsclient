@@ -52,24 +52,24 @@ func TestCreateVariableV2(t *testing.T) {
 
 	fmt.Println(resp)
 
-	if !reflect.DeepEqual(resp.Variable.ID, inputVariableV2Data.Variable.ID) {
-		t.Errorf("returned \n\n%#v want \n\n%#v", resp.Variable.ID, inputVariableV2Data.Variable.ID)
+	if !reflect.DeepEqual(resp.ID, inputVariableV2Data.ID) {
+		t.Errorf("returned \n\n%#v want \n\n%#v", resp.ID, inputVariableV2Data.ID)
 	}
 
-	if !reflect.DeepEqual(resp.Variable.Name, inputVariableV2Data.Variable.Name) {
-		t.Errorf("returned \n\n%#v want \n\n%#v", resp.Variable.Name, inputVariableV2Data.Variable.Name)
+	if !reflect.DeepEqual(resp.Name, inputVariableV2Data.Name) {
+		t.Errorf("returned \n\n%#v want \n\n%#v", resp.Name, inputVariableV2Data.Name)
 	}
 
-	if !reflect.DeepEqual(resp.Variable.Description, inputVariableV2Data.Variable.Description) {
-		t.Errorf("returned \n\n%#v want \n\n%#v", resp.Variable.Description, inputVariableV2Data.Variable.Description)
+	if !reflect.DeepEqual(resp.Description, inputVariableV2Data.Description) {
+		t.Errorf("returned \n\n%#v want \n\n%#v", resp.Description, inputVariableV2Data.Description)
 	}
 
-	if !reflect.DeepEqual(resp.Variable.Value, inputVariableV2Data.Variable.Value) {
-		t.Errorf("returned \n\n%#v want \n\n%#v", resp.Variable.Value, inputVariableV2Data.Variable.Value)
+	if !reflect.DeepEqual(resp.Value, inputVariableV2Data.Value) {
+		t.Errorf("returned \n\n%#v want \n\n%#v", resp.Value, inputVariableV2Data.Value)
 	}
 
-	if !reflect.DeepEqual(resp.Variable.Secret, inputVariableV2Data.Variable.Secret) {
-		t.Errorf("returned \n\n%#v want \n\n%#v", resp.Variable.Secret, inputVariableV2Data.Variable.Secret)
+	if !reflect.DeepEqual(resp.Secret, inputVariableV2Data.Secret) {
+		t.Errorf("returned \n\n%#v want \n\n%#v", resp.Secret, inputVariableV2Data.Secret)
 	}
 
 }

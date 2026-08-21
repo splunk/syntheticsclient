@@ -51,28 +51,28 @@ func TestUpdateDowntimeConfigurationV2(t *testing.T) {
 
 	fmt.Println(resp)
 
-	if !reflect.DeepEqual(resp.DowntimeConfiguration.Name, inputDowntimeConfigurationV2Update.DowntimeConfiguration.Name) {
-		t.Errorf("returned \n\n%#v want \n\n%#v", resp.DowntimeConfiguration.Name, inputDowntimeConfigurationV2Update.DowntimeConfiguration.Name)
+	if !reflect.DeepEqual(resp.Name, inputDowntimeConfigurationV2Update.Name) {
+		t.Errorf("returned \n\n%#v want \n\n%#v", resp.Name, inputDowntimeConfigurationV2Update.Name)
 	}
 
-	if !reflect.DeepEqual(resp.DowntimeConfiguration.Description, inputDowntimeConfigurationV2Update.DowntimeConfiguration.Description) {
-		t.Errorf("returned \n\n%#v want \n\n%#v", resp.DowntimeConfiguration.Description, inputDowntimeConfigurationV2Update.DowntimeConfiguration.Description)
+	if !reflect.DeepEqual(resp.Description, inputDowntimeConfigurationV2Update.Description) {
+		t.Errorf("returned \n\n%#v want \n\n%#v", resp.Description, inputDowntimeConfigurationV2Update.Description)
 	}
 
-	if !reflect.DeepEqual(resp.DowntimeConfiguration.Rule, inputDowntimeConfigurationV2Update.DowntimeConfiguration.Rule) {
-		t.Errorf("returned \n\n%#v want \n\n%#v", resp.DowntimeConfiguration.Rule, inputDowntimeConfigurationV2Update.DowntimeConfiguration.Rule)
+	if !reflect.DeepEqual(resp.Rule, inputDowntimeConfigurationV2Update.Rule) {
+		t.Errorf("returned \n\n%#v want \n\n%#v", resp.Rule, inputDowntimeConfigurationV2Update.Rule)
 	}
 
-	if !reflect.DeepEqual(resp.DowntimeConfiguration.Testids, inputDowntimeConfigurationV2Update.DowntimeConfiguration.Testids) {
-		t.Errorf("returned \n\n%#v want \n\n%#v", resp.DowntimeConfiguration.Testids, inputDowntimeConfigurationV2Update.DowntimeConfiguration.Testids)
+	if !reflect.DeepEqual(resp.Testids, inputDowntimeConfigurationV2Update.Testids) {
+		t.Errorf("returned \n\n%#v want \n\n%#v", resp.Testids, inputDowntimeConfigurationV2Update.Testids)
 	}
 
-	if !reflect.DeepEqual(resp.DowntimeConfiguration.Starttime, inputDowntimeConfigurationV2Update.DowntimeConfiguration.Starttime) {
-		t.Errorf("returned \n\n%#v want \n\n%#v", resp.DowntimeConfiguration.Starttime, inputDowntimeConfigurationV2Update.DowntimeConfiguration.Starttime)
+	if !reflect.DeepEqual(resp.Starttime, inputDowntimeConfigurationV2Update.Starttime) {
+		t.Errorf("returned \n\n%#v want \n\n%#v", resp.Starttime, inputDowntimeConfigurationV2Update.Starttime)
 	}
 
-	if !reflect.DeepEqual(resp.DowntimeConfiguration.Endtime, inputDowntimeConfigurationV2Update.DowntimeConfiguration.Endtime) {
-		t.Errorf("returned \n\n%#v want \n\n%#v", resp.DowntimeConfiguration.Endtime, inputDowntimeConfigurationV2Update.DowntimeConfiguration.Endtime)
+	if !reflect.DeepEqual(resp.Endtime, inputDowntimeConfigurationV2Update.Endtime) {
+		t.Errorf("returned \n\n%#v want \n\n%#v", resp.Endtime, inputDowntimeConfigurationV2Update.Endtime)
 	}
 }
 

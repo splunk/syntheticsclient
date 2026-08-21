@@ -45,32 +45,32 @@ func TestGetVariableV2(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
-	if !reflect.DeepEqual(resp.Variable.ID, inputGetVariableV2.Variable.ID) {
-		t.Errorf("returned \n\n%#v want \n\n%#v", resp.Variable.ID, inputGetVariableV2.Variable.ID)
+	if !reflect.DeepEqual(resp.ID, inputGetVariableV2.ID) {
+		t.Errorf("returned \n\n%#v want \n\n%#v", resp.ID, inputGetVariableV2.ID)
 	}
 
-	if !reflect.DeepEqual(resp.Variable.Name, inputGetVariableV2.Variable.Name) {
-		t.Errorf("returned \n\n%#v want \n\n%#v", resp.Variable.Name, inputGetVariableV2.Variable.Name)
+	if !reflect.DeepEqual(resp.Name, inputGetVariableV2.Name) {
+		t.Errorf("returned \n\n%#v want \n\n%#v", resp.Name, inputGetVariableV2.Name)
 	}
 
-	if !reflect.DeepEqual(resp.Variable.Description, inputGetVariableV2.Variable.Description) {
-		t.Errorf("returned \n\n%#v want \n\n%#v", resp.Variable.Description, inputGetVariableV2.Variable.Description)
+	if !reflect.DeepEqual(resp.Description, inputGetVariableV2.Description) {
+		t.Errorf("returned \n\n%#v want \n\n%#v", resp.Description, inputGetVariableV2.Description)
 	}
 
-	if !reflect.DeepEqual(resp.Variable.Value, inputGetVariableV2.Variable.Value) {
-		t.Errorf("returned \n\n%#v want \n\n%#v", resp.Variable.Value, inputGetVariableV2.Variable.Value)
+	if !reflect.DeepEqual(resp.Value, inputGetVariableV2.Value) {
+		t.Errorf("returned \n\n%#v want \n\n%#v", resp.Value, inputGetVariableV2.Value)
 	}
 
-	if !reflect.DeepEqual(resp.Variable.Secret, inputGetVariableV2.Variable.Secret) {
-		t.Errorf("returned \n\n%#v want \n\n%#v", resp.Variable.Secret, inputGetVariableV2.Variable.Secret)
+	if !reflect.DeepEqual(resp.Secret, inputGetVariableV2.Secret) {
+		t.Errorf("returned \n\n%#v want \n\n%#v", resp.Secret, inputGetVariableV2.Secret)
 	}
 
-	if !reflect.DeepEqual(resp.Variable.Createdat, inputGetVariableV2.Variable.Createdat) {
-		t.Errorf("returned \n\n%#v want \n\n%#v", resp.Variable.Createdat, inputGetVariableV2.Variable.Createdat)
+	if !reflect.DeepEqual(resp.Createdat, inputGetVariableV2.Createdat) {
+		t.Errorf("returned \n\n%#v want \n\n%#v", resp.Createdat, inputGetVariableV2.Createdat)
 	}
 
-	if !reflect.DeepEqual(resp.Variable.Updatedat, inputGetVariableV2.Variable.Updatedat) {
-		t.Errorf("returned \n\n%#v want \n\n%#v", resp.Variable.Updatedat, inputGetVariableV2.Variable.Updatedat)
+	if !reflect.DeepEqual(resp.Updatedat, inputGetVariableV2.Updatedat) {
+		t.Errorf("returned \n\n%#v want \n\n%#v", resp.Updatedat, inputGetVariableV2.Updatedat)
 	}
 
 }
