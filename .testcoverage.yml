@@ -4,6 +4,5 @@ threshold:
   # SYN-6889 added error-path unit tests, raising syntheticsclientv2 coverage
   # from 73% to 94.4%. Floor set at 90 (the ticket's target) rather than the
   # measured value, to leave headroom for minor fluctuations without
-  # relaxing the original goal. syntheticsclient (v1) is deprecated and
-  # excluded from tests/coverage entirely (see Makefile).
+  # relaxing the original goal.
   total: 90

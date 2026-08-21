@@ -5,10 +5,12 @@
 [![Build](https://img.shields.io/github/actions/workflow/status/splunk/syntheticsclient/ci.yml?branch=v2&label=build)](https://github.com/splunk/syntheticsclient/actions/workflows/ci.yml?query=branch%3Av2)
 [![License](https://img.shields.io/github/license/splunk/syntheticsclient)](https://github.com/splunk/syntheticsclient/blob/v2/LICENSE)
 
-A Splunk Synthetics for Splunk Observability (Formerly Rigor) client for golang.
+A Go client for the [Splunk Observability Synthetics API](https://dev.splunk.com/observability/reference/api/synthetics_api_tests/).
 
 ## Installation
-`go get https://github.com/splunk/syntheticsclient.git`
+```shell
+go get github.com/splunk/syntheticsclient/v2
+```
 
 ## Development
 
@@ -36,15 +38,22 @@ go install golang.org/x/vuln/cmd/govulncheck@v1.7.0
 go install github.com/rhysd/actionlint/cmd/actionlint@v1.7.12
 ```
 
-> **Note:** `github.com/splunk/syntheticsclient` (V1) is deprecated and excluded from
-> build/coverage targets (see the Makefile); its tests still run and report as an explicit
-> `SKIP`. It may be removed from this module in a future change (tracked separately).
-
 ## Important Note
 
-V2 client is used to make API calls and CRUD operations to the Splunk Observability Synthetics endpoints (E.G. [API Tests](https://dev.splunk.com/observability/reference/api/synthetics_api_tests/))
+This client makes API calls and performs CRUD operations against the Splunk Observability
+Synthetics endpoints (e.g. [API Tests](https://dev.splunk.com/observability/reference/api/synthetics_api_tests/)).
 
-**Deprecated** V1 Client is used to make the API calls for the [Splunk Synthetics (Formerly Rigor) public API](https://monitoring-api.rigor.com/). 
+It previously shipped an additional client for a legacy, now-decommissioned monitoring
+API. That package has been removed; only the Splunk Observability Synthetics client
+described below is supported.
+
+## Configuration
+
+The client requires:
+
+* `API_ACCESS_TOKEN` — a Splunk Observability access token with permission to manage
+  Synthetics tests.
+* `REALM` — the realm your organization is hosted in (e.g. `us1`).
 
 ## Example Usages
 ```go

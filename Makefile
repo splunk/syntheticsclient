@@ -1,11 +1,6 @@
 .PHONY: default all build clean test test-race test-cover test-integration fmt fmtcheck vet lint govulncheck actionlint
 
-# syntheticsclient (v1) is deprecated but still built, vetted, linted, and tested
-# via FILES below (see skipDeprecated in syntheticsclient/synthetics_test.go, which
-# reports it as an explicit SKIP rather than the package silently vanishing from CI
-# output). Only syntheticsclientv2 is measured for coverage, via COVERPKG.
 FILES=./...
-COVERPKG=./syntheticsclientv2/...
 
 default: test
 
@@ -50,7 +45,7 @@ actionlint:
 
 test: fmtcheck vet
 	@echo "==> Running all tests"
-	go test $(FILES) -v -timeout=30s -parallel=4 -cover -coverpkg=$(COVERPKG)
+	go test $(FILES) -v -timeout=30s -parallel=4 -cover
 
 test-race: fmtcheck vet
 	@echo "==> Running all tests with the race detector"
@@ -58,7 +53,7 @@ test-race: fmtcheck vet
 
 test-cover: clean fmtcheck vet
 	@echo "==> Running all tests with coverage and JSON output"
-	go test $(FILES) -timeout=30s -parallel=8 -json -cover -covermode=atomic -coverpkg=$(COVERPKG) -coverprofile coverage.txt > test-results.json
+	go test $(FILES) -timeout=30s -parallel=8 -json -cover -covermode=atomic -coverprofile coverage.txt > test-results.json
 
 # Runs the live integration suite (syntheticsclientv2/integration_test.go) against a real
 # Synthetics org. Requires API_ACCESS_TOKEN and REALM in the environment. Not part of the
