@@ -65,15 +65,15 @@ jobs:
           path: test-results.json
           reporter: golang-json
           only-summary: true
-      # Fetch v2's (the base branch's) last coverage breakdown so PR runs can
+      # Fetch main's (the base branch's) last coverage breakdown so PR runs can
       # report how this change moves coverage, not just its absolute value.
       - name: Download base branch coverage breakdown
         id: download-main-breakdown
         uses: dawidd6/action-download-artifact@b6e2e70617bc3265edd6dab6c906732b2f1ae151 # v21
         with:
-          branch: v2
+          branch: main
           workflow_conclusion: success
-          name: v2.breakdown
+          name: main.breakdown
           if_no_artifact_found: warn
       - name: Check test coverage
         id: coverage
@@ -81,14 +81,14 @@ jobs:
         continue-on-error: true # fail after the coverage comment is posted below
         with:
           config: ./.testcoverage.yml
-          breakdown-file-name: ${{ github.ref_name == 'v2' && 'v2.breakdown' || '' }}
-          diff-base-breakdown-file-name: ${{ steps.download-main-breakdown.outputs.found_artifact == 'true' && 'v2.breakdown' || '' }}
+          breakdown-file-name: ${{ github.ref_name == 'main' && 'main.breakdown' || '' }}
+          diff-base-breakdown-file-name: ${{ steps.download-main-breakdown.outputs.found_artifact == 'true' && 'main.breakdown' || '' }}
       - name: Upload coverage breakdown
-        if: ${{ github.ref_name == 'v2' }}
+        if: ${{ github.ref_name == 'main' }}
         uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
         with:
-          name: v2.breakdown
-          path: v2.breakdown
+          name: main.breakdown
+          path: main.breakdown
           if-no-files-found: error
       # No status function here: leaving the implicit success() check in
       # place means this (and the coverage step it reads outputs from) is

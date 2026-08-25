@@ -11,7 +11,7 @@ name: Integration Test
 # what branch protection actually watches.
 #
 # run-name names the PR being tested: without it, every run of this workflow shows as
-# "Integration Test" on branch v2 in the Actions list and in the environment-approval
+# "Integration Test" on branch main in the Actions list and in the environment-approval
 # prompt, and a reviewer approving the live-token gate can't tell which PR they're
 # approving from that alone.
 run-name: >-
@@ -230,7 +230,7 @@ jobs:
         with:
           go-version-file: '.go-version'
           # No build cache here: workflow_run executes on the base repo's default-branch
-          # ref, so a cache written in this job would be saved into the shared v2 cache
+          # ref, so a cache written in this job would be saved into the shared main cache
           # scope and later restored by trusted CI runs — a poisoning path for fork code
           # to persist beyond its own PR. Every other job that needs a fast Go setup runs
           # on ci.yml, which is unaffected by this.

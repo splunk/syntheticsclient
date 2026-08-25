@@ -1,15 +1,15 @@
 # syntheticsclient
 
 [![Release](https://img.shields.io/github/v/release/splunk/syntheticsclient)](https://github.com/splunk/syntheticsclient/releases)
-[![CI Checks](https://img.shields.io/github/actions/workflow/status/splunk/syntheticsclient/ci.yml?branch=v2&label=CI)](https://github.com/splunk/syntheticsclient/actions/workflows/ci.yml?query=branch%3Av2)
-[![Build](https://img.shields.io/github/actions/workflow/status/splunk/syntheticsclient/ci.yml?branch=v2&label=build)](https://github.com/splunk/syntheticsclient/actions/workflows/ci.yml?query=branch%3Av2)
-[![License](https://img.shields.io/github/license/splunk/syntheticsclient)](https://github.com/splunk/syntheticsclient/blob/v2/LICENSE)
+[![CI Checks](https://img.shields.io/github/actions/workflow/status/splunk/syntheticsclient/ci.yml?branch=main&label=CI)](https://github.com/splunk/syntheticsclient/actions/workflows/ci.yml?query=branch%3Amain)
+[![Build](https://img.shields.io/github/actions/workflow/status/splunk/syntheticsclient/ci.yml?branch=main&label=build)](https://github.com/splunk/syntheticsclient/actions/workflows/ci.yml?query=branch%3Amain)
+[![License](https://img.shields.io/github/license/splunk/syntheticsclient)](https://github.com/splunk/syntheticsclient/blob/main/LICENSE)
 
 A Go client for the [Splunk Observability Synthetics API](https://dev.splunk.com/observability/reference/api/synthetics_api_tests/).
 
 ## Installation
 ```shell
-go get github.com/splunk/syntheticsclient/v2
+go get github.com/splunk/syntheticsclient/v3
 ```
 
 ## Development
@@ -63,7 +63,7 @@ import (
 	"fmt"
 	"os"
 	"encoding/json"
-	sc2 "github.com/splunk/syntheticsclient/v2/syntheticsclientv2"
+	sc2 "github.com/splunk/syntheticsclient/v3/syntheticsclientv2"
 )
 
 func main() {
