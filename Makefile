@@ -12,7 +12,7 @@ build: fmtcheck
 clean:
 	@echo "==> Cleaning out old builds "
 	go clean
-	rm -rf coverage.txt test-results.json v2.breakdown integration.jsonl
+	rm -rf coverage.txt test-results.json main.breakdown integration.jsonl
 
 fmt:
 	@echo "==> Fixing source code with gofmt "
