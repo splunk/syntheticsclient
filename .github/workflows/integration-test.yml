@@ -48,7 +48,7 @@ jobs:
     steps:
       - name: Download PR metadata
         id: download
-        uses: actions/download-artifact@37930b1c2abaa49bbe596cd826c3c89aef350131 # v7.0.0
+        uses: actions/download-artifact@3e5f45b2cfb9172054b4087a40e8e0b5a5461e7c # v8.0.1
         with:
           name: pr-metadata
           path: pr-metadata
@@ -273,7 +273,7 @@ jobs:
       - name: Download integration test log
         id: download-log
         continue-on-error: true # absent when the job never started (rejected/timed-out approval)
-        uses: actions/download-artifact@37930b1c2abaa49bbe596cd826c3c89aef350131 # v7.0.0
+        uses: actions/download-artifact@3e5f45b2cfb9172054b4087a40e8e0b5a5461e7c # v8.0.1
         with:
           name: integration-test-log
           path: integration-test-log
