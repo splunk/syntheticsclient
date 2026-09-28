@@ -33,20 +33,16 @@ func TestCreateDowntimeConfigurationV2SendsCustomRecurrenceAsUnitAndValue(t *tes
 		testMethod(t, r, "POST")
 		fields := readDowntimeConfigurationV2RepeatsFields(t, r)
 
-		rawUnit, ok := fields["unit"]
-		if !ok {
-			t.Fatal("request body missing recurrence.repeats.unit")
-		}
-		if string(rawUnit) != `"days"` {
-			t.Fatalf("request body recurrence.repeats.unit = %s, want \"days\"", rawUnit)
+		if rawUnit, ok := fields["unit"]; !ok {
+			t.Error("request body missing recurrence.repeats.unit")
+		} else if string(rawUnit) != `"days"` {
+			t.Errorf("request body recurrence.repeats.unit = %s, want \"days\"", rawUnit)
 		}
 
-		rawValue, ok := fields["value"]
-		if !ok {
-			t.Fatal("request body missing recurrence.repeats.value")
-		}
-		if string(rawValue) != "3" {
-			t.Fatalf("request body recurrence.repeats.value = %s, want 3", rawValue)
+		if rawValue, ok := fields["value"]; !ok {
+			t.Error("request body missing recurrence.repeats.value")
+		} else if string(rawValue) != "3" {
+			t.Errorf("request body recurrence.repeats.value = %s, want 3", rawValue)
 		}
 
 		if _, ok := fields["customFrequency"]; ok {
@@ -56,9 +52,8 @@ func TestCreateDowntimeConfigurationV2SendsCustomRecurrenceAsUnitAndValue(t *tes
 			t.Error("request body sent recurrence.repeats.customValue, which the API does not accept")
 		}
 
-		_, err := w.Write([]byte(`{"downtimeConfiguration":{"id":1,"name":"dc test","rule":"augment_data","recurrence":{"repeats":{"type":"custom","unit":"days","value":3},"end":{"type":"after","value":"10"}}}}`))
-		if err != nil {
-			t.Fatal(err)
+		if _, err := w.Write([]byte(`{"downtimeConfiguration":{"id":1,"name":"dc test","rule":"augment_data","recurrence":{"repeats":{"type":"custom","unit":"days","value":3},"end":{"type":"after","value":"10"}}}}`)); err != nil {
+			t.Errorf("writing mock response: %v", err)
 		}
 	})
 
@@ -107,9 +102,8 @@ func TestCreateDowntimeConfigurationV2OmitsUnitAndValueForNonCustomRecurrence(t 
 			t.Errorf("request body recurrence.repeats.value = %s, want field omitted", rawValue)
 		}
 
-		_, err := w.Write([]byte(`{"downtimeConfiguration":{"id":2,"name":"dc test","rule":"augment_data","recurrence":{"repeats":{"type":"daily"}}}}`))
-		if err != nil {
-			t.Fatal(err)
+		if _, err := w.Write([]byte(`{"downtimeConfiguration":{"id":2,"name":"dc test","rule":"augment_data","recurrence":{"repeats":{"type":"daily"}}}}`)); err != nil {
+			t.Errorf("writing mock response: %v", err)
 		}
 	})
 
@@ -132,12 +126,16 @@ func TestCreateDowntimeConfigurationV2OmitsUnitAndValueForNonCustomRecurrence(t 
 	}
 }
 
+// Runs on the test server's handler goroutine, where t.Fatal is not allowed, so
+// failures are reported with t.Errorf and a nil map is returned; the caller's
+// lookups then report the individual fields as missing.
 func readDowntimeConfigurationV2RepeatsFields(t *testing.T, r *http.Request) map[string]json.RawMessage {
 	t.Helper()
 
 	requestBody, err := io.ReadAll(r.Body)
 	if err != nil {
-		t.Fatal(err)
+		t.Errorf("reading request body: %v", err)
+		return nil
 	}
 
 	var envelope struct {
@@ -148,7 +146,8 @@ func readDowntimeConfigurationV2RepeatsFields(t *testing.T, r *http.Request) map
 		} `json:"downtimeConfiguration"`
 	}
 	if err := json.Unmarshal(requestBody, &envelope); err != nil {
-		t.Fatalf("request body JSON parse failed: %v", err)
+		t.Errorf("request body JSON parse failed: %v", err)
+		return nil
 	}
 
 	return envelope.DowntimeConfiguration.Recurrence.Repeats
