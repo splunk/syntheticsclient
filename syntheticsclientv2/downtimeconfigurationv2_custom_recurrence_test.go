@@ -22,8 +22,8 @@ import (
 )
 
 // SYN-7042: the downtime API names the custom recurrence fields
-// recurrence.repeats.unit and recurrence.repeats.value. Sending customFrequency
-// and customValue instead got them dropped by strong parameters, so creating a
+// recurrence.repeats.unit and recurrence.repeats.value. Sending repeatUnit
+// and repeatValue instead got them dropped by strong parameters, so creating a
 // custom recurring downtime failed with 422 "can't be blank".
 func TestCreateDowntimeConfigurationV2SendsCustomRecurrenceAsUnitAndValue(t *testing.T) {
 	setup()
@@ -45,11 +45,11 @@ func TestCreateDowntimeConfigurationV2SendsCustomRecurrenceAsUnitAndValue(t *tes
 			t.Errorf("request body recurrence.repeats.value = %s, want 3", rawValue)
 		}
 
-		if _, ok := fields["customFrequency"]; ok {
-			t.Error("request body sent recurrence.repeats.customFrequency, which the API does not accept")
+		if _, ok := fields["repeatUnit"]; ok {
+			t.Error("request body sent recurrence.repeats.repeatUnit, which the API does not accept")
 		}
-		if _, ok := fields["customValue"]; ok {
-			t.Error("request body sent recurrence.repeats.customValue, which the API does not accept")
+		if _, ok := fields["repeatValue"]; ok {
+			t.Error("request body sent recurrence.repeats.repeatValue, which the API does not accept")
 		}
 
 		if _, err := w.Write([]byte(`{"downtimeConfiguration":{"id":1,"name":"dc test","rule":"augment_data","recurrence":{"repeats":{"type":"custom","unit":"days","value":3},"end":{"type":"after","value":"10"}}}}`)); err != nil {
@@ -57,16 +57,16 @@ func TestCreateDowntimeConfigurationV2SendsCustomRecurrenceAsUnitAndValue(t *tes
 		}
 	})
 
-	customFrequency := "days"
-	customValue := 3
+	repeatUnit := "days"
+	repeatValue := 3
 	input := DowntimeConfigurationV2Input{}
 	input.Name = "dc test"
 	input.Rule = "augment_data"
 	input.Recurrence = &Recurrence{
 		Repeats: Repeats{
-			Type:            "custom",
-			Customfrequency: &customFrequency,
-			Customvalue:     &customValue,
+			Type:  "custom",
+			Unit:  &repeatUnit,
+			Value: &repeatValue,
 		},
 		End: &End{Type: "after", Value: "10"},
 	}
@@ -77,11 +77,11 @@ func TestCreateDowntimeConfigurationV2SendsCustomRecurrenceAsUnitAndValue(t *tes
 	}
 
 	repeats := resp.Recurrence.Repeats
-	if repeats.Customfrequency == nil || *repeats.Customfrequency != "days" {
-		t.Errorf("response repeats.Customfrequency = %#v, want days", repeats.Customfrequency)
+	if repeats.Unit == nil || *repeats.Unit != "days" {
+		t.Errorf("response repeats.Unit = %#v, want days", repeats.Unit)
 	}
-	if repeats.Customvalue == nil || *repeats.Customvalue != 3 {
-		t.Errorf("response repeats.Customvalue = %#v, want 3", repeats.Customvalue)
+	if repeats.Value == nil || *repeats.Value != 3 {
+		t.Errorf("response repeats.Value = %#v, want 3", repeats.Value)
 	}
 }
 
@@ -118,11 +118,11 @@ func TestCreateDowntimeConfigurationV2OmitsUnitAndValueForNonCustomRecurrence(t 
 	}
 
 	repeats := resp.Recurrence.Repeats
-	if repeats.Customfrequency != nil {
-		t.Errorf("response repeats.Customfrequency = %#v, want nil", repeats.Customfrequency)
+	if repeats.Unit != nil {
+		t.Errorf("response repeats.Unit = %#v, want nil", repeats.Unit)
 	}
-	if repeats.Customvalue != nil {
-		t.Errorf("response repeats.Customvalue = %#v, want nil", repeats.Customvalue)
+	if repeats.Value != nil {
+		t.Errorf("response repeats.Value = %#v, want nil", repeats.Value)
 	}
 }
 
